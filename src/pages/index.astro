@@ -1,0 +1,172 @@
+---
+import Base from '../layouts/Base.astro';
+import { strings, type StringKey } from '../data/content';
+import '../styles/pieces.css';
+import '../styles/mundo.css';
+import '../styles/book.css';
+
+const pt = (key: StringKey) => strings[key].pt;
+const navItems = [
+  { station: 'hero', key: 'nav.inicio' },
+  { station: 'line', key: 'nav.varal' },
+  { station: 'lectern', key: 'nav.estante' },
+  { station: 'house', key: 'nav.sobre' },
+] as const;
+const signItems = [
+  { sign: 'varal', key: 'mundo.sign.varal' },
+  { sign: 'estante', key: 'mundo.sign.estante' },
+  { sign: 'sobre', key: 'mundo.sign.sobre' },
+] as const;
+---
+
+<Base title="André Luan · mundo de papel">
+  <div class="intro" id="intro" hidden>
+    <div class="intro-stage">
+      <p class="hand intro-label"><span data-i18n="intro.label">{pt('intro.label')}</span> <span class="intro-percent">0%</span></p>
+      <svg class="intro-line ink" viewBox="0 0 320 18" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </div>
+    <p class="hand intro-hint" data-i18n="intro.hint">{pt('intro.hint')}</p>
+    <button class="intro-skip" type="button"><span data-i18n="intro.skip">{pt('intro.skip')}</span> <kbd>Esc</kbd></button>
+  </div>
+
+  <header class="topbar">
+    <a class="topbar-signature" href="#" data-go="hero" aria-label="André Luan">André Luan</a>
+
+    <nav class="world-nav" aria-label={pt('nav.label')} data-i18n-label="nav.label">
+      {
+        navItems.map((item) => (
+          <button type="button" data-go={item.station} aria-current="false">
+            <span data-i18n={item.key}>{pt(item.key)}</span>
+          </button>
+        ))
+      }
+    </nav>
+
+    <div class="topbar-tools">
+      <div class="lang-switch" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="pt" aria-pressed="true">pt</button>
+        <button type="button" data-lang="en" aria-pressed="false">en</button>
+      </div>
+      <button class="sound-toggle" type="button" aria-pressed="false" data-i18n-label="topbar.sound.off" aria-label={pt('topbar.sound.off')}>
+        <svg class="ink" viewBox="0 0 32 28" aria-hidden="true"></svg>
+      </button>
+      <button class="secrets-toggle" type="button" aria-expanded="false" aria-controls="passport">
+        <span class="secrets-seal" aria-hidden="true">秘</span>
+        <span class="secrets-count">0/9</span>
+        <span class="visually-hidden" data-i18n="topbar.secrets">{pt('topbar.secrets')}</span>
+      </button>
+    </div>
+
+    <div class="passport" id="passport" hidden>
+      <p class="label" data-i18n="secrets.title">{pt('secrets.title')}</p>
+      <ul class="passport-grid"></ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="mundo" aria-label="Mundo de papel">
+      <div class="mundo-pin">
+        <div class="mundo-sky"></div>
+        <canvas class="mundo-paint" aria-hidden="true"></canvas>
+        <div class="mundo-layer mundo-far"><svg class="ink" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+        <div class="mundo-layer mundo-mid"><svg class="ink" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+        <div class="mundo-layer mundo-ground">
+          <svg class="ink mundo-ground-art" aria-hidden="true"></svg>
+
+          <div class="mundo-station station-hero">
+            <div class="station-hero-sheet">
+              <svg class="ink station-hero-frame" aria-hidden="true"></svg>
+              <svg class="station-hero-painting" viewBox="0 60 900 1340" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Retrato de André em nanquim, de perfil"></svg>
+            </div>
+          </div>
+          <div class="mundo-station station-hero-text">
+            <p class="hand" data-i18n="hero.eyebrow">{pt('hero.eyebrow')}</p>
+            <h1 class="station-hero-name">André<br />Luan</h1>
+            <p class="station-hero-role" data-i18n="hero.role">{pt('hero.role')}</p>
+            <p class="station-hero-lede" data-i18n="hero.lede">{pt('hero.lede')}</p>
+            <p class="hand station-hero-hint"><span data-i18n="mundo.hint">{pt('mundo.hint')}</span> <span class="station-hero-arrow">→</span></p>
+          </div>
+
+          {
+            signItems.map((item) => (
+              <div class="mundo-station station-sign" data-sign={item.sign}>
+                <svg class="ink" viewBox="0 0 180 190" aria-hidden="true" />
+                <span class="hand" data-i18n={item.key}>{pt(item.key)}</span>
+              </div>
+            ))
+          }
+
+          <div class="mundo-station station-line">
+            <svg class="ink station-line-art" aria-hidden="true"></svg>
+            <div class="station-line-papers"></div>
+          </div>
+
+          <div class="mundo-station station-lectern">
+            <button class="station-lectern-button" type="button" data-i18n-label="mundo.lectern" aria-label={pt('mundo.lectern')}>
+              <svg class="ink station-lectern-art" viewBox="0 0 220 260" aria-hidden="true"></svg>
+              <svg class="ink station-lectern-page" viewBox="0 0 74 44" aria-hidden="true"></svg>
+            </button>
+            <p class="hand station-lectern-label" data-i18n="mundo.lectern">{pt('mundo.lectern')}</p>
+          </div>
+
+          <div class="mundo-station station-house">
+            <svg class="ink station-house-art" viewBox="0 0 260 240" aria-hidden="true"></svg>
+            <div class="station-board">
+              <svg class="ink station-board-frame" aria-hidden="true"></svg>
+              <div class="station-board-body"></div>
+            </div>
+          </div>
+
+          <div class="mundo-station station-end">
+            <svg class="ink" viewBox="0 0 120 120" aria-hidden="true"></svg>
+            <p class="hand" data-i18n="mundo.end">{pt('mundo.end')}</p>
+          </div>
+
+          <div class="mundo-station station-desk">
+            <svg class="ink station-desk-art" viewBox="0 0 260 200" aria-hidden="true"></svg>
+            <button class="desk-ink" type="button" data-i18n-label="mundo.ink" aria-label={pt('mundo.ink')}>
+              <svg class="ink" viewBox="0 0 130 115" aria-hidden="true"></svg>
+            </button>
+            <button class="desk-brush" type="button" data-i18n-label="mundo.brush" aria-label={pt('mundo.brush')}>
+              <svg class="ink" viewBox="0 0 170 155" aria-hidden="true"></svg>
+            </button>
+          </div>
+        </div>
+        <div class="mundo-layer mundo-front"><svg class="ink" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+        <div class="mundo-mascot-layer"></div>
+        <div class="mundo-progress" aria-hidden="true">
+          <svg class="ink" viewBox="0 0 400 20" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+      <div class="mundo-painting-bar" hidden>
+        <span class="hand" data-i18n="mundo.painting">{pt('mundo.painting')}</span>
+        <button class="ink-button small" type="button" data-frame data-clear-sky><span data-i18n="mundo.clear">{pt('mundo.clear')}</span></button>
+      </div>
+      <div class="mundo-brush-cursor" aria-hidden="true"><svg class="ink" viewBox="0 0 170 155"></svg></div>
+    </section>
+  </main>
+
+  <dialog class="sheet-dialog" id="sheet-dialog">
+    <svg class="ink sheet-frame" aria-hidden="true"></svg>
+    <button class="sheet-close hand" type="button" data-close-sheet><span data-i18n="dialog.close">{pt('dialog.close')}</span> ✕</button>
+    <div class="sheet-body"></div>
+  </dialog>
+
+  <dialog class="book-dialog" id="book-dialog" aria-label={pt('book.title')}>
+    <div class="book-topline">
+      <span class="hand book-counter"></span>
+      <button class="book-close" type="button" data-close-book><span data-i18n="dialog.close">{pt('dialog.close')}</span> ✕</button>
+    </div>
+    <div class="book-stage">
+      <button class="book-nav prev" type="button" data-i18n-label="book.prev" aria-label={pt('book.prev')}>‹</button>
+      <div class="book"><div class="book-leaves"></div></div>
+      <button class="book-nav next" type="button" data-i18n-label="book.next" aria-label={pt('book.next')}>›</button>
+    </div>
+    <p class="hand book-hint" data-i18n="book.hint">{pt('book.hint')}</p>
+  </dialog>
+
+  <script>
+    import { boot } from '../lib/app';
+    boot();
+  </script>
+</Base>

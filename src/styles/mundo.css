@@ -1,0 +1,534 @@
+.mundo-pin {
+  position: relative;
+  height: 100svh;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--paper) 0%, #e9e9e6 70%, var(--paper-deep) 100%);
+}
+
+.mundo-sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mundo-cloud {
+  position: absolute;
+  width: 220px;
+  height: 44px;
+  animation: cloud-drift var(--drift, 50s) linear infinite alternate;
+}
+
+@keyframes cloud-drift {
+  to { transform: translateX(120px); }
+}
+
+.mundo-bird {
+  position: absolute;
+  left: -40px;
+  width: 30px;
+  height: 12px;
+  animation: bird-fly var(--fly, 20s) linear infinite;
+}
+
+@keyframes bird-fly {
+  from { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(55vw) translateY(-20px); }
+  to { transform: translateX(110vw) translateY(10px); }
+}
+
+.mundo-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  will-change: transform;
+}
+
+.mundo-layer > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mundo-ground {
+  z-index: 2;
+}
+
+.mundo-front {
+  z-index: 4;
+  pointer-events: none;
+}
+
+.mundo-mascot-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.mundo-mascot-layer .mascot {
+  pointer-events: auto;
+}
+
+.mundo-station {
+  position: absolute;
+}
+
+/* Hero */
+.station-hero-sheet {
+  position: absolute;
+  background: #f5f5f3;
+  transform: rotate(-1.5deg);
+  transform-origin: 50% 100%;
+  box-shadow: 0 20px 30px -24px var(--shadow);
+}
+
+.station-hero-frame {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: calc(100% + 40px);
+  overflow: visible;
+}
+
+.station-hero-painting {
+  position: absolute;
+  inset: 14px;
+  width: calc(100% - 28px);
+  height: calc(100% - 28px);
+  mix-blend-mode: multiply;
+}
+
+.station-hero-text {
+  position: absolute;
+  display: grid;
+  gap: 16px;
+}
+
+.station-hero-name {
+  font-size: clamp(3.2rem, 8vw, 6.4rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.025em;
+  text-shadow: 0.05em 0.05em 0 rgb(141 143 139 / 0.35);
+}
+
+.station-hero-role {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 500;
+}
+
+.station-hero-lede {
+  color: var(--ink-soft);
+}
+
+.station-hero-arrow {
+  display: inline-block;
+  animation: nudge 1.2s ease-in-out infinite;
+}
+
+@keyframes nudge {
+  50% { transform: translateX(10px); }
+}
+
+/* Signs */
+.station-sign {
+  width: 180px;
+  height: 190px;
+}
+
+.station-sign svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.station-sign .hand {
+  position: absolute;
+  left: 20px;
+  top: 38px;
+  font-size: 1.6rem;
+  color: var(--ink);
+}
+
+/* Clothesline */
+.station-line-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.station-line-papers {
+  position: absolute;
+  left: 52px;
+  right: 52px;
+  top: 22px;
+  display: flex;
+  gap: var(--paper-gap, 46px);
+}
+
+.line-paper {
+  position: relative;
+  flex: 0 0 var(--paper-width, 210px);
+  padding: 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  transform-origin: 50% 0;
+  transform: rotate(calc(var(--wind, 0) * 1deg));
+  transition: transform 0.4s var(--ease-ink);
+}
+
+.line-paper:nth-child(2),
+.line-paper:nth-child(5) { margin-top: 18px; }
+.line-paper:nth-child(3),
+.line-paper:nth-child(4) { margin-top: 28px; }
+
+.line-paper-pin {
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  z-index: 2;
+  width: 10px;
+  height: 26px;
+  background: var(--ink);
+  border-radius: 2px;
+  translate: -50% 0;
+  filter: url(#bleed);
+}
+
+.line-paper-sheet {
+  display: grid;
+  gap: 6px;
+  padding: 14px 14px 16px;
+  background: #f5f5f3;
+  box-shadow: 0 14px 18px -14px var(--shadow);
+  transform-origin: 50% 0;
+  animation: paper-sway 3.6s ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+  rotate: var(--tilt, 0deg);
+  transition: scale 0.35s var(--ease-ink);
+}
+
+.line-paper:hover .line-paper-sheet,
+.line-paper:focus-visible .line-paper-sheet {
+  scale: 1.06;
+}
+
+@keyframes paper-sway {
+  from { transform: rotate(-2.5deg); }
+  to { transform: rotate(2.5deg); }
+}
+
+.line-paper svg {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  background: var(--paper-deep);
+}
+
+.line-paper-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+.line-paper-status {
+  font-size: 1.2rem;
+}
+
+/* House and board */
+.station-house-art {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 260px;
+  height: 240px;
+}
+
+.station-board {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 28px;
+  background: #f5f5f3;
+  box-shadow: 0 20px 30px -24px var(--shadow);
+}
+
+.station-board-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.station-board-body {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  height: 100%;
+  align-content: start;
+  overflow: hidden;
+}
+
+.station-board-body .character-identity {
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px 18px;
+}
+
+.station-board-body .character-face {
+  grid-row: span 3;
+  align-self: start;
+  width: 120px;
+  height: 120px;
+}
+
+.station-board-body .character-bio {
+  grid-column: 1 / -1;
+  font-size: 0.95rem;
+}
+
+.station-board-body .ink-button {
+  justify-self: start;
+}
+
+/* End */
+.station-end {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  width: 260px;
+  text-align: center;
+}
+
+.station-end svg {
+  width: 200px;
+  height: 200px;
+}
+
+/* Progress */
+.mundo-progress {
+  position: absolute;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  width: min(420px, 70vw);
+  height: 20px;
+  translate: -50% 0;
+}
+
+.mundo-progress svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 700px) {
+  .station-house-art { display: none; }
+  .station-board { padding: 18px; }
+  .station-board-body .character-identity { grid-template-columns: 90px minmax(0, 1fr); }
+  .station-board-body .character-face { width: 90px; height: 90px; }
+}
+
+/* Featured paper extras */
+.line-paper-summary {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  line-height: 1.3;
+}
+
+.line-paper-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.line-paper-open {
+  color: var(--ink);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.line-paper:hover .line-paper-open,
+.line-paper:focus-visible .line-paper-open {
+  opacity: 1;
+}
+
+/* Lectern */
+.station-lectern-button {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.station-lectern-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s var(--ease-ink);
+}
+
+.station-lectern-page {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  width: 36%;
+  height: auto;
+  aspect-ratio: 74 / 44;
+  transform-origin: 0 90%;
+  animation: page-flutter 2.8s ease-in-out infinite;
+  rotate: calc(var(--wind, 0) * -3deg);
+}
+
+@keyframes page-flutter {
+  0%, 100% { transform: rotate(0deg) scaleX(1); }
+  40% { transform: rotate(-16deg) scaleX(0.82); }
+  60% { transform: rotate(-10deg) scaleX(0.9); }
+}
+
+.station-lectern-button:hover .station-lectern-art {
+  transform: translateY(-6px) rotate(-1.5deg);
+}
+
+.station-lectern-button:hover .station-lectern-page {
+  animation-duration: 0.9s;
+}
+
+.station-lectern-label {
+  position: absolute;
+  left: 50%;
+  top: -10%;
+  width: max-content;
+  max-width: 260px;
+  font-size: 1.35rem;
+  text-align: center;
+  translate: -50% 0;
+  animation: nudge-up 2.4s ease-in-out infinite;
+}
+
+@keyframes nudge-up {
+  50% { transform: translateY(-6px); }
+}
+
+/* Hidden desk */
+.station-desk {
+  width: 260px;
+  height: 200px;
+}
+
+.station-desk-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.desk-ink,
+.desk-brush {
+  position: absolute;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-ink);
+}
+
+.desk-ink {
+  left: 150px;
+  top: 16px;
+  width: 78px;
+  height: 70px;
+}
+
+.desk-brush {
+  left: 24px;
+  top: 14px;
+  width: 110px;
+  height: 100px;
+  transform: rotate(-60deg);
+}
+
+.desk-ink:hover { transform: translateY(-4px) rotate(-6deg); }
+.desk-brush:hover { transform: rotate(-54deg) translateY(-4px); }
+
+.desk-ink svg,
+.desk-brush svg {
+  width: 100%;
+  height: 100%;
+}
+
+.desk-splat {
+  position: absolute;
+  left: 160px;
+  top: 150px;
+  width: 220px;
+  height: 140px;
+  pointer-events: none;
+}
+
+/* Painting the sky */
+.mundo-paint {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mundo.is-painting .mundo-pin {
+  cursor: none;
+  touch-action: none;
+}
+
+.mundo-painting-bar {
+  position: fixed;
+  left: 50%;
+  bottom: max(48px, env(safe-area-inset-bottom, 0px));
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 10px 8px 18px;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--mist);
+  translate: -50% 0;
+}
+
+.mundo-brush-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 80;
+  display: none;
+  width: 90px;
+  height: 82px;
+  pointer-events: none;
+}
+
+.mundo-brush-cursor svg {
+  position: absolute;
+  left: -88px;
+  top: -1px;
+  width: 90px;
+  height: 82px;
+}
+
+.mundo.is-painting .mundo-brush-cursor {
+  display: block;
+}
+
+.station-board-body .character-attributes {
+  margin: 0;
+}

@@ -1,0 +1,2166 @@
+<title>Caderno de André Luan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Hanken+Grotesk:wght@400;500;600&family=Nanum+Pen+Script&display=swap">
+<style>
+  /* Layout: a sketchbook on cool paper. The portrait is painted in with the brush; every block of the reference site becomes an ink equivalent. Single light theme by choice. */
+  :root {
+    --paper: #eeeeec;
+    --paper-deep: #e3e4e1;
+    --ink: #151515;
+    --ink-soft: #3b3c3a;
+    --wash: #8d8f8b;
+    --mist: #c6c8c4;
+    --rule: rgba(21, 21, 21, 0.16);
+
+    --font-display: 'Shippori Mincho B1', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    --font-body: 'Hanken Grotesk', 'Segoe UI', system-ui, sans-serif;
+    --font-hand: 'Nanum Pen Script', 'Segoe Print', 'Bradley Hand', cursive;
+
+    --step-body: 1.0625rem;
+    --step-h3: 1.45rem;
+    --step-h2: clamp(2rem, 3.8vw, 2.9rem);
+    --step-h1: clamp(3.2rem, 9vw, 7.4rem);
+    --step-hand: 1.55rem;
+
+    --page-width: 1180px;
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--paper);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.08 0 0 0 0 0.08 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23p)'/%3E%3C/svg%3E");
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--step-body);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body.intro-open { overflow: hidden; }
+
+  .page {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.12;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  p { margin: 0; }
+
+  a { color: inherit; }
+
+  button { font: inherit; color: inherit; }
+
+  :focus-visible {
+    outline: 2px dashed var(--ink);
+    outline-offset: 4px;
+  }
+
+  .hand {
+    font-family: var(--font-hand);
+    font-size: var(--step-hand);
+    line-height: 1.1;
+    color: var(--ink-soft);
+  }
+
+  .ink-ink { fill: var(--ink); }
+  .ink-soft { fill: var(--ink-soft); }
+  .ink-wash { fill: var(--wash); opacity: 0.55; }
+  .ink-mist { fill: var(--mist); opacity: 0.85; }
+
+  .brush-link {
+    text-decoration: none;
+    background-image: linear-gradient(transparent 62%, var(--mist) 62%, var(--mist) 92%, transparent 92%);
+    background-size: 100% 100%;
+    transition: background-size 0.3s;
+  }
+
+  .brush-link:hover { background-image: linear-gradient(transparent 50%, var(--wash) 50%, var(--wash) 95%, transparent 95%); }
+
+  /* Intro */
+  .intro {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    background: var(--paper);
+    padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  }
+
+  .intro.leaving {
+    animation: intro-leave 0.7s cubic-bezier(.6, 0, .3, 1) forwards;
+  }
+
+  @keyframes intro-leave {
+    to { opacity: 0; filter: blur(14px); transform: scale(1.04); visibility: hidden; }
+  }
+
+  .intro-stage {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    width: min(320px, 100%);
+  }
+
+  .intro-stage .ground-line {
+    width: 100%;
+    height: 18px;
+    overflow: visible;
+  }
+
+  .intro-stage .walker {
+    position: absolute;
+    left: 0;
+    bottom: 12px;
+  }
+
+  .intro-skip {
+    position: absolute;
+    right: max(24px, env(safe-area-inset-right, 0px));
+    bottom: max(24px, env(safe-area-inset-bottom, 0px));
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 14px;
+    background: none;
+    border: 1px solid var(--rule);
+    font-family: var(--font-hand);
+    font-size: 1.35rem;
+    cursor: pointer;
+  }
+
+  .intro-skip kbd {
+    font: 600 0.75rem var(--font-body);
+    padding: 1px 6px;
+    border: 1.5px solid var(--ink);
+  }
+
+  /* Creature */
+  .creature {
+    width: 44px;
+    height: 40px;
+    overflow: visible;
+    display: block;
+  }
+
+  .creature .leg {
+    stroke: var(--ink);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    transform-box: fill-box;
+    transform-origin: 50% 0;
+  }
+
+  .creature .eye { fill: var(--paper); transform-box: fill-box; transform-origin: center; animation: blink 4.6s infinite; }
+
+  .walking .creature .leg-a { animation: step 0.34s ease-in-out infinite alternate; }
+  .walking .creature .leg-b { animation: step 0.34s ease-in-out infinite alternate-reverse; }
+  .walking .creature .body { animation: bob 0.34s ease-in-out infinite alternate; }
+
+  @keyframes step { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
+  @keyframes bob { from { transform: translateY(0); } to { transform: translateY(-1.5px); } }
+  @keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.1); } }
+  @keyframes hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-26px) rotate(-8deg); } 70% { transform: translateY(0) scaleY(0.8); } }
+
+  .walker {
+    position: absolute;
+    pointer-events: auto;
+  }
+
+  .walker .flip { transition: transform 0.2s; }
+  .walker.facing-left .flip { transform: scaleX(-1); }
+  .walker.hopping .creature { animation: hop 0.6s ease-out; }
+
+  /* Header */
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-block: 28px 8px;
+  }
+
+  .signature {
+    font-family: var(--font-hand);
+    font-size: 2.1rem;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.95rem;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--ink-soft);
+  }
+
+  .nav-links a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 6px; }
+
+  .lang-switch {
+    display: flex;
+    gap: 2px;
+    font-family: var(--font-hand);
+    font-size: 1.45rem;
+  }
+
+  .lang-switch button {
+    background: none;
+    border: 0;
+    padding: 2px 8px;
+    color: var(--wash);
+    cursor: pointer;
+  }
+
+  .lang-switch button[aria-pressed='true'] {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 24px;
+    align-items: end;
+    padding-top: 24px;
+  }
+
+  .hero-text {
+    display: grid;
+    gap: 24px;
+    min-width: 0;
+    padding-bottom: 120px;
+  }
+
+  .hero h1 {
+    font-size: var(--step-h1);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+    text-shadow: 0.05em 0.05em 0 rgba(141, 143, 139, 0.35);
+  }
+
+  .hero h1 .letter {
+    display: inline-block;
+  }
+
+  .hero h1.bleeding .letter {
+    animation: bleed-in 0.9s cubic-bezier(.2, .7, .2, 1) both;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+
+  @keyframes bleed-in {
+    from { opacity: 0; filter: blur(12px); transform: translateY(0.08em) scale(1.08); }
+    60% { opacity: 1; filter: blur(1.5px); }
+    to { opacity: 1; filter: blur(0); transform: none; }
+  }
+
+  .lede {
+    max-width: 30rem;
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+  }
+
+  .lede a { color: var(--ink); font-weight: 600; }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-hand);
+    font-size: 1.45rem;
+  }
+
+  .socials a { text-decoration: none; color: var(--ink-soft); }
+  .socials a:hover { color: var(--ink); }
+  .socials .soon { color: var(--wash); }
+
+  .ink-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 26px;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: 600 0.98rem var(--font-body);
+    text-decoration: none;
+    cursor: pointer;
+    isolation: isolate;
+  }
+
+  .ink-button > svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: visible;
+  }
+
+  .ink-button .blot {
+    transform-origin: 50% 60%;
+    transform: scale(0.2);
+    opacity: 0;
+    transition: transform 0.45s cubic-bezier(.2, .8, .2, 1), opacity 0.3s;
+  }
+
+  .ink-button.solid { color: var(--paper); }
+  .ink-button.solid .blot,
+  .ink-button:hover .blot,
+  .ink-button:focus-visible .blot { transform: scale(1); opacity: 1; }
+  .ink-button:hover:not(.solid) { color: var(--paper); }
+  .ink-button:not(.solid) .blot path { fill: var(--ink-soft); }
+
+  .ink-button.small { padding: 8px 16px; font-size: 0.88rem; }
+
+  .portrait {
+    position: relative;
+    min-width: 0;
+    align-self: stretch;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .portrait svg.painting {
+    display: block;
+    width: 100%;
+    max-width: 470px;
+    height: auto;
+    mix-blend-mode: multiply;
+    cursor: pointer;
+  }
+
+  .portrait .margin-note {
+    position: absolute;
+    left: -8px;
+    top: 30%;
+    display: grid;
+    gap: 2px;
+    max-width: 8.5rem;
+    transform: rotate(-5deg);
+  }
+
+  .margin-note svg { width: 70px; height: 34px; overflow: visible; }
+
+  .ground {
+    position: relative;
+    height: 40px;
+    margin-top: -40px;
+  }
+
+  .ground svg.ground-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 20px;
+    overflow: visible;
+  }
+
+  .ground .walker { bottom: 12px; left: 0; cursor: pointer; }
+
+  /* Sections */
+  .section {
+    padding-block: 88px 16px;
+  }
+
+  .section-head {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+
+  .section-head h2 { font-size: var(--step-h2); }
+
+  .section-head .underline {
+    width: 190px;
+    height: 16px;
+    overflow: visible;
+  }
+
+  .section-head p:not(.hand) {
+    max-width: 38rem;
+    color: var(--ink-soft);
+  }
+
+  /* Projects */
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 56px 44px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .work {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    min-width: 0;
+  }
+
+  .sheet {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    max-width: 100%;
+    background: var(--paper-deep);
+    transform: rotate(-0.5deg);
+    overflow: hidden;
+  }
+
+  .work:nth-child(even) .sheet { transform: rotate(0.6deg); }
+
+  .sheet svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .sheet .pencil { opacity: 0.22; }
+
+  .work-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .work h3 { font-size: var(--step-h3); }
+  .work p { color: var(--ink-soft); }
+
+  .work-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 16px;
+  }
+
+  .stat {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-hand);
+    font-size: 1.35rem;
+    color: var(--wash);
+  }
+
+  .status {
+    font-family: var(--font-hand);
+    font-size: 1.3rem;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+
+  /* Character sheet */
+  .character {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 0;
+    padding: 6px;
+  }
+
+  .character > svg.frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .character-portrait {
+    position: relative;
+    display: grid;
+    align-content: space-between;
+    gap: 16px;
+    padding: 28px;
+    border-right: 1px solid var(--rule);
+    min-width: 0;
+  }
+
+  .character-portrait .face {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    object-position: 46% 14%;
+    mix-blend-mode: multiply;
+    filter: contrast(1.05);
+  }
+
+  .character-id {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .character-id .hand { font-size: 1.4rem; }
+
+  .character-body {
+    display: grid;
+    gap: 26px;
+    align-content: start;
+    padding: 28px 32px;
+    min-width: 0;
+  }
+
+  .character-body h3 { font-size: 2rem; }
+
+  .label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--wash);
+  }
+
+  .attributes {
+    display: grid;
+    gap: 10px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .attribute {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+  }
+
+  .attribute svg { width: 100%; height: 16px; overflow: visible; }
+
+  .inventory {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 28px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .inventory li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--rule);
+    min-width: 0;
+  }
+
+  .inventory .value { font-family: var(--font-hand); font-size: 1.3rem; color: var(--ink-soft); white-space: nowrap; }
+
+  .special {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  /* Year of brushstrokes */
+  .year-scroll {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .year-grid {
+    display: block;
+    min-width: 720px;
+    width: 100%;
+    height: auto;
+  }
+
+  .year-grid path { transition: transform 0.2s; transform-box: fill-box; transform-origin: center; }
+  .year-grid path:hover { transform: scale(1.5); }
+
+  .year-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 24px;
+    margin-top: 14px;
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  .legend { display: flex; align-items: center; gap: 6px; }
+  .legend svg { width: 110px; height: 16px; }
+
+  /* Process */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 32px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .step {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .step-index {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--wash);
+  }
+
+  .step h3 { font-size: var(--step-h3); }
+  .step p { color: var(--ink-soft); font-size: 0.98rem; }
+
+  /* Log */
+  .log-entry {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 32px;
+    align-items: center;
+    padding: 20px;
+    background: var(--paper-deep);
+  }
+
+  .log-entry svg { width: 100%; max-width: 100%; aspect-ratio: 3 / 2; height: auto; }
+
+  .log-text { display: grid; gap: 12px; min-width: 0; }
+  .log-text h3 { font-size: 1.7rem; }
+  .log-text p { color: var(--ink-soft); }
+
+  /* Contact */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+  }
+
+  .contact-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .contact-list li { border-bottom: 1px solid var(--rule); }
+
+  .contact-list a,
+  .contact-list button,
+  .contact-list .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    width: 100%;
+    padding: 14px 0;
+    background: none;
+    border: 0;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .contact-list .row { cursor: default; }
+
+  .contact-list .name {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    font-weight: 700;
+  }
+
+  .contact-list .handle {
+    font-family: var(--font-hand);
+    font-size: 1.35rem;
+    color: var(--ink-soft);
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+
+  .contact-list a:hover .name,
+  .contact-list button:hover .name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+
+  .contact-list .row .name,
+  .contact-list .row .handle { color: var(--wash); }
+
+  .notebook {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-height: 360px;
+    background:
+      repeating-linear-gradient(transparent 0, transparent 33px, rgba(21, 21, 21, 0.09) 33px, rgba(21, 21, 21, 0.09) 34px),
+      var(--paper-deep);
+    min-width: 0;
+  }
+
+  .notebook-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    color: var(--wash);
+  }
+
+  .notebook-head svg { width: 40px; height: 12px; }
+
+  .notebook-log {
+    display: grid;
+    align-content: start;
+    gap: 2px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 12px 18px;
+    font-family: var(--font-hand);
+    font-size: 1.5rem;
+    line-height: 34px;
+  }
+
+  .notebook-log .you { color: var(--wash); }
+  .notebook-log svg { width: 180px; height: 34px; overflow: visible; }
+
+  .notebook-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 18px 10px;
+    font-family: var(--font-hand);
+    font-size: 1.5rem;
+  }
+
+  .notebook-form label { color: var(--ink-soft); white-space: nowrap; }
+
+  .notebook-form input {
+    flex: 1;
+    min-width: 0;
+    padding: 4px 2px;
+    background: none;
+    border: 0;
+    border-bottom: 1.5px solid var(--ink);
+    font: inherit;
+    color: var(--ink);
+    caret-color: var(--ink);
+  }
+
+  .notebook-form input:focus { outline: none; border-bottom-width: 2.5px; }
+
+  .notebook-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 14px 14px;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* Footer */
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 88px;
+    padding-block: 28px 40px;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+  }
+
+  .seal {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .seal svg { width: 44px; height: 44px; overflow: visible; }
+
+  .secrets-wrap { position: relative; }
+
+  .secrets-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: none;
+    border: 1.5px solid var(--ink);
+    font-family: var(--font-hand);
+    font-size: 1.35rem;
+    cursor: pointer;
+  }
+
+  .secrets-panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
+    width: min(300px, calc(100vw - 32px));
+    padding: 16px 18px;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--mist);
+    z-index: 20;
+  }
+
+  .secrets-panel ul {
+    display: grid;
+    gap: 6px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-hand);
+    font-size: 1.3rem;
+  }
+
+  .secrets-panel .locked { color: var(--wash); }
+
+  .hidden-drop {
+    position: absolute;
+    width: 22px;
+    height: 26px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    opacity: 0.55;
+  }
+
+  .hidden-drop:hover { opacity: 1; }
+  .hidden-drop svg { width: 100%; height: 100%; overflow: visible; }
+
+  .toast {
+    position: fixed;
+    left: max(16px, env(safe-area-inset-left, 0px));
+    bottom: max(16px, env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    display: grid;
+    gap: 2px;
+    max-width: min(320px, calc(100vw - 32px));
+    padding: 12px 18px;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    box-shadow: 5px 5px 0 var(--mist);
+    animation: toast-in 0.4s cubic-bezier(.2, .8, .2, 1);
+  }
+
+  .toast strong { font-family: var(--font-display); font-size: 1.1rem; }
+  .toast span { font-family: var(--font-hand); font-size: 1.3rem; color: var(--ink-soft); }
+
+  @keyframes toast-in { from { transform: translateY(16px) rotate(-2deg); opacity: 0; } }
+
+  @media (max-width: 900px) {
+    .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .character { grid-template-columns: minmax(0, 1fr); }
+    .character-portrait { border-right: 0; border-bottom: 1px solid var(--rule); grid-template-columns: minmax(0, 160px) minmax(0, 1fr); align-items: end; }
+    .contact-grid { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+    .hero { grid-template-columns: minmax(0, 1fr); }
+    .hero-text { padding-bottom: 8px; }
+    .portrait svg.painting { max-width: 340px; }
+    .portrait .margin-note { left: 0; top: 18%; }
+    .ground { margin-top: -24px; }
+    .work-grid { grid-template-columns: minmax(0, 1fr); }
+    .steps { grid-template-columns: minmax(0, 1fr); }
+    .inventory { grid-template-columns: minmax(0, 1fr); }
+    .character-body { padding: 22px 18px; }
+    .character-portrait { padding: 18px; }
+    .attribute { grid-template-columns: 6rem minmax(0, 1fr); }
+    .log-entry { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .ink-button .blot { transition: none; }
+    .creature .eye,
+    .walking .creature .leg-a,
+    .walking .creature .leg-b,
+    .walking .creature .body { animation: none; }
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="bleed" x="-15%" y="-15%" width="130%" height="130%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="4" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="dry" x="-15%" y="-15%" width="130%" height="130%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9 0.07" numOctaves="2" seed="8" result="grain"/>
+    <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 1.65" result="gaps"/>
+    <feComposite in="SourceGraphic" in2="gaps" operator="in" result="streaked"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="2" result="noise"/>
+    <feDisplacementMap in="streaked" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="wash" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" seed="5" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    <feGaussianBlur stdDeviation="1.4"/>
+  </filter>
+  <filter id="brush-mask" x="-10%" y="-10%" width="120%" height="120%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.012 0.05" numOctaves="3" seed="11" result="noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="60" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<div class="intro" id="intro" hidden>
+  <div class="intro-stage">
+    <p class="hand" id="intro-label"><span data-i18n="intro.label">molhando o pincel</span> <span id="intro-percent">0%</span></p>
+    <svg class="ground-line" viewBox="0 0 320 18" preserveAspectRatio="none" id="intro-line" aria-hidden="true"></svg>
+    <div class="walker walking" id="intro-walker"></div>
+  </div>
+  <p class="hand" style="position:absolute;left:0;right:0;bottom:30%;text-align:center;font-size:1.25rem;color:var(--wash)" data-i18n="intro.hint">desenhando a página, traço a traço</p>
+  <button class="intro-skip" type="button" id="intro-skip"><span data-i18n="intro.skip">pular intro</span> <kbd>Esc</kbd></button>
+</div>
+
+<div class="page">
+  <header class="site-header">
+    <a class="signature" href="#top" id="top">André Luan</a>
+    <nav class="nav" aria-label="Principal">
+      <ul class="nav-links">
+        <li><a href="#projetos" data-i18n="nav.work">Projetos</a></li>
+        <li><a href="#sobre" data-i18n="nav.about">Sobre</a></li>
+        <li><a href="#diario" data-i18n="nav.log">Diário</a></li>
+        <li><a href="#contato" data-i18n="nav.contact">Contato</a></li>
+        <li><a href="https://github.com/andreluaan" target="_blank" rel="noopener">GitHub ↗</a></li>
+      </ul>
+      <div class="lang-switch" role="group" aria-label="Idioma / Language">
+        <button type="button" id="lang-pt" data-lang="pt" aria-pressed="true">pt</button>
+        <button type="button" id="lang-en" data-lang="en" aria-pressed="false">en</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-text">
+        <p class="hand" data-i18n="hero.eyebrow">caderno de um desenvolvedor que desenha</p>
+        <h1 id="hero-title" aria-label="André Luan">André<br>Luan</h1>
+        <p class="lede" data-i18n="hero.lede">Desenvolvedor front-end e designer. Criador do <a class="brush-link" href="#projetos">Nanquim System</a>. Desenhando a landing da <a class="brush-link" href="#projetos">AeR</a> dentro do Loquei.</p>
+        <div class="actions">
+          <a class="ink-button solid" href="#projetos" data-frame><span data-i18n="hero.cta">Ver projetos ↓</span></a>
+          <a class="ink-button" href="#contato" data-frame><span data-i18n="hero.cta2">Conversar sobre um projeto</span></a>
+        </div>
+        <ul class="socials">
+          <li><a href="https://github.com/andreluaan" target="_blank" rel="noopener">github</a></li>
+          <li><a href="#contato">e-mail</a></li>
+          <li class="soon">linkedin <span data-i18n="soon">(em breve)</span></li>
+          <li class="soon">instagram <span data-i18n="soon">(em breve)</span></li>
+        </ul>
+      </div>
+      <div class="portrait">
+        <svg class="painting" id="painting" viewBox="0 60 900 1300" role="img" aria-label="Retrato de André em nanquim: de perfil, olhando para cima, de casaco claro e camiseta preta"></svg>
+        <div class="margin-note" aria-hidden="true">
+          <span class="hand" data-i18n="hero.note">eu, em nanquim</span>
+          <svg viewBox="0 0 70 34" data-scene="arrow"></svg>
+        </div>
+      </div>
+    </section>
+
+    <div class="ground" id="ground">
+      <svg class="ground-line" viewBox="0 0 1000 20" preserveAspectRatio="none" data-scene="ground" aria-hidden="true"></svg>
+      <div class="walker" id="hero-walker" role="button" tabindex="0" aria-label="Criaturinha de tinta"></div>
+    </div>
+
+    <section class="section" id="projetos" aria-labelledby="work-title">
+      <div class="section-head">
+        <p class="hand" data-i18n="work.eyebrow">folhas soltas do caderno</p>
+        <h2 id="work-title" data-i18n="work.title">Projetos</h2>
+        <svg class="underline" viewBox="0 0 190 16" data-scene="underline" data-draw-on-view aria-hidden="true"></svg>
+        <p data-i18n="work.lede">Sites, marcas, sistemas e experimentos. Cada folha é passada a nanquim quando chega até você.</p>
+      </div>
+      <ul class="work-grid" id="work-grid"></ul>
+    </section>
+
+    <section class="section" id="sobre" aria-labelledby="about-title">
+      <div class="section-head">
+        <p class="hand" data-i18n="about.eyebrow">ficha do personagem</p>
+        <h2 id="about-title" data-i18n="about.title">Sobre mim</h2>
+        <svg class="underline" viewBox="0 0 190 16" data-scene="underline" data-draw-on-view aria-hidden="true"></svg>
+      </div>
+
+      <article class="character" id="character">
+        <svg class="frame" id="character-frame" aria-hidden="true"></svg>
+        <div class="character-portrait">
+          <img class="face" src="assets/andre-nanquim.jpg" alt="Rosto de André em nanquim, de perfil">
+          <div class="character-id">
+            <span class="label" data-i18n="about.player">Jogador 1</span>
+            <span class="hand" data-i18n="about.level">nível: em evolução</span>
+          </div>
+        </div>
+        <div class="character-body">
+          <div>
+            <h3>André Luan</h3>
+            <p class="hand" data-i18n="about.class">classe: artesão do front-end</p>
+          </div>
+          <p data-i18n="about.bio">Estudante de Ciência da Computação. Construo sites em que a parte visual pesa tanto quanto a técnica, sobre um design system próprio. Fora do código, desenho: figura, nanquim e muito caderno rabiscado.</p>
+          <div>
+            <span class="label" data-i18n="about.attributes">Atributos</span>
+            <ul class="attributes" id="attributes"></ul>
+          </div>
+          <div>
+            <span class="label" data-i18n="about.inventory">Inventário</span>
+            <ul class="inventory" id="inventory"></ul>
+          </div>
+          <div>
+            <span class="label" data-i18n="about.special">Golpe especial</span>
+            <p class="special" data-i18n="about.move">Me dê um esboço num guardanapo. Eu devolvo um site no ar.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="section" id="ano" aria-labelledby="year-title">
+      <div class="section-head">
+        <p class="hand" data-i18n="year.eyebrow">um ano em pinceladas</p>
+        <h2 id="year-title" data-i18n="year.title">Cada dia de código é uma pincelada</h2>
+        <svg class="underline" viewBox="0 0 190 16" data-scene="underline" data-draw-on-view aria-hidden="true"></svg>
+        <p data-i18n="year.lede">Quanto mais escura a mancha, mais coisa saiu do caderno para o ar.</p>
+      </div>
+      <div class="year-scroll">
+        <svg class="year-grid" id="year-grid" role="img" aria-label="Grade de contribuições do último ano"></svg>
+      </div>
+      <div class="year-meta">
+        <span id="year-total"></span>
+        <span class="legend"><span data-i18n="year.less">menos</span> <svg viewBox="0 0 110 16" data-scene="legend" aria-hidden="true"></svg> <span data-i18n="year.more">mais</span></span>
+      </div>
+    </section>
+
+    <section class="section" id="processo" aria-labelledby="process-title">
+      <div class="section-head">
+        <p class="hand" data-i18n="process.eyebrow">do esboço ao ar</p>
+        <h2 id="process-title" data-i18n="process.title">Como eu trabalho</h2>
+        <svg class="underline" viewBox="0 0 190 16" data-scene="underline" data-draw-on-view aria-hidden="true"></svg>
+      </div>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-index" aria-hidden="true">i.</span>
+          <h3 data-i18n="process.s1.title">Conversa</h3>
+          <p data-i18n="process.s1.text">Entendo o negócio, o público e o que o site precisa resolver antes de pensar em tela.</p>
+        </li>
+        <li class="step">
+          <span class="step-index" aria-hidden="true">ii.</span>
+          <h3 data-i18n="process.s2.title">Esboço</h3>
+          <p data-i18n="process.s2.text">Desenho estrutura e visual antes da primeira linha de código. Você aprova o rumo cedo.</p>
+        </li>
+        <li class="step">
+          <span class="step-index" aria-hidden="true">iii.</span>
+          <h3 data-i18n="process.s3.title">Construção</h3>
+          <p data-i18n="process.s3.text">Código sobre um design system próprio: rápido, acessível e pronto para crescer.</p>
+        </li>
+        <li class="step">
+          <span class="step-index" aria-hidden="true">iv.</span>
+          <h3 data-i18n="process.s4.title">Entrega</h3>
+          <p data-i18n="process.s4.text">Publicação, domínio, ajustes finos e acompanhamento depois do lançamento.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" id="diario" aria-labelledby="log-title">
+      <div class="section-head">
+        <p class="hand" data-i18n="log.eyebrow">anotações de bastidor</p>
+        <h2 id="log-title" data-i18n="log.title">Diário</h2>
+        <svg class="underline" viewBox="0 0 190 16" data-scene="underline" data-draw-on-view aria-hidden="true"></svg>
+      </div>
+      <article class="log-entry">
+        <svg viewBox="0 0 240 160" data-scene="logSketch" data-draw-on-view aria-hidden="true"></svg>
+        <div class="log-text">
+          <span class="label" data-i18n="log.date">out 2026 · em breve</span>
+          <h3 data-i18n="log.entry">Como este portfólio está sendo desenhado</h3>
+          <p data-i18n="log.text">Da referência em pixel ao nanquim: o motor de pincel, a criaturinha de tinta e as decisões de design por trás de cada folha.</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="section" id="contato" aria-labelledby="contact-title">
+      <div class="section-head">
+        <p class="hand" data-i18n="contact.eyebrow">a próxima folha pode ser a sua</p>
+        <h2 id="contact-title" data-i18n="contact.title">Contato</h2>
+        <svg class="underline" viewBox="0 0 190 16" data-scene="underline" data-draw-on-view aria-hidden="true"></svg>
+      </div>
+      <div class="contact-grid">
+        <ul class="contact-list">
+          <li><button type="button" id="copy-email"><span class="name">E-mail</span><span class="handle" id="email-handle">andre.luanbq@gmail.com</span></button></li>
+          <li><a href="https://github.com/andreluaan" target="_blank" rel="noopener"><span class="name">GitHub</span><span class="handle">@andreluaan ↗</span></a></li>
+          <li><span class="row"><span class="name">LinkedIn</span><span class="handle" data-i18n="soonLong">em breve</span></span></li>
+          <li><span class="row"><span class="name">Instagram</span><span class="handle" data-i18n="soonLong">em breve</span></span></li>
+        </ul>
+
+        <div class="notebook" id="notebook">
+          <div class="notebook-head">
+            <svg viewBox="0 0 40 12" data-scene="dots" aria-hidden="true"></svg>
+            <span data-i18n="notebook.title">caderno de recados</span>
+          </div>
+          <div class="notebook-log" id="notebook-log" aria-live="polite"></div>
+          <div>
+            <form class="notebook-form" id="notebook-form" autocomplete="off">
+              <label for="notebook-input" data-i18n="notebook.prompt">visitante ~ ✒</label>
+              <input id="notebook-input" name="command" type="text" spellcheck="false">
+            </form>
+            <div class="notebook-actions">
+              <button class="ink-button small" type="button" data-command="recado" data-frame><span data-i18n="notebook.note">deixar um recado</span></button>
+              <button class="ink-button small" type="button" data-command="desenhar" data-frame><span data-i18n="notebook.draw">desenhar</span></button>
+              <button class="ink-button small" type="button" data-command="ajuda" data-frame><span data-i18n="notebook.help">ajuda</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="footer">
+    <div class="seal">
+      <svg viewBox="0 0 44 44" data-scene="seal" aria-hidden="true"></svg>
+      <span data-i18n="footer.made">Desenhado traço a traço. © 2026 André Luan</span>
+    </div>
+    <div class="secrets-wrap">
+      <button class="secrets-button" type="button" id="secrets-button" aria-expanded="false" aria-controls="secrets-panel"><span data-i18n="secrets.label">segredos</span> <strong id="secrets-count">0/6</strong></button>
+      <div class="secrets-panel" id="secrets-panel" hidden>
+        <span class="label" data-i18n="secrets.title">Segredos do caderno</span>
+        <ul id="secrets-list"></ul>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let maskCounter = 0;
+
+  function seededRandom(seed) {
+    let state = (seed * 9973 + 12345) % 2147483647;
+    return () => (state = (state * 16807) % 2147483647) / 2147483647;
+  }
+
+  function smoothPoints(points) {
+    if (points.length < 3) return points;
+    const result = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i - 1] || points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2] || p2;
+      const steps = Math.max(4, Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / 5));
+      for (let s = 0; s < steps; s++) {
+        const t = s / steps;
+        const t2 = t * t;
+        const t3 = t2 * t;
+        const at = axis => 0.5 * (2 * p1[axis] + (-p0[axis] + p2[axis]) * t
+          + (2 * p0[axis] - 5 * p1[axis] + 4 * p2[axis] - p3[axis]) * t2
+          + (-p0[axis] + 3 * p1[axis] - 3 * p2[axis] + p3[axis]) * t3);
+        result.push([at(0), at(1)]);
+      }
+    }
+    result.push(points[points.length - 1]);
+    return result;
+  }
+
+  function densify(points) {
+    const result = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      const [x1, y1] = points[i];
+      const [x2, y2] = points[i + 1];
+      const steps = Math.max(1, Math.ceil(Math.hypot(x2 - x1, y2 - y1) / 4));
+      for (let s = 0; s < steps; s++) result.push([x1 + (x2 - x1) * s / steps, y1 + (y2 - y1) * s / steps]);
+    }
+    result.push(points[points.length - 1]);
+    return result;
+  }
+
+  function brushOutline(centerline, width, { seed = 1, start = 0.12, end = 0.3, wobble = 0.35 } = {}) {
+    const random = seededRandom(seed);
+    const count = centerline.length;
+    const left = [];
+    const right = [];
+    let pressure = 1;
+
+    centerline.forEach((point, i) => {
+      const t = i / (count - 1);
+      const before = centerline[Math.max(0, i - 1)];
+      const after = centerline[Math.min(count - 1, i + 1)];
+      const length = Math.hypot(after[0] - before[0], after[1] - before[1]) || 1;
+      const nx = -(after[1] - before[1]) / length;
+      const ny = (after[0] - before[0]) / length;
+      pressure = Math.min(1.35, Math.max(0.55, pressure * 0.9 + 0.1 + (random() - 0.5) * wobble));
+      const taper = Math.max(0, Math.min(1, t / start, (1 - t) / end));
+      const half = Math.max(0.25, width * Math.sin(taper * Math.PI / 2) * pressure / 2);
+      left.push([point[0] + nx * half, point[1] + ny * half]);
+      right.push([point[0] - nx * half, point[1] - ny * half]);
+    });
+
+    const format = p => p[0].toFixed(1) + ' ' + p[1].toFixed(1);
+    return 'M' + left.map(format).join('L') + 'L' + right.reverse().map(format).join('L') + 'Z';
+  }
+
+  const brushPath = (points, width, options) => brushOutline(densify(smoothPoints(points)), width, options);
+
+  function ellipsePoints(cx, cy, rx, ry, { from = -1.4, sweep = 6.6, count = 16, seed = 3 } = {}) {
+    const random = seededRandom(seed);
+    return Array.from({ length: count + 1 }, (_, i) => {
+      const angle = from + sweep * i / count;
+      const drift = 1 + (random() - 0.5) * 0.08;
+      return [cx + Math.cos(angle) * rx * drift, cy + Math.sin(angle) * ry * drift];
+    });
+  }
+
+  const stroke = (points, width, options = {}) => ({ points, width, ...options });
+
+  function roughRect(x, y, w, h, width = 1.6, seed = 1) {
+    const r = seededRandom(seed);
+    const j = () => (r() - 0.5) * 3;
+    return [
+      stroke([[x - 5, y + j()], [x + w / 2, y + j() - 1], [x + w + 4, y + j()]], width, { seed: seed + 1, start: 0.05, end: 0.15 }),
+      stroke([[x + w + j(), y - 3], [x + w + j() + 1, y + h / 2], [x + w + j(), y + h + 4]], width, { seed: seed + 2, start: 0.05, end: 0.2 }),
+      stroke([[x + w + 3, y + h + j()], [x + w / 2, y + h + j() + 1], [x - 4, y + h + j()]], width, { seed: seed + 3, start: 0.05, end: 0.15 }),
+      stroke([[x + j(), y + h + 3], [x + j() - 1, y + h / 2], [x + j(), y - 4]], width, { seed: seed + 4, start: 0.05, end: 0.2 })
+    ];
+  }
+
+  function el(tag, attributes = {}, parent) {
+    const node = document.createElementNS(SVG_NS, tag);
+    Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, value));
+    if (parent) parent.append(node);
+    return node;
+  }
+
+  const scenes = {
+    arrow: [
+      stroke([[4, 6], [30, 10], [58, 26]], 2, { seed: 5 }),
+      stroke([[46, 27], [59, 27], [56, 15]], 2, { seed: 6 })
+    ],
+    ground: [stroke([[0, 12], [260, 10], [620, 13], [1000, 11]], 4.5, { seed: 9, dry: true, start: 0.01, end: 0.08 })],
+    introLine: [stroke([[0, 9], [160, 8], [320, 10]], 4, { seed: 19, dry: true, start: 0.02, end: 0.1 })],
+    underline: [stroke([[2, 9], [90, 6], [186, 10]], 4.5, { seed: 10, dry: true, start: 0.04, end: 0.3 })],
+    dots: [
+      stroke(ellipsePoints(6, 6, 2.5, 2.5, { seed: 1, count: 8 }), 3.5, { seed: 1 }),
+      stroke(ellipsePoints(20, 6, 2.5, 2.5, { seed: 2, count: 8 }), 3.5, { seed: 2, tone: 'wash' }),
+      stroke(ellipsePoints(34, 6, 2.5, 2.5, { seed: 3, count: 8 }), 3.5, { seed: 3, tone: 'mist' })
+    ],
+    seal: [
+      ...roughRect(4, 4, 36, 36, 2.6, 50),
+      stroke([[12, 32], [17, 12], [22, 32]], 2.4, { seed: 55 }),
+      stroke([[14, 24], [20, 24]], 1.8, { seed: 56 }),
+      stroke([[27, 12], [27, 32], [34, 32]], 2.4, { seed: 57 })
+    ],
+    legend: [0, 1, 2, 3, 4].map(level => stroke([[6 + level * 22, 9], [18 + level * 22, 7]], 10, { seed: 90 + level, tone: ['mist', 'mist', 'wash', 'soft', 'ink'][level], start: 0.2, end: 0.4 })),
+    logSketch: [
+      ...roughRect(20, 18, 200, 124, 1.6, 300),
+      stroke([[20, 40], [220, 40]], 1.2, { seed: 305 }),
+      stroke([[40, 70], [120, 68]], 6, { seed: 306, dry: true }),
+      stroke([[40, 90], [150, 88]], 2, { seed: 307 }),
+      stroke([[40, 104], [130, 103]], 2, { seed: 308 }),
+      stroke(ellipsePoints(176, 98, 16, 13, { seed: 309 }), 18, { seed: 309 }),
+      stroke([[170, 112], [167, 126]], 2.4, { seed: 310 }),
+      stroke([[182, 112], [185, 126]], 2.4, { seed: 311 })
+    ]
+  };
+
+  const works = [
+    {
+      stat: { pt: 'Nanquim, Carvão, Vitrine, Verde-água', en: 'Nanquim, Carvão, Vitrine, Verde-água' },
+      scene: [
+        stroke([[120, 22], [104, 58], [106, 80], [120, 88], [134, 80], [136, 58], [120, 22]], 3, { seed: 161, start: 0.02, end: 0.05 }),
+        stroke([[112, 66], [118, 80]], 5, { tone: 'wash', seed: 162 }),
+        stroke([[40, 118], [76, 118]], 26, { seed: 163, start: 0.02, end: 0.08 }),
+        stroke([[86, 118], [122, 118]], 26, { tone: 'wash', seed: 164, start: 0.02, end: 0.08, filter: 'wash' }),
+        stroke([[132, 118], [168, 118]], 26, { tone: 'mist', seed: 165, start: 0.02, end: 0.08, filter: 'wash' }),
+        ...roughRect(178, 105, 26, 26, 1.4, 166)
+      ],
+      pt: { title: 'Nanquim System', text: 'Meu design system: tokens em CSS e Web Components. Cada marca nasce do mesmo nanquim, diluído em outro pigmento.', tags: ['design system', 'css', 'web components'], status: 'v0.5' },
+      en: { title: 'Nanquim System', text: 'My own design system: CSS tokens and Web Components. Every brand grows from the same ink, diluted into another pigment.', tags: ['design system', 'css', 'web components'], status: 'v0.5' }
+    },
+    {
+      stat: { pt: 'logo, manual, tokens, kit social', en: 'logo, manual, tokens, social kit' },
+      scene: [
+        stroke([[52, 92], [120, 38], [190, 92]], 4.4, { seed: 121, start: 0.04 }),
+        stroke([[70, 80], [70, 132]], 2.2, { seed: 122 }),
+        stroke([[170, 80], [170, 132]], 2.2, { seed: 123 }),
+        stroke([[108, 132], [108, 102], [132, 102], [132, 132]], 2, { seed: 124 }),
+        stroke([[36, 134], [120, 131], [204, 135]], 2.6, { seed: 125, dry: true }),
+        stroke([[150, 60], [150, 40], [162, 40], [162, 70]], 2, { seed: 126 }),
+        stroke([[60, 140], [180, 142]], 14, { tone: 'mist', filter: 'wash', seed: 127 })
+      ],
+      pt: { title: 'AeR Corretores', text: 'Identidade visual completa para uma imobiliária de Patos-PB: logotipo, manual da marca, paleta, tokens e kit para redes sociais.', tags: ['identidade visual', 'branding'], status: '2026' },
+      en: { title: 'AeR Corretores', text: 'Full visual identity for a real estate agency in Patos, Brazil: logo, brand manual, palette, design tokens and a social media kit.', tags: ['visual identity', 'branding'], status: '2026' }
+    },
+    {
+      stat: { pt: '120 imóveis no catálogo', en: '120 listings in the catalog' },
+      scene: [
+        ...roughRect(34, 26, 172, 108, 1.8, 140),
+        stroke([[74, 30], [74, 130]], 1.4, { seed: 145 }),
+        stroke([[44, 44], [64, 44]], 3, { seed: 146 }), stroke([[44, 58], [60, 58]], 3, { seed: 147 }), stroke([[44, 72], [62, 72]], 3, { seed: 148 }),
+        stroke([[98, 120], [98, 92]], 10, { seed: 149, start: 0.02, end: 0.1 }),
+        stroke([[122, 120], [122, 72]], 10, { seed: 150, start: 0.02, end: 0.1, tone: 'wash' }),
+        stroke([[146, 120], [146, 84]], 10, { seed: 151, start: 0.02, end: 0.1 }),
+        stroke([[170, 120], [170, 56]], 10, { seed: 152, start: 0.02, end: 0.1, dry: true }),
+        stroke([[88, 62], [116, 48], [140, 56], [188, 40]], 1.6, { seed: 153 })
+      ],
+      pt: { title: 'Loquei · landing AeR', text: 'Landing pública da AeR dentro do Loquei, um SaaS multi-imobiliária. Tema por cliente sem quebrar as outras contas.', tags: ['angular', 'nestjs', 'saas'], status: 'em andamento' },
+      en: { title: 'Loquei · AeR landing', text: 'AeR’s public landing page inside Loquei, a multi-tenant real estate SaaS. Per-client theming without breaking other accounts.', tags: ['angular', 'nestjs', 'saas'], status: 'in progress' }
+    },
+    {
+      stat: { pt: 'jurídico + contábil', en: 'legal + accounting' },
+      scene: [
+        stroke([[40, 34], [128, 30], [132, 70], [74, 72], [58, 88], [60, 72], [42, 72], [40, 34]], 2.2, { seed: 181, start: 0.02, end: 0.05 }),
+        stroke([[54, 46], [114, 44]], 1.6, { seed: 182 }), stroke([[54, 58], [96, 57]], 1.6, { seed: 183 }),
+        stroke([[120, 128], [156, 112], [196, 124]], 2.6, { seed: 184 }),
+        stroke([[120, 128], [156, 118], [196, 130]], 1.4, { seed: 185 }),
+        stroke([[120, 128], [120, 96], [156, 84], [196, 96], [196, 128]], 2.4, { seed: 186, start: 0.02, end: 0.05 }),
+        stroke([[156, 84], [156, 116]], 1.6, { seed: 187 }),
+        stroke([[164, 98], [188, 94]], 1.2, { seed: 188 }), stroke([[164, 106], [184, 103]], 1.2, { seed: 189 }),
+        stroke([[136, 72], [150, 82]], 1.4, { seed: 190 })
+      ],
+      pt: { title: 'Assistente com RAG', text: 'Meu TCC: um assistente conversacional que consulta documentos das áreas jurídica e contábil, configurável por perfil de área.', tags: ['ia', 'rag', 'pesquisa'], status: 'em andamento' },
+      en: { title: 'RAG assistant', text: 'My thesis: a conversational assistant that searches legal and accounting documents, configurable per field of work.', tags: ['ai', 'rag', 'research'], status: 'in progress' }
+    },
+    {
+      stat: { pt: 'site institucional', en: 'institutional website' },
+      scene: [
+        stroke([[120, 34], [120, 122]], 3.4, { seed: 101 }),
+        stroke([[76, 52], [120, 47], [164, 52]], 3, { seed: 102 }),
+        stroke([[78, 52], [66, 88]], 1.2, { seed: 103 }), stroke([[78, 52], [92, 88]], 1.2, { seed: 104 }),
+        stroke([[162, 52], [148, 88]], 1.2, { seed: 105 }), stroke([[162, 52], [176, 88]], 1.2, { seed: 106 }),
+        stroke([[62, 88], [79, 100], [96, 88]], 3, { seed: 107 }),
+        stroke([[144, 88], [162, 100], [180, 88]], 3, { seed: 108 }),
+        stroke([[96, 126], [120, 122], [146, 126]], 6, { seed: 109 }),
+        stroke([[40, 140], [200, 138]], 12, { tone: 'mist', filter: 'wash', seed: 110 })
+      ],
+      pt: { title: 'SI Advocacia', text: 'Site para um escritório de advocacia: sóbrio, claro e pensado para gerar confiança desde o primeiro contato.', tags: ['site', 'front-end'], status: 'no ar' },
+      en: { title: 'SI Advocacia', text: 'Website for a law firm: sober, clear and built to earn trust from the first visit.', tags: ['website', 'front-end'], status: 'live' }
+    },
+    {
+      stat: { pt: 'feito por diversão', en: 'made for fun' },
+      scene: [
+        stroke([[88, 40], [94, 126], [146, 126], [152, 40]], 2.6, { seed: 201, start: 0.02, end: 0.05 }),
+        stroke([[92, 66], [148, 66]], 1.4, { seed: 202 }),
+        stroke([[96, 76], [100, 120], [140, 120], [144, 76]], 16, { tone: 'wash', filter: 'wash', seed: 203 }),
+        stroke(ellipsePoints(108, 38, 16, 10, { seed: 204, count: 10 }), 5, { tone: 'mist', seed: 204 }),
+        stroke(ellipsePoints(132, 34, 18, 11, { seed: 205, count: 10 }), 5, { tone: 'mist', seed: 205 }),
+        stroke([[152, 60], [172, 64], [172, 96], [150, 102]], 2.6, { seed: 206 }),
+        stroke([[60, 136], [180, 138]], 12, { tone: 'mist', filter: 'wash', seed: 207 })
+      ],
+      pt: { title: 'PPT da Saideira', text: 'Um jogo casual para testar mecânicas e animação no navegador.', tags: ['jogo', 'javascript'], status: 'experimento' },
+      en: { title: 'PPT da Saideira', text: 'A casual game to try out mechanics and animation in the browser.', tags: ['game', 'javascript'], status: 'experiment' }
+    }
+  ];
+
+  const attributes = [
+    { pt: 'traço', en: 'linework', value: 0.9 },
+    { pt: 'front-end', en: 'front-end', value: 0.85 },
+    { pt: 'design', en: 'design', value: 0.8 },
+    { pt: 'paciência', en: 'patience', value: 0.7 },
+    { pt: 'café', en: 'coffee', value: 1 }
+  ];
+
+  const inventory = [
+    { pt: 'Nanquim System', en: 'Nanquim System', value: { pt: 'v0.5', en: 'v0.5' } },
+    { pt: 'AeR Corretores', en: 'AeR Corretores', value: { pt: 'marca', en: 'brand' } },
+    { pt: 'Loquei', en: 'Loquei', value: { pt: '120 imóveis', en: '120 listings' } },
+    { pt: 'TCC com RAG', en: 'RAG thesis', value: { pt: 'em curso', en: 'ongoing' } },
+    { pt: 'Pincel', en: 'Brush', value: { pt: 'sempre à mão', en: 'always at hand' } },
+    { pt: 'Este site', en: 'This site', value: { pt: 'traço a traço', en: 'stroke by stroke' } }
+  ];
+
+  function renderScene(svg, strokes, { animate = false, delay = 0, pace = 1 } = {}) {
+    svg.replaceChildren();
+    const defs = el('defs', {}, svg);
+    let clock = delay;
+
+    strokes.forEach((item, index) => {
+      const centerline = densify(smoothPoints(item.points));
+      const path = el('path', {
+        d: brushOutline(centerline, item.width, { seed: item.seed ?? index + 1, start: item.start, end: item.end }),
+        class: 'ink-' + (item.tone || 'ink'),
+        filter: 'url(#' + (item.filter || (item.dry ? 'dry' : 'bleed')) + ')'
+      });
+
+      if (animate) {
+        const length = centerline.reduce((sum, p, i) => i ? sum + Math.hypot(p[0] - centerline[i - 1][0], p[1] - centerline[i - 1][1]) : 0, 0);
+        const duration = Math.min(0.9, Math.max(0.18, length / 520)) / pace;
+        const maskId = 'reveal-' + (++maskCounter);
+        const mask = el('mask', { id: maskId, maskUnits: 'userSpaceOnUse' }, defs);
+        const trail = el('path', {
+          d: 'M' + centerline.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('L'),
+          fill: 'none',
+          stroke: '#fff',
+          'stroke-linecap': 'round',
+          'stroke-width': item.width * 2 + 12,
+          pathLength: '1'
+        }, mask);
+        trail.style.strokeDasharray = '1.02';
+        trail.style.strokeDashoffset = '1.02';
+        trail.style.animation = `draw ${duration}s cubic-bezier(.45,.05,.3,1) ${clock}s forwards`;
+        path.setAttribute('mask', 'url(#' + maskId + ')');
+        clock += duration * 0.55;
+      }
+      svg.append(path);
+    });
+    return clock;
+  }
+
+  const drawKeyframes = document.createElement('style');
+  drawKeyframes.textContent = '@keyframes draw { to { stroke-dashoffset: 0; } }';
+  document.head.append(drawKeyframes);
+
+  function creatureMarkup() {
+    const body = brushPath(ellipsePoints(22, 19, 9, 7.5, { seed: 7, count: 14 }), 15, { seed: 7, start: 0.02, end: 0.05, wobble: 0.2 });
+    const tuft = brushPath([[21, 8], [23, 3], [28, 1]], 2.6, { seed: 8 });
+    return `<div class="flip"><svg class="creature" viewBox="0 0 44 40" aria-hidden="true">
+      <path class="leg leg-a" d="M17 27 L15 37" fill="none"/>
+      <path class="leg leg-b" d="M27 27 L29 37" fill="none"/>
+      <g class="body">
+        <path d="${body}" class="ink-ink" filter="url(#bleed)"/>
+        <path d="${tuft}" class="ink-ink"/>
+        <circle class="eye" cx="18" cy="17" r="2.3"/>
+        <circle class="eye" cx="27" cy="17" r="2.3"/>
+      </g>
+    </svg></div>`;
+  }
+
+  function createWalker(container, walker, { speed = 46 } = {}) {
+    walker.innerHTML = creatureMarkup();
+    let x = 40;
+    let direction = 1;
+    let pausedUntil = 0;
+    let last = performance.now();
+
+    function frame(now) {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const max = container.clientWidth - 48;
+      if (now > pausedUntil) {
+        walker.classList.add('walking');
+        x += direction * speed * dt;
+        if (x > max || x < 0) {
+          x = Math.max(0, Math.min(max, x));
+          direction *= -1;
+        }
+        if (Math.random() < 0.003) {
+          pausedUntil = now + 900 + Math.random() * 1800;
+          if (Math.random() < 0.5) direction *= -1;
+        }
+      } else {
+        walker.classList.remove('walking');
+      }
+      walker.classList.toggle('facing-left', direction < 0);
+      walker.style.transform = `translateX(${x}px)`;
+      requestAnimationFrame(frame);
+    }
+
+    if (reduceMotion) {
+      walker.style.transform = 'translateX(40px)';
+    } else {
+      requestAnimationFrame(frame);
+    }
+  }
+
+  function paintPortrait(svg, animate) {
+    svg.replaceChildren();
+    const defs = el('defs', {}, svg);
+    const image = el('image', { href: 'assets/andre-nanquim.jpg', x: 0, y: 0, width: 900, height: 1600 });
+
+    if (!animate) {
+      svg.append(image);
+      return;
+    }
+
+    const mask = el('mask', { id: 'portrait-mask', maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: 900, height: 1600 }, defs);
+    const group = el('g', { filter: 'url(#brush-mask)' }, mask);
+    const sweeps = [
+      [[420, 140], [560, 200], [640, 330], [560, 420]],
+      [[300, 380], [470, 470], [700, 520], [820, 650]],
+      [[260, 560], [380, 800], [520, 960], [760, 1000]],
+      [[820, 760], [700, 980], [560, 1200], [420, 1380]],
+      [[200, 900], [320, 1150], [300, 1400]],
+      [[600, 1100], [780, 1250], [840, 1420]],
+      [[120, 300], [450, 700], [880, 400]],
+      [[100, 1300], [450, 900], [880, 1300]]
+    ];
+    let clock = 0.15;
+    sweeps.forEach((points, index) => {
+      const duration = 0.55;
+      const trail = el('path', {
+        d: 'M' + densify(smoothPoints(points)).map(p => p.join(' ')).join('L'),
+        fill: 'none',
+        stroke: '#fff',
+        'stroke-width': index > 5 ? 420 : 300,
+        'stroke-linecap': 'round',
+        pathLength: '1'
+      }, group);
+      trail.style.strokeDasharray = '1.02';
+      trail.style.strokeDashoffset = '1.02';
+      trail.style.animation = `draw ${duration}s cubic-bezier(.5,.1,.3,1) ${clock}s forwards`;
+      clock += 0.22;
+    });
+    const settle = el('rect', { x: -50, y: -50, width: 1000, height: 1700, fill: '#fff', opacity: 0 }, mask);
+    settle.style.transition = 'opacity 0.6s';
+    setTimeout(() => settle.setAttribute('opacity', 1), (clock + 0.5) * 1000);
+    image.setAttribute('mask', 'url(#portrait-mask)');
+    svg.append(image);
+  }
+
+  function frameBox(target, svg, seed, width = 1.8) {
+    const { width: w, height: h } = target.getBoundingClientRect();
+    if (!w) return;
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    renderScene(svg, roughRect(3, 3, w - 6, h - 6, width, seed));
+  }
+
+  function frameButton(button) {
+    const { width, height } = button.getBoundingClientRect();
+    if (!width) return;
+    let svg = button.querySelector(':scope > svg');
+    if (!svg) {
+      svg = el('svg', { 'aria-hidden': 'true' });
+      button.prepend(svg);
+    }
+    const seed = Math.round(width);
+    frameBox(button, svg, seed);
+    const blot = el('g', { class: 'blot' }, svg);
+    const mid = height / 2;
+    el('path', {
+      d: brushPath([[6, mid + 1], [width / 2, mid - 2], [width - 6, mid + 1]], height - 4, { seed, start: 0.06, end: 0.12, wobble: 0.2 }),
+      class: 'ink-ink',
+      filter: 'url(#bleed)'
+    }, blot);
+  }
+
+  function renderYear() {
+    const svg = document.getElementById('year-grid');
+    const cell = 14;
+    const weeks = 53;
+    svg.setAttribute('viewBox', `0 0 ${weeks * cell} ${7 * cell}`);
+    svg.replaceChildren();
+    const random = seededRandom(2026);
+    const tones = ['mist', 'mist', 'wash', 'soft', 'ink'];
+    const today = new Date(2026, 9, 23);
+    let total = 0;
+    let streak = 0;
+    for (let week = 0; week < weeks; week++) {
+      for (let day = 0; day < 7; day++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - ((weeks - 1 - week) * 7 + (6 - day)));
+        const ramp = 0.35 + week / weeks * 0.6;
+        const roll = random() * ramp + (day > 0 && day < 6 ? 0.12 : 0);
+        streak = roll > 0.45 ? streak + 1 : 0;
+        const level = roll < 0.3 ? 0 : roll < 0.45 ? 1 : roll < 0.6 ? 2 : roll < 0.75 ? 3 : 4;
+        const count = level === 0 ? 0 : level * 3 + Math.floor(random() * 3);
+        total += count;
+        const cx = week * cell + cell / 2;
+        const cy = day * cell + cell / 2;
+        const tilt = (random() - 0.5) * 4;
+        const path = el('path', {
+          d: brushPath([[cx - 4.5, cy + tilt / 2], [cx + 4.5, cy - tilt / 2]], level === 0 ? 3 : 9.5, { seed: week * 7 + day + 1, start: 0.25, end: 0.4 }),
+          class: 'ink-' + tones[level],
+          filter: 'url(#bleed)',
+          'data-week': week
+        }, svg);
+        if (level === 0) path.style.opacity = '0.6';
+        el('title', {}, path).textContent = `${date.toLocaleDateString(currentLang === 'pt' ? 'pt-BR' : 'en-US', { day: '2-digit', month: 'short' })} · ${count}`;
+      }
+    }
+    document.getElementById('year-total').textContent = t('year.total').replace('{n}', total.toLocaleString(currentLang === 'pt' ? 'pt-BR' : 'en-US'));
+    return svg;
+  }
+
+  function animateYear(svg) {
+    if (reduceMotion) return;
+    svg.querySelectorAll('path').forEach(path => {
+      const week = Number(path.dataset.week);
+      path.animate([
+        { opacity: 0, transform: 'scale(0.2)' },
+        { opacity: path.style.opacity || 1, transform: 'scale(1)' }
+      ], { duration: 420, delay: week * 18, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' });
+    });
+  }
+
+  const dictionary = {
+    pt: {
+      'contact.copied': 'copiado!',
+      'year.total': '{n} contribuições no último ano · dados de exemplo, a versão final lê o GitHub',
+      'notebook.welcome': ['oi. este é o caderno do André.', 'escreva um comando e aperte enter,', 'ou use os botões aqui embaixo.'],
+      'notebook.help': ['comandos: sobre, projetos, contato, desenhar,', 'segredos, recado <texto>, limpar.'],
+      'notebook.about': ['dev front-end e designer. desenha nas horas vagas', 'e às vezes nas horas ocupadas também.'],
+      'notebook.projects': ['Nanquim System, AeR Corretores, Loquei,', 'assistente com RAG, SI Advocacia, PPT da Saideira.'],
+      'notebook.contact': ['andre.luanbq@gmail.com · github.com/andreluaan'],
+      'notebook.noteEmpty': ['escreva depois do comando: recado olá, André!'],
+      'notebook.noteSaved': ['recado anotado neste navegador.', 'na versão final ele chega direto até mim.'],
+      'notebook.unknown': ['não conheço "{c}". tente "ajuda".'],
+      'notebook.magic': ['a tinta reconheceu a palavra.'],
+      'notebook.prefill': 'recado ',
+      'secrets.found': 'segredo encontrado',
+      'secrets.hidden': '??? ',
+      'hidden.drop': 'Gota de tinta escondida'
+    },
+    en: {
+      'intro.label': 'wetting the brush',
+      'intro.hint': 'drawing the page, stroke by stroke',
+      'intro.skip': 'skip intro',
+      'nav.work': 'Projects',
+      'nav.about': 'About',
+      'nav.log': 'Log',
+      'nav.contact': 'Contact',
+      'hero.eyebrow': 'sketchbook of a developer who draws',
+      'hero.lede': 'Front-end developer and designer. Creator of the <a class="brush-link" href="#projetos">Nanquim System</a>. Drawing <a class="brush-link" href="#projetos">AeR</a>’s landing page inside Loquei.',
+      'hero.cta': 'See projects ↓',
+      'hero.cta2': 'Talk about a project',
+      'hero.note': 'me, in ink',
+      'soon': '(soon)',
+      'soonLong': 'coming soon',
+      'work.eyebrow': 'loose pages from the sketchbook',
+      'work.title': 'Projects',
+      'work.lede': 'Websites, brands, systems and experiments. Each page gets inked as it reaches you.',
+      'about.eyebrow': 'character sheet',
+      'about.title': 'About me',
+      'about.player': 'Player 1',
+      'about.level': 'level: leveling up',
+      'about.class': 'class: front-end craftsman',
+      'about.bio': 'Computer Science student. I build websites where the visual side weighs as much as the technical one, on top of my own design system. Away from code, I draw: figures, ink and plenty of scribbled sketchbooks.',
+      'about.attributes': 'Attributes',
+      'about.inventory': 'Inventory',
+      'about.special': 'Special move',
+      'about.move': 'Give me a sketch on a napkin. I’ll hand back a live website.',
+      'year.eyebrow': 'a year in brushstrokes',
+      'year.title': 'Every day of code is a brushstroke',
+      'year.lede': 'The darker the mark, the more left the sketchbook and went live.',
+      'year.less': 'less',
+      'year.more': 'more',
+      'year.total': '{n} contributions in the last year · sample data, the final version reads GitHub',
+      'process.eyebrow': 'from sketch to launch',
+      'process.title': 'How I work',
+      'process.s1.title': 'Conversation',
+      'process.s1.text': 'I learn the business, the audience and what the site has to solve before thinking about screens.',
+      'process.s2.title': 'Sketch',
+      'process.s2.text': 'I draw the structure and look before the first line of code. You approve the direction early.',
+      'process.s3.title': 'Build',
+      'process.s3.text': 'Code on top of my own design system: fast, accessible and ready to grow.',
+      'process.s4.title': 'Launch',
+      'process.s4.text': 'Publishing, domain, fine-tuning and follow-up after launch.',
+      'log.eyebrow': 'behind-the-scenes notes',
+      'log.title': 'Log',
+      'log.date': 'oct 2026 · coming soon',
+      'log.entry': 'How this portfolio is being drawn',
+      'log.text': 'From a pixel reference to ink: the brush engine, the little ink creature and the design decisions behind each page.',
+      'contact.eyebrow': 'the next page could be yours',
+      'contact.title': 'Contact',
+      'contact.copied': 'copied!',
+      'notebook.title': 'guestbook',
+      'notebook.prompt': 'guest ~ ✒',
+      'notebook.note': 'leave a note',
+      'notebook.draw': 'draw',
+      'notebook.help': 'help',
+      'notebook.welcome': ['hi. this is André’s sketchbook.', 'type a command and press enter,', 'or just use the buttons below.'],
+      'notebook.helpText': ['commands: about, projects, contact, draw,', 'secrets, note <text>, clear.'],
+      'notebook.about': ['front-end dev and designer. draws in his spare time,', 'and sometimes in his busy time too.'],
+      'notebook.projects': ['Nanquim System, AeR Corretores, Loquei,', 'RAG assistant, SI Advocacia, PPT da Saideira.'],
+      'notebook.contact': ['andre.luanbq@gmail.com · github.com/andreluaan'],
+      'notebook.noteEmpty': ['write after the command: note hi, André!'],
+      'notebook.noteSaved': ['note saved in this browser.', 'in the final version it reaches me directly.'],
+      'notebook.unknown': ['I don’t know "{c}". try "help".'],
+      'notebook.magic': ['the ink recognized the word.'],
+      'notebook.prefill': 'note ',
+      'footer.made': 'Drawn stroke by stroke. © 2026 André Luan',
+      'secrets.label': 'secrets',
+      'secrets.title': 'Sketchbook secrets',
+      'secrets.found': 'secret found',
+      'secrets.hidden': '??? ',
+      'hidden.drop': 'Hidden ink drop'
+    }
+  };
+  dictionary.pt['notebook.helpText'] = dictionary.pt['notebook.help'];
+  delete dictionary.pt['notebook.help'];
+
+  const secrets = [
+    { id: 'skip', pt: ['impaciente', 'pulou a intro com Esc'], en: ['impatient', 'skipped the intro with Esc'] },
+    { id: 'tickle', pt: ['cócegas', 'cutucou a criaturinha de tinta'], en: ['tickles', 'poked the ink creature'] },
+    { id: 'portrait', pt: ['autorretrato', 'clicou três vezes no retrato'], en: ['self-portrait', 'clicked the portrait three times'] },
+    { id: 'magic', pt: ['palavra mágica', 'escreveu "nanquim" no caderno'], en: ['magic word', 'typed "nanquim" in the guestbook'] },
+    { id: 'polyglot', pt: ['poliglota', 'trocou o idioma'], en: ['polyglot', 'switched the language'] },
+    { id: 'drop', pt: ['gota perdida', 'achou a gota escondida'], en: ['lost drop', 'found the hidden drop'] }
+  ];
+
+  let currentLang = 'pt';
+  let found = new Set();
+  try { found = new Set(JSON.parse(localStorage.getItem('portfolio-secrets') || '[]')); } catch (error) {}
+
+  const t = key => dictionary[currentLang][key] ?? dictionary.pt[key];
+
+  function renderSecrets() {
+    document.getElementById('secrets-count').textContent = `${found.size}/${secrets.length}`;
+    const list = document.getElementById('secrets-list');
+    list.replaceChildren(...secrets.map(secret => {
+      const item = document.createElement('li');
+      const [name, how] = secret[currentLang];
+      if (found.has(secret.id)) {
+        item.textContent = `✓ ${name}: ${how}`;
+      } else {
+        item.textContent = `${t('secrets.hidden')}${'·'.repeat(name.length)}`;
+        item.className = 'locked';
+      }
+      return item;
+    }));
+  }
+
+  let toastTimer;
+  function unlock(id) {
+    if (found.has(id)) return;
+    found.add(id);
+    try { localStorage.setItem('portfolio-secrets', JSON.stringify([...found])); } catch (error) {}
+    renderSecrets();
+    const secret = secrets.find(item => item.id === id);
+    document.querySelector('.toast')?.remove();
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.setAttribute('role', 'status');
+    toast.innerHTML = `<span></span><strong></strong>`;
+    toast.querySelector('span').textContent = `${t('secrets.found')} · ${found.size}/${secrets.length}`;
+    toast.querySelector('strong').textContent = secret[currentLang][0];
+    document.body.append(toast);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.remove(), 3200);
+  }
+
+  function renderWorks() {
+    const grid = document.getElementById('work-grid');
+    grid.replaceChildren();
+    works.forEach(work => {
+      const copy = work[currentLang];
+      const item = document.createElement('li');
+      item.className = 'work';
+      item.innerHTML = `
+        <div class="sheet"><svg viewBox="0 0 240 160" role="img"></svg></div>
+        <div class="work-meta"><h3></h3><span class="status"></span></div>
+        <p></p>
+        <div class="work-foot"><span class="stat"></span><ul class="tags"></ul></div>`;
+      const svg = item.querySelector('svg');
+      svg.setAttribute('aria-label', copy.title);
+      item.querySelector('h3').textContent = copy.title;
+      item.querySelector('.status').textContent = copy.status;
+      item.querySelector('p').textContent = copy.text;
+      item.querySelector('.stat').textContent = work.stat[currentLang];
+      item.querySelector('.tags').append(...copy.tags.map(tag => Object.assign(document.createElement('li'), { textContent: tag })));
+      renderScene(svg, work.scene);
+      if (!reduceMotion && !inked.has(work)) {
+        svg.classList.add('pencil');
+        viewObserver.observe(svg);
+        svg.inkWith = () => {
+          inked.add(work);
+          svg.classList.remove('pencil');
+          renderScene(svg, work.scene, { animate: true, pace: 1.2 });
+        };
+      }
+      if (!reduceMotion) {
+        item.addEventListener('mouseenter', () => {
+          if (inked.has(work)) renderScene(svg, work.scene, { animate: true, pace: 1.8 });
+        });
+      }
+      grid.append(item);
+    });
+  }
+
+  function renderCharacter() {
+    const attributeList = document.getElementById('attributes');
+    attributeList.replaceChildren(...attributes.map((attribute, index) => {
+      const item = document.createElement('li');
+      item.className = 'attribute';
+      item.innerHTML = `<span class="hand"></span><svg viewBox="0 0 300 16" preserveAspectRatio="none" aria-hidden="true"></svg>`;
+      item.querySelector('span').textContent = attribute[currentLang];
+      const svg = item.querySelector('svg');
+      const end = 6 + 288 * attribute.value;
+      svg.sceneStrokes = [
+        stroke([[4, 9], [150, 8], [296, 9]], 1, { tone: 'mist', seed: 400 + index, start: 0.01, end: 0.02 }),
+        stroke([[6, 9], [end / 2, 7], [end, 9]], 10, { seed: 410 + index, dry: true, start: 0.03, end: 0.2 })
+      ];
+      renderScene(svg, svg.sceneStrokes);
+      return item;
+    }));
+    attributeList.querySelectorAll('svg').forEach(observeForDrawing);
+
+    document.getElementById('inventory').replaceChildren(...inventory.map(entry => {
+      const item = document.createElement('li');
+      item.innerHTML = `<span></span><span class="value"></span>`;
+      item.firstChild.textContent = entry[currentLang];
+      item.lastChild.textContent = entry.value[currentLang];
+      return item;
+    }));
+  }
+
+  const inked = new Set();
+  const drawn = new WeakSet();
+
+  const viewObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const target = entry.target;
+      viewObserver.unobserve(target);
+      if (target.inkWith) target.inkWith();
+      else if (target.id === 'year-grid') animateYear(target);
+      else if (!drawn.has(target)) {
+        drawn.add(target);
+        renderScene(target, target.sceneStrokes || scenes[target.dataset.scene], { animate: true, pace: 1.1 });
+      }
+    });
+  }, { threshold: 0.35 });
+
+  function observeForDrawing(svg) {
+    if (!reduceMotion && !drawn.has(svg)) viewObserver.observe(svg);
+  }
+
+  // Notebook
+  const notebookLog = document.getElementById('notebook-log');
+
+  function write(lines, className) {
+    lines.forEach(line => {
+      const row = document.createElement('div');
+      row.textContent = line;
+      if (className) row.className = className;
+      notebookLog.append(row);
+    });
+    notebookLog.scrollTop = notebookLog.scrollHeight;
+  }
+
+  function drawDoodle() {
+    const row = document.createElement('div');
+    const svg = el('svg', { viewBox: '0 0 180 34', 'aria-hidden': 'true' });
+    row.append(svg);
+    notebookLog.append(row);
+    const random = Math.random;
+    const points = Array.from({ length: 4 + Math.floor(random() * 3) }, (_, i) => [8 + i * 32, 8 + random() * 18]);
+    renderScene(svg, [stroke(points, 3 + random() * 6, { seed: Math.floor(random() * 999), dry: random() > 0.5 })], { animate: !reduceMotion });
+    notebookLog.scrollTop = notebookLog.scrollHeight;
+  }
+
+  const commandAliases = {
+    ajuda: 'help', help: 'help',
+    sobre: 'about', about: 'about',
+    projetos: 'projects', projects: 'projects',
+    contato: 'contact', contact: 'contact',
+    desenhar: 'draw', draw: 'draw',
+    segredos: 'secrets', secrets: 'secrets',
+    recado: 'note', note: 'note',
+    limpar: 'clear', clear: 'clear',
+    nanquim: 'magic', ink: 'magic'
+  };
+
+  function runCommand(raw) {
+    const input = raw.trim();
+    if (!input) return;
+    write([`${t('notebook.prompt')} ${input}`], 'you');
+    const [word, ...rest] = input.split(/\s+/);
+    const command = commandAliases[word.toLowerCase()];
+    const text = rest.join(' ');
+    if (command === 'help') write(t('notebook.helpText'));
+    else if (command === 'about') write(t('notebook.about'));
+    else if (command === 'projects') write(t('notebook.projects'));
+    else if (command === 'contact') write(t('notebook.contact'));
+    else if (command === 'draw') drawDoodle();
+    else if (command === 'secrets') write([`${found.size}/${secrets.length}`]);
+    else if (command === 'clear') notebookLog.replaceChildren();
+    else if (command === 'magic') {
+      write(t('notebook.magic'));
+      drawDoodle();
+      unlock('magic');
+    } else if (command === 'note') {
+      if (!text) {
+        write(t('notebook.noteEmpty'));
+      } else {
+        try {
+          const notes = JSON.parse(localStorage.getItem('portfolio-notes') || '[]');
+          notes.push({ text, at: new Date().toISOString() });
+          localStorage.setItem('portfolio-notes', JSON.stringify(notes));
+        } catch (error) {}
+        write(t('notebook.noteSaved'));
+      }
+    } else write([t('notebook.unknown')[0].replace('{c}', word)]);
+  }
+
+  document.getElementById('notebook-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const input = document.getElementById('notebook-input');
+    runCommand(input.value);
+    input.value = '';
+  });
+
+  document.querySelectorAll('[data-command]').forEach(button => {
+    button.addEventListener('click', () => {
+      const input = document.getElementById('notebook-input');
+      if (button.dataset.command === 'recado') {
+        input.value = t('notebook.prefill');
+        input.focus();
+        return;
+      }
+      runCommand(currentLang === 'pt' ? button.dataset.command : { desenhar: 'draw', ajuda: 'help' }[button.dataset.command]);
+    });
+  });
+
+  // Language
+  function setLanguage(lang, { fromUser = false } = {}) {
+    currentLang = lang;
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    document.querySelectorAll('[data-i18n]').forEach(node => {
+      const value = dictionary[lang][node.dataset.i18n];
+      if (typeof value === 'string') node.innerHTML = value;
+    });
+    document.querySelectorAll('.lang-switch button').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.lang === lang));
+    });
+    renderWorks();
+    renderCharacter();
+    renderYear();
+    renderSecrets();
+    document.querySelectorAll('[data-frame]').forEach(frameButton);
+    notebookLog.replaceChildren();
+    write(t('notebook.welcome'));
+    try { localStorage.setItem('portfolio-lang', lang); } catch (error) {}
+    if (fromUser) unlock('polyglot');
+  }
+
+  document.querySelectorAll('[data-i18n]').forEach(node => {
+    if (dictionary.pt[node.dataset.i18n] === undefined) dictionary.pt[node.dataset.i18n] = node.innerHTML;
+  });
+
+  document.querySelectorAll('.lang-switch button').forEach(button => {
+    button.addEventListener('click', () => {
+      if (button.dataset.lang !== currentLang) setLanguage(button.dataset.lang, { fromUser: true });
+    });
+  });
+
+  // Copy e-mail
+  document.getElementById('copy-email').addEventListener('click', () => {
+    const handle = document.getElementById('email-handle');
+    const email = 'andre.luanbq@gmail.com';
+    const confirmCopy = () => {
+      handle.textContent = t('contact.copied');
+      setTimeout(() => { handle.textContent = email; }, 1600);
+    };
+    const selectFallback = () => {
+      const range = document.createRange();
+      range.selectNodeContents(handle);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    };
+    if (navigator.clipboard) navigator.clipboard.writeText(email).then(confirmCopy, selectFallback);
+    else selectFallback();
+  });
+
+  // Secrets panel
+  const secretsButton = document.getElementById('secrets-button');
+  const secretsPanel = document.getElementById('secrets-panel');
+  secretsButton.addEventListener('click', () => {
+    secretsPanel.hidden = !secretsPanel.hidden;
+    secretsButton.setAttribute('aria-expanded', String(!secretsPanel.hidden));
+  });
+
+  function placeHiddenDrop() {
+    const drop = document.createElement('button');
+    drop.type = 'button';
+    drop.className = 'hidden-drop';
+    drop.setAttribute('aria-label', t('hidden.drop'));
+    const svg = el('svg', { viewBox: '0 0 22 26', 'aria-hidden': 'true' });
+    drop.append(svg);
+    renderScene(svg, [stroke([[11, 2], [6, 14], [8, 21], [11, 23], [15, 21], [16, 14], [11, 2]], 4, { seed: 77, start: 0.02, end: 0.05 }), stroke([[9, 14], [9, 18]], 3, { tone: 'wash', seed: 78 })]);
+    const yearSection = document.getElementById('ano');
+    yearSection.style.position = 'relative';
+    drop.style.right = '6px';
+    drop.style.top = '96px';
+    yearSection.append(drop);
+    drop.addEventListener('click', () => {
+      drop.animate([{ transform: 'scale(1)' }, { transform: 'scale(2.4)', opacity: 0 }], { duration: 400, fill: 'forwards' });
+      unlock('drop');
+    });
+  }
+
+  // Portrait clicks
+  let portraitClicks = 0;
+  let portraitTimer;
+  document.getElementById('painting').addEventListener('click', () => {
+    portraitClicks += 1;
+    clearTimeout(portraitTimer);
+    portraitTimer = setTimeout(() => { portraitClicks = 0; }, 900);
+    if (portraitClicks >= 3) {
+      portraitClicks = 0;
+      paintPortrait(document.getElementById('painting'), !reduceMotion);
+      unlock('portrait');
+    }
+  });
+
+  // Hero walker
+  const heroWalker = document.getElementById('hero-walker');
+  createWalker(document.getElementById('ground'), heroWalker);
+  const poke = () => {
+    heroWalker.classList.remove('hopping');
+    void heroWalker.offsetWidth;
+    heroWalker.classList.add('hopping');
+    unlock('tickle');
+  };
+  heroWalker.addEventListener('click', poke);
+  heroWalker.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      poke();
+    }
+  });
+
+  // Name letters
+  function splitName() {
+    const title = document.getElementById('hero-title');
+    let index = 0;
+    title.innerHTML = ['André', 'Luan'].map(word =>
+      [...word].map(letter => `<span class="letter" aria-hidden="true" style="--i:${index++}">${letter}</span>`).join('')
+    ).join('<br>');
+  }
+
+  function startHero() {
+    const title = document.getElementById('hero-title');
+    if (!reduceMotion) title.classList.add('bleeding');
+    paintPortrait(document.getElementById('painting'), !reduceMotion);
+    document.querySelectorAll('[data-scene]').forEach(svg => {
+      if (svg.closest('.hero, .ground')) renderScene(svg, scenes[svg.dataset.scene], { animate: !reduceMotion, delay: 0.6 });
+    });
+  }
+
+  // Intro
+  function runIntro(done) {
+    let seen = false;
+    try { seen = sessionStorage.getItem('portfolio-intro') === '1'; } catch (error) {}
+    if (reduceMotion || seen) {
+      done();
+      return;
+    }
+    const intro = document.getElementById('intro');
+    intro.hidden = false;
+    document.body.classList.add('intro-open');
+    const line = document.getElementById('intro-line');
+    renderScene(line, scenes.introLine, { animate: true, pace: 0.35 });
+    const walker = document.getElementById('intro-walker');
+    walker.innerHTML = creatureMarkup();
+    const percent = document.getElementById('intro-percent');
+    const duration = 2400;
+    const started = performance.now();
+    let finished = false;
+
+    function finish(skipped) {
+      if (finished) return;
+      finished = true;
+      try { sessionStorage.setItem('portfolio-intro', '1'); } catch (error) {}
+      intro.classList.add('leaving');
+      document.body.classList.remove('intro-open');
+      setTimeout(() => { intro.hidden = true; }, 700);
+      document.removeEventListener('keydown', onKey);
+      done();
+      if (skipped) unlock('skip');
+    }
+
+    function onKey(event) {
+      if (event.key === 'Escape') finish(true);
+    }
+
+    function tick(now) {
+      if (finished) return;
+      const progress = Math.min(1, (now - started) / duration);
+      const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+      percent.textContent = Math.round(eased * 100) + '%';
+      walker.style.transform = `translateX(${eased * (line.clientWidth - 44)}px)`;
+      if (progress < 1) requestAnimationFrame(tick);
+      else setTimeout(() => finish(false), 250);
+    }
+
+    document.addEventListener('keydown', onKey);
+    document.getElementById('intro-skip').addEventListener('click', () => finish(true));
+    requestAnimationFrame(tick);
+  }
+
+  // Boot
+  splitName();
+  document.querySelectorAll('[data-scene]').forEach(svg => renderScene(svg, scenes[svg.dataset.scene]));
+  paintPortrait(document.getElementById('painting'), false);
+  document.querySelectorAll('[data-draw-on-view]').forEach(observeForDrawing);
+
+  let savedLang = 'pt';
+  try { savedLang = localStorage.getItem('portfolio-lang') || 'pt'; } catch (error) {}
+  setLanguage(savedLang === 'en' ? 'en' : 'pt');
+  placeHiddenDrop();
+  if (!reduceMotion) viewObserver.observe(document.getElementById('year-grid'));
+
+  const frameAll = () => {
+    document.querySelectorAll('[data-frame]').forEach(frameButton);
+    frameBox(document.getElementById('character'), document.getElementById('character-frame'), 700, 2.2);
+  };
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(frameAll);
+  frameAll();
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(frameAll, 150);
+  });
+
+  runIntro(startHero);
+</script>

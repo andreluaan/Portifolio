@@ -1,0 +1,228 @@
+@import '@fontsource/shippori-mincho-b1/500.css';
+@import '@fontsource/shippori-mincho-b1/700.css';
+@import '@fontsource/shippori-mincho-b1/800.css';
+@import '@fontsource/nanum-pen-script/400.css';
+@import '@fontsource-variable/hanken-grotesk';
+
+:root {
+  --paper: #eeeeec;
+  --paper-deep: #e3e4e1;
+  --paper-shade: #d6d7d3;
+  --desk: #d9dad6;
+  --ink: #151515;
+  --ink-soft: #3b3c3a;
+  --wash: #8d8f8b;
+  --mist: #c6c8c4;
+  --rule: rgb(21 21 21 / 0.16);
+  --shadow: rgb(21 21 21 / 0.22);
+
+  --font-display: 'Shippori Mincho B1', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-body: 'Hanken Grotesk Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-hand: 'Nanum Pen Script', 'Segoe Print', 'Bradley Hand', cursive;
+
+  --text-body: 1.0625rem;
+  --text-hand: 1.55rem;
+  --text-h3: 1.45rem;
+  --text-h2: clamp(2rem, 3.8vw, 2.9rem);
+  --text-h1: clamp(3rem, 8vw, 6.6rem);
+
+  --topbar-height: 64px;
+  --ease-ink: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.08 0 0 0 0 0.08 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23p)'/%3E%3C/svg%3E");
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body.is-locked {
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 2px dashed var(--ink);
+  outline-offset: 4px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.hand {
+  font-family: var(--font-hand);
+  font-size: var(--text-hand);
+  line-height: 1.1;
+  color: var(--ink-soft);
+}
+
+.label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--wash);
+}
+
+.ink-ink { fill: var(--ink); }
+.ink-soft { fill: var(--ink-soft); }
+.ink-wash { fill: var(--wash); opacity: 0.55; }
+.ink-mist { fill: var(--mist); opacity: 0.85; }
+.ink-paper { fill: var(--paper); }
+
+svg.ink {
+  overflow: visible;
+}
+
+.brush-link {
+  text-decoration: none;
+  font-weight: 600;
+  background-image: linear-gradient(transparent 62%, var(--mist) 62%, var(--mist) 92%, transparent 92%);
+  transition: background-image 0.3s;
+}
+
+.brush-link:hover {
+  background-image: linear-gradient(transparent 48%, var(--wash) 48%, var(--wash) 95%, transparent 95%);
+}
+
+.ink-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 600 0.98rem var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+  isolation: isolate;
+}
+
+.ink-button > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: visible;
+}
+
+.ink-button .blot {
+  transform-origin: 50% 60%;
+  transform: scale(0.2);
+  opacity: 0;
+  transition: transform 0.45s var(--ease-ink), opacity 0.3s;
+}
+
+.ink-button.solid {
+  color: var(--paper);
+}
+
+.ink-button.solid .blot,
+.ink-button:hover .blot,
+.ink-button:focus-visible .blot {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.ink-button:hover:not(.solid) {
+  color: var(--paper);
+}
+
+.ink-button:not(.solid) .blot path {
+  fill: var(--ink-soft);
+}
+
+.ink-button.small {
+  padding: 8px 16px;
+  font-size: 0.88rem;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  color: var(--wash);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
