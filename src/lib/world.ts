@@ -1,11 +1,13 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { projects } from '../data/content';
-import { frameAll, inkSplat, prefersReducedMotion, renderScene, roughRect, seededRandom, stroke, svgElement, type Point, type Stroke } from './brush';
+import { brushPath, frameAll, inkSplat, prefersReducedMotion, renderScene, roughRect, seededRandom, stroke, svgElement, type Point, type Stroke } from './brush';
 import { openBook } from './book';
 import { openCharacterSheet } from './character';
+import { openNotebook } from './notebook';
+import type { GithubData } from '../data/github';
 import { paintPortrait } from './effects';
-import { onLangChange, pick, t } from './i18n';
+import { getLang, onLangChange, pick, t } from './i18n';
 import { Mascot } from './mascot';
 import { InkPainter } from './painting';
 import { deskObjects, grassTufts, projectSketches, ridge, worldProps } from './scenes';
@@ -13,7 +15,7 @@ import { unlock } from './secrets';
 import { attributeList, characterIdentity, portraits } from './sections';
 import { sounds } from './sound';
 
-export type StationName = 'hero' | 'varal' | 'line' | 'estante' | 'lectern' | 'sobre' | 'house' | 'end' | 'desk';
+export type StationName = 'hero' | 'processo' | 'process' | 'varal' | 'line' | 'estante' | 'lectern' | 'atelie' | 'repos' | 'year' | 'sobre' | 'house' | 'mail' | 'end' | 'desk';
 
 interface WorldLayout {
   width: number;
@@ -25,7 +27,7 @@ interface WorldLayout {
 }
 
 const PARALLAX = { far: 0.22, mid: 0.5, ground: 1, front: 1.35 };
-const NAV_STATIONS: StationName[] = ['hero', 'line', 'lectern', 'house'];
+const NAV_STATIONS: StationName[] = ['hero', 'line', 'lectern', 'repos', 'house', 'mail'];
 
 function place(element: HTMLElement, x: number, styles: Partial<CSSStyleDeclaration> = {}) {
   element.style.left = `${x}px`;
@@ -48,10 +50,20 @@ export function mountWorld(scrollTo: (y: number) => void) {
   const heroSheet = $(root, '.station-hero-sheet');
   const heroText = $(root, '.station-hero-text');
   const signs = {
+    processo: $(root, '[data-sign="processo"]'),
     varal: $(root, '[data-sign="varal"]'),
     estante: $(root, '[data-sign="estante"]'),
+    atelie: $(root, '[data-sign="atelie"]'),
     sobre: $(root, '[data-sign="sobre"]'),
   };
+  const signSeeds = { processo: 1300, varal: 1310, estante: 1320, atelie: 1330, sobre: 1340 };
+  const process = $(root, '.station-process');
+  const repos = $(root, '.station-repos');
+  const reposBoard = $(root, '.station-repos-board');
+  const year = $(root, '.station-year');
+  const yearPaper = $(root, '.station-year-paper');
+  const mail = $(root, '.station-mail');
+  const github: GithubData = JSON.parse(document.getElementById('github-data')?.textContent ?? '{"repos":[],"days":[],"total":0,"live":false}');
   const line = $(root, '.station-line');
   const lineArt = $<SVGSVGElement>(root, '.station-line-art');
   const papersHost = $(root, '.station-line-papers');
@@ -127,6 +139,60 @@ export function mountWorld(scrollTo: (y: number) => void) {
     );
   }
 
+  function renderRepos() {
+    const list = $(reposBoard, '.station-repos-list');
+    const locale = getLang() === 'pt' ? 'pt-BR' : 'en-US';
+    list.replaceChildren(
+      ...github.repos.slice(0, 12).map((repo, index) => {
+        const item = document.createElement('li');
+        item.className = 'repo-card';
+        item.style.setProperty('--tilt', `${((index * 37) % 5) - 2}deg`);
+        item.innerHTML = '<a target="_blank" rel="noopener"><span class="repo-pin" aria-hidden="true"></span><strong></strong><span class="repo-description"></span><span class="repo-foot"><span class="hand repo-language"></span><span class="repo-date"></span></span></a>';
+        item.querySelector('a')!.href = repo.url;
+        item.querySelector('strong')!.textContent = repo.name.replace(/[-_]/g, ' ');
+        item.querySelector('.repo-description')!.textContent = repo.description ?? '—';
+        item.querySelector('.repo-language')!.textContent = repo.language ?? '';
+        item.querySelector('.repo-date')!.textContent = `${t('repos.updated')} ${new Date(`${repo.pushedAt}T12:00:00`).toLocaleDateString(locale, { day: '2-digit', month: 'short' })}`;
+        return item;
+      })
+    );
+  }
+
+  const yearSvg = $<SVGSVGElement>(year, '.station-year-grid');
+  function renderYear() {
+    const cell = 13;
+    const days = github.days;
+    const firstDay = days.length ? new Date(`${days[0].date}T12:00:00`).getDay() : 0;
+    const weeks = Math.max(1, Math.ceil((days.length + firstDay) / 7));
+    yearSvg.setAttribute('viewBox', `0 0 ${weeks * cell} ${7 * cell}`);
+    yearSvg.replaceChildren();
+    const tones = ['mist', 'wash', 'soft', 'ink', 'ink'];
+    days.forEach((day, index) => {
+      const slot = index + firstDay;
+      const column = Math.floor(slot / 7);
+      const cx = column * cell + cell / 2;
+      const cy = (slot % 7) * cell + cell / 2;
+      const tilt = ((index * 13) % 7) - 3;
+      const path = svgElement('path', {
+        d: brushPath([[cx - 4.2, cy + tilt / 3], [cx + 4.2, cy - tilt / 3]], day.level === 0 ? 2.4 : 8.6, { seed: index + 1, start: 0.25, end: 0.4 }),
+        class: `ink-${tones[day.level] ?? 'ink'}`,
+        filter: 'url(#bleed)',
+        'data-column': column,
+      }, yearSvg);
+      if (day.level === 0) path.style.opacity = '0.55';
+      svgElement('title', {}, path).textContent = `${day.date} · ${day.count}`;
+    });
+    $(year, '.station-year-total').textContent = days.length ? t('year.total').replace('{n}', String(github.total)) : t('year.offline');
+  }
+
+  function animateYear() {
+    if (reduced) return;
+    yearSvg.querySelectorAll<SVGPathElement>('path').forEach((path) => {
+      const column = Number(path.dataset.column);
+      path.animate([{ opacity: 0, transform: 'scale(0.2)' }, { opacity: path.style.opacity || '1', transform: 'scale(1)' }], { duration: 420, delay: column * 22, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' });
+    });
+  }
+
   // Layout
   function buildWorld(): WorldLayout {
     const viewport = pin.clientWidth;
@@ -149,13 +215,23 @@ export function mountWorld(scrollTo: (y: number) => void) {
     } else {
       place(heroSheet, x, { width: `${sheetWidth}px`, height: `${sheetHeight}px`, top: `${ground - sheetHeight}px` });
       x += sheetWidth + 56;
-      place(heroText, x, { width: `${textWidth}px`, top: `${topbar + 70}px` });
+      place(heroText, x, { width: `${textWidth}px`, top: `${topbar + 36}px` });
       x += textWidth + viewport * 0.22;
     }
 
+    stations.processo = x;
+    place(signs.processo, x, { top: `${ground - 190}px` });
+    x += 300;
+
+    const flagWidth = mobile ? 190 : 210;
+    stations.process = x;
+    place(process, x, { top: `${ground - 260}px`, width: `${flagWidth * 4 + 60}px`, height: '260px' });
+    process.style.setProperty('--flag-width', `${flagWidth}px`);
+    x += flagWidth * 4 + 60 + viewport * 0.2;
+
     stations.varal = x;
     place(signs.varal, x, { top: `${ground - 190}px` });
-    x += 260;
+    x += 300;
 
     const featuredCount = projects.filter((project) => project.featured).length;
     const paperWidth = Math.min(230, viewport * 0.56);
@@ -177,9 +253,26 @@ export function mountWorld(scrollTo: (y: number) => void) {
     place(lectern, x, { top: `${ground - 256 * lecternScale}px`, width: `${160 * lecternScale}px`, height: `${260 * lecternScale}px` });
     x += 160 * lecternScale + viewport * 0.25;
 
+    stations.atelie = x;
+    place(signs.atelie, x, { top: `${ground - 190}px` });
+    x += 300;
+
+    const reposColumns = mobile ? 2 : 4;
+    const reposWidth = Math.min(reposColumns * 220 + 60, viewport * 0.92);
+    const reposHeight = Math.min(ground - topbar - 110, 470);
+    stations.repos = x;
+    place(repos, x, { top: `${ground - reposHeight - 74}px`, width: `${reposWidth}px`, height: `${reposHeight}px` });
+    repos.style.setProperty('--repo-columns', String(reposColumns));
+    x += reposWidth + viewport * 0.18;
+
+    const yearWidth = Math.min(860, Math.max(viewport * 0.9, 760));
+    stations.year = x;
+    place(year, x, { top: `${topbar + (mobile ? 40 : 80)}px`, width: `${yearWidth}px` });
+    x += yearWidth + viewport * 0.25;
+
     stations.sobre = x;
     place(signs.sobre, x, { top: `${ground - 190}px` });
-    x += 250;
+    x += 300;
 
     const boardWidth = Math.min(560, viewport * 0.88);
     const boardHeight = Math.min(ground - topbar - 30, 560);
@@ -187,7 +280,13 @@ export function mountWorld(scrollTo: (y: number) => void) {
     place(house, x, { top: `${ground - boardHeight}px`, height: `${boardHeight}px`, width: `${(mobile ? 0 : 300) + boardWidth}px` });
     board.style.width = `${boardWidth}px`;
     board.style.height = `${boardHeight}px`;
-    x += (mobile ? 0 : 300) + boardWidth + viewport * 0.3;
+    x += (mobile ? 0 : 300) + boardWidth + viewport * 0.25;
+
+    const noteWidth = Math.min(340, viewport * 0.62);
+    stations.mail = x;
+    place(mail, x, { top: `${ground - 300}px`, width: `${130 + noteWidth}px`, height: '300px' });
+    mail.style.setProperty('--note-width', `${noteWidth}px`);
+    x += 130 + noteWidth + viewport * 0.3;
 
     stations.end = x;
     place(end, x, { top: `${ground - 330}px` });
@@ -200,10 +299,13 @@ export function mountWorld(scrollTo: (y: number) => void) {
     const width = Math.max(x, viewport * 2);
     const random = seededRandom(Math.round(width));
     const rocks = [
-      stations.varal - viewport * 0.12,
+      stations.processo - viewport * 0.1,
+      stations.varal - viewport * 0.1,
       stations.line + lineWidth * 0.5,
       stations.estante - 120,
+      stations.atelie - 110,
       stations.sobre - 90,
+      stations.mail - 120,
       stations.end - viewport * 0.15,
       stations.desk - 160,
     ].map((value) => value + random() * 40);
@@ -280,7 +382,7 @@ export function mountWorld(scrollTo: (y: number) => void) {
   }
 
   function drawStations() {
-    const sheet = heroSheet.getBoundingClientRect();
+    const sheet = { width: heroSheet.offsetWidth, height: heroSheet.offsetHeight };
     const frame = $<SVGSVGElement>(heroSheet, '.station-hero-frame');
     frame.setAttribute('viewBox', `0 0 ${sheet.width} ${sheet.height + 40}`);
     renderScene(frame, [
@@ -288,7 +390,7 @@ export function mountWorld(scrollTo: (y: number) => void) {
       stroke([[sheet.width * 0.18, sheet.height - 4], [sheet.width * 0.16, sheet.height + 36]], 4.5, { seed: 1206 }),
       stroke([[sheet.width * 0.82, sheet.height - 4], [sheet.width * 0.85, sheet.height + 36]], 4.5, { seed: 1207 }),
     ]);
-    Object.values(signs).forEach((sign, index) => renderScene($<SVGSVGElement>(sign, 'svg'), worldProps.signpost(1300 + index * 10)));
+    (Object.keys(signs) as (keyof typeof signs)[]).forEach((name) => renderScene($<SVGSVGElement>(signs[name], 'svg'), worldProps.signpost(signSeeds[name])));
 
     const lineBox = { width: line.clientWidth, height: line.clientHeight };
     lineArt.setAttribute('viewBox', `0 0 ${lineBox.width} ${lineBox.height}`);
@@ -303,8 +405,24 @@ export function mountWorld(scrollTo: (y: number) => void) {
     renderScene($<SVGSVGElement>(lectern, '.station-lectern-art'), worldProps.lectern(1450));
     renderScene($<SVGSVGElement>(lectern, '.station-lectern-page'), worldProps.lecternPage(1470));
 
+    process.querySelectorAll<SVGSVGElement>('.process-flag svg').forEach((svg, index) => renderScene(svg, worldProps.flag(2400 + index * 10)));
+    const boardBox = { width: repos.clientWidth, height: repos.clientHeight };
+    const reposArt = $<SVGSVGElement>(repos, '.station-repos-art');
+    reposArt.setAttribute('viewBox', `0 0 ${boardBox.width} ${boardBox.height + 80}`);
+    renderScene(reposArt, [...roughRect(4, 4, boardBox.width - 8, boardBox.height - 8, 2.6, 2501), ...worldProps.boardLegs(2510, boardBox.width, boardBox.height)]);
+    const paperBox = { width: yearPaper.offsetWidth, height: yearPaper.offsetHeight };
+    const rods = $<SVGSVGElement>(year, '.station-year-rods');
+    rods.setAttribute('viewBox', `0 -10 ${paperBox.width} ${paperBox.height + 20}`);
+    renderScene(rods, worldProps.scrollRods(2601, paperBox.width, paperBox.height));
+    renderScene($<SVGSVGElement>(mail, '.station-mail-art'), worldProps.mailbox(2700));
+    renderScene($<SVGSVGElement>(mail, '.station-mail-flag'), worldProps.mailFlag(2710));
+    const note = $(mail, '.station-mail-note');
+    const noteFrame = $<SVGSVGElement>(mail, '.station-mail-note-frame');
+    noteFrame.setAttribute('viewBox', `0 0 ${note.offsetWidth} ${note.offsetHeight}`);
+    renderScene(noteFrame, roughRect(3, 3, note.offsetWidth - 6, note.offsetHeight - 6, 1.8, 2720));
+
     renderScene($<SVGSVGElement>(house, '.station-house-art'), worldProps.house(1500));
-    const boardRect = board.getBoundingClientRect();
+    const boardRect = { width: board.offsetWidth, height: board.offsetHeight };
     const boardFrame = $<SVGSVGElement>(board, '.station-board-frame');
     boardFrame.setAttribute('viewBox', `0 0 ${boardRect.width} ${boardRect.height}`);
     renderScene(boardFrame, roughRect(4, 4, boardRect.width - 8, boardRect.height - 8, 2.4, 1601));
@@ -328,17 +446,33 @@ export function mountWorld(scrollTo: (y: number) => void) {
   let boardBars: ReturnType<typeof attributeList> | null = null;
   const reveals: Partial<Record<StationName, () => void>> = {
     hero: () => paintPortrait($<SVGSVGElement>(heroSheet, '.station-hero-painting'), { ...portraits.profile, animate: true, delay: 0.2 }),
-    varal: () => renderScene($<SVGSVGElement>(signs.varal, 'svg'), worldProps.signpost(1300), { animate: true }),
+    varal: () => renderScene($<SVGSVGElement>(signs.varal, 'svg'), worldProps.signpost(signSeeds.varal), { animate: true }),
+    processo: () => renderScene($<SVGSVGElement>(signs.processo, 'svg'), worldProps.signpost(signSeeds.processo), { animate: true }),
+    process: () => {
+      if (reduced) return;
+      gsap.fromTo(process.querySelectorAll('.process-flag'), { rotation: 80, autoAlpha: 0, transformOrigin: '8% 100%' }, { rotation: 0, autoAlpha: 1, duration: 1, stagger: 0.18, ease: 'back.out(1.8)', clearProps: 'transform,opacity,visibility' });
+    },
+    atelie: () => renderScene($<SVGSVGElement>(signs.atelie, 'svg'), worldProps.signpost(signSeeds.atelie), { animate: true }),
+    repos: () => {
+      mascot.say(pick({ pt: 'quanto código!', en: 'so much code!' }));
+      if (reduced) return;
+      gsap.fromTo(repos.querySelectorAll('.repo-card'), { y: -30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.06, ease: 'back.out(2)', clearProps: 'transform,opacity,visibility' });
+    },
+    year: () => animateYear(),
+    mail: () => {
+      mascot.say(pick({ pt: 'deixa um recado!', en: 'leave a note!' }));
+      if (!reduced) gsap.fromTo($(mail, '.station-mail-flag'), { rotation: 0 }, { rotation: -80, transformOrigin: '15% 95%', duration: 0.5, yoyo: true, repeat: 3, ease: 'power2.inOut' });
+    },
     line: () => {
       if (reduced) return;
       gsap.fromTo(papersHost.children, { rotation: -70, autoAlpha: 0 }, { rotation: 0, autoAlpha: 1, duration: 1.1, stagger: 0.12, ease: 'elastic.out(1, 0.45)', clearProps: 'transform,opacity,visibility' });
     },
-    estante: () => renderScene($<SVGSVGElement>(signs.estante, 'svg'), worldProps.signpost(1310), { animate: true }),
+    estante: () => renderScene($<SVGSVGElement>(signs.estante, 'svg'), worldProps.signpost(signSeeds.estante), { animate: true }),
     lectern: () => {
       renderScene($<SVGSVGElement>(lectern, '.station-lectern-art'), worldProps.lectern(1450), { animate: true, pace: 1.2 });
       mascot.say(pick({ pt: 'tem um livro ali!', en: 'there’s a book there!' }));
     },
-    sobre: () => renderScene($<SVGSVGElement>(signs.sobre, 'svg'), worldProps.signpost(1320), { animate: true }),
+    sobre: () => renderScene($<SVGSVGElement>(signs.sobre, 'svg'), worldProps.signpost(signSeeds.sobre), { animate: true }),
     house: () => {
       renderScene($<SVGSVGElement>(house, '.station-house-art'), worldProps.house(1500), { animate: true });
       boardBars?.animate(0.4);
@@ -392,7 +526,7 @@ export function mountWorld(scrollTo: (y: number) => void) {
         const velocity = self.getVelocity();
         wind += (Math.max(-14, Math.min(14, velocity / 260)) - wind) * 0.2;
         root.style.setProperty('--wind', wind.toFixed(2));
-        mascot.drive(mascotX, velocity / 8);
+        mascot.drive(mascotX, velocity / 3);
 
         world.rocks.forEach((rockX, index) => {
           const screenX = rockX - offset;
@@ -458,6 +592,22 @@ export function mountWorld(scrollTo: (y: number) => void) {
 
   $(lectern, '.station-lectern-button').addEventListener('click', () => openBook());
 
+  const raiseFlag = () => gsap.to($(mail, '.station-mail-flag'), { rotation: -80, transformOrigin: '15% 95%', duration: 0.5, ease: 'back.out(2)' });
+  const openMail = () => openNotebook(raiseFlag);
+  $(mail, '.station-mail-box').addEventListener('click', openMail);
+  $(mail, '[data-open-notebook]').addEventListener('click', openMail);
+  const copyButton = $(mail, '[data-copy-email]');
+  copyButton.addEventListener('click', () => {
+    const label = copyButton.querySelector('span')!;
+    const fallback = () => window.getSelection()?.selectAllChildren($(mail, '.station-mail-email'));
+    if (!navigator.clipboard) return fallback();
+    navigator.clipboard.writeText('andre.luanbq@gmail.com').then(() => {
+      label.textContent = t('mail.copied');
+      sounds.pop();
+      window.setTimeout(() => (label.textContent = t('mail.copy')), 1600);
+    }, fallback);
+  });
+
   // Mascot
   const mascot = new Mascot({
     layer: mascotLayer,
@@ -467,6 +617,8 @@ export function mountWorld(scrollTo: (y: number) => void) {
   });
 
   renderPapers();
+  renderRepos();
+  renderYear();
   boardBars = renderBoard();
   setup();
 
@@ -476,6 +628,8 @@ export function mountWorld(scrollTo: (y: number) => void) {
 
   onLangChange(() => {
     renderPapers();
+    renderRepos();
+    renderYear();
     boardBars = renderBoard();
     if (revealed.has('house')) boardBars.animate();
     frameAll(root);
@@ -493,9 +647,14 @@ export function mountWorld(scrollTo: (y: number) => void) {
   window.setTimeout(() => mascot.say(t('mundo.hint'), 2600), 1500);
 
   return {
-    goTo(name: StationName) {
+    goTo(name: StationName, immediate = false) {
       if (!trigger) return;
-      scrollTo(trigger.start + scrollOffsetFor(name));
+      const target = trigger.start + scrollOffsetFor(name);
+      if (immediate) window.scrollTo(0, target);
+      else scrollTo(target);
+    },
+    has(name: string): name is StationName {
+      return Boolean(world?.stations && name in world.stations);
     },
     onSection(listener: (name: StationName) => void) {
       sectionListeners.add(listener);

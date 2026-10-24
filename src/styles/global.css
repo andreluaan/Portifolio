@@ -15,6 +15,8 @@
   --mist: #c6c8c4;
   --rule: rgb(21 21 21 / 0.16);
   --shadow: rgb(21 21 21 / 0.22);
+  --dog-fur: #5e605c;
+  --dog-far: #a4a6a2;
 
   --font-display: 'Shippori Mincho B1', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   --font-body: 'Hanken Grotesk Variable', 'Segoe UI', system-ui, sans-serif;
@@ -134,6 +136,8 @@ img {
 .ink-wash { fill: var(--wash); opacity: 0.55; }
 .ink-mist { fill: var(--mist); opacity: 0.85; }
 .ink-paper { fill: var(--paper); }
+.dog-fur { fill: var(--dog-fur); }
+.dog-fur-far { fill: var(--dog-far); }
 
 svg.ink {
   overflow: visible;
@@ -161,8 +165,10 @@ svg.ink {
   color: var(--ink);
   font: 600 0.98rem var(--font-body);
   text-decoration: none;
+  white-space: nowrap;
   cursor: pointer;
   isolation: isolate;
+  flex-shrink: 0;
 }
 
 .ink-button > svg {

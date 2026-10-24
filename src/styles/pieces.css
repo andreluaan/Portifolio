@@ -349,7 +349,7 @@
 }
 
 .intro-label {
-  margin-bottom: 72px;
+  margin-bottom: 96px;
   font-size: 1.7rem;
 }
 
@@ -389,14 +389,14 @@
   font: 600 0.75rem var(--font-body);
 }
 
-/* Mascot */
+/* Mascot: Borrão, the ink dog */
 .mascot {
   position: absolute;
   left: 0;
   top: 0;
   z-index: 40;
-  width: 64px;
-  height: 64px;
+  width: 116px;
+  height: 89px;
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -411,101 +411,75 @@
   width: 100%;
   height: 100%;
   transform: scaleX(var(--facing, 1));
-  transition: transform 0.18s;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.mascot-svg {
+.dog-svg {
   width: 100%;
   height: 100%;
   overflow: visible;
+  filter: drop-shadow(0 0 1.2px var(--paper)) drop-shadow(0 0 0.6px var(--paper));
 }
 
-.mascot-shadow {
+.dog-shadow {
   fill: var(--ink);
-  opacity: calc(0.18 - var(--lift, 0) * 0.14);
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scale(calc(1 - var(--lift, 0) * 0.6));
 }
 
-.mascot-leg,
-.mascot-arm,
-.mascot-mouth,
-.mascot-closed {
-  fill: none;
+.dog-near-rear,
+.dog-near-front,
+.dog-haunch {
   stroke: var(--ink);
+  stroke-width: 0.7;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+.dog-collar {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.6;
   stroke-linecap: round;
 }
 
-.mascot-leg { stroke-width: 3; transform-box: fill-box; transform-origin: 50% 0; }
-.mascot-arm { stroke-width: 2.6; transform-box: fill-box; opacity: 0; transition: opacity 0.2s; }
-.arm-a { transform-origin: 100% 0; }
-.arm-b { transform-origin: 0 0; }
-.mascot-mouth { stroke-width: 1.8; }
-.mascot-closed { stroke-width: 1.8; opacity: 0; }
+.dog-eye-closed {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  opacity: 0;
+}
 
-.mascot-body {
+.dog-tongue {
+  opacity: 0;
   transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: mascot-breathe 2.6s ease-in-out infinite;
+  transform-origin: 50% 0;
+  transition: opacity 0.2s;
 }
 
-.mascot-eye {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: mascot-blink 5.2s infinite;
+.mascot.is-blinking .dog-eye { opacity: 0; }
+.mascot.is-blinking .dog-eye-closed { opacity: 1; }
+.mascot.is-panting .dog-tongue { opacity: 1; animation: pant 0.22s ease-in-out infinite alternate; }
+
+@keyframes pant {
+  to { transform: scaleY(1.25); }
 }
 
-.mascot-eye + .mascot-eye {
-  animation-delay: 0.04s;
+.dog-dust {
+  position: absolute;
+  z-index: 4;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--mist);
+  pointer-events: none;
+  filter: url(#wash);
+  animation: dust 0.9s ease-out forwards;
 }
 
-@keyframes mascot-breathe {
-  50% { transform: scale(1.03, 0.97); }
+@keyframes dust {
+  from { opacity: 0.8; transform: translate(0, 0) scale(0.6); }
+  to { opacity: 0; transform: translate(var(--drift, 0), -14px) scale(2); }
 }
-
-@keyframes mascot-blink {
-  0%, 93%, 100% { transform: scaleY(1); }
-  96% { transform: scaleY(0.1); }
-}
-
-@keyframes mascot-step {
-  from { transform: rotate(-24deg); }
-  to { transform: rotate(24deg); }
-}
-
-@keyframes mascot-bob {
-  from { transform: translateY(0) rotate(-2deg); }
-  to { transform: translateY(-2px) rotate(2deg); }
-}
-
-@keyframes mascot-wave {
-  from { transform: rotate(-40deg); }
-  to { transform: rotate(30deg); }
-}
-
-.mascot[data-state='walk'] .leg-a { animation: mascot-step 0.3s ease-in-out infinite alternate; }
-.mascot[data-state='walk'] .leg-b { animation: mascot-step 0.3s ease-in-out infinite alternate-reverse; }
-.mascot[data-state='walk'] .mascot-body { animation: mascot-bob 0.3s ease-in-out infinite alternate; }
-
-.mascot[data-state='carried'] .mascot-legs { transform: rotate(var(--sway, 0deg)); transform-origin: 30px 40px; }
-.mascot[data-state='carried'] .mascot-arm,
-.mascot[data-state='falling'] .mascot-arm { opacity: 1; animation: mascot-wave 0.16s ease-in-out infinite alternate; }
-.mascot[data-state='carried'] .mascot-body { animation: none; transform: rotate(calc(var(--sway, 0deg) * 0.5)); }
-
-.mascot[data-state='knocked'] .mascot-body {
-  animation: none;
-  transform: scale(1.3, 0.62);
-}
-
-.mascot[data-state='knocked'] .mascot-legs {
-  transform: scaleY(0.4);
-  transform-origin: 30px 58px;
-}
-
-.mascot[data-state='sleep'] .mascot-eyes { opacity: 0; }
-.mascot[data-state='sleep'] .mascot-closed { opacity: 1; }
-.mascot[data-state='sleep'] .mascot-body { animation-duration: 4.2s; }
 
 .mascot-bubble {
   position: absolute;
@@ -835,10 +809,6 @@
   .character-inventory { grid-template-columns: minmax(0, 1fr); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .mascot-body,
-  .mascot-eye { animation: none !important; }
-}
 
 /* Full character sheet */
 .sheet-dialog.is-character {
@@ -1097,7 +1067,7 @@
 /* World navigation in the top bar */
 .world-nav {
   display: flex;
-  justify-content: center;
+  justify-content: safe center;
   gap: 4px;
   min-width: 0;
 }

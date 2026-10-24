@@ -257,7 +257,8 @@ export function drawWhenVisible(target: SVGElement, strokes: Stroke[], options: 
 
 /** Gives a button or box a hand-drawn frame plus an ink blot that floods it on hover. */
 export function frameElement(element: HTMLElement, { blot = true, width = 1.8 } = {}) {
-  const { width: w, height: h } = element.getBoundingClientRect();
+  const w = element.offsetWidth;
+  const h = element.offsetHeight;
   if (!w || !h) return;
   let svg = element.querySelector<SVGSVGElement>(':scope > svg.ink-frame');
   if (!svg) {
@@ -280,8 +281,24 @@ export function frameElement(element: HTMLElement, { blot = true, width = 1.8 } 
   );
 }
 
+const frameSizes = new WeakMap<Element, string>();
+const frameObserver =
+  typeof ResizeObserver === 'undefined'
+    ? null
+    : new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const element = entry.target as HTMLElement;
+          const size = `${Math.round(entry.contentRect.width)}x${Math.round(entry.contentRect.height)}`;
+          if (frameSizes.get(element) === size) continue;
+          frameSizes.set(element, size);
+          frameElement(element, { blot: element.dataset.frame !== 'plain' });
+        }
+      });
+
+/** Frames every `[data-frame]` element and keeps redrawing it whenever its size changes (late fonts, language switch). */
 export function frameAll(root: ParentNode = document) {
-  root.querySelectorAll<HTMLElement>('[data-frame]').forEach((element) =>
-    frameElement(element, { blot: element.dataset.frame !== 'plain' })
-  );
+  root.querySelectorAll<HTMLElement>('[data-frame]').forEach((element) => {
+    frameElement(element, { blot: element.dataset.frame !== 'plain' });
+    frameObserver?.observe(element);
+  });
 }

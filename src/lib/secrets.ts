@@ -17,6 +17,8 @@ export const secrets: Secret[] = [
   { id: 'spill', glyph: '墨', name: { pt: 'tinta derramada', en: 'spilled ink' }, hint: { pt: 'derrubou o tinteiro da mesinha escondida', en: 'knocked over the hidden ink bottle' } },
   { id: 'painter', glyph: '画', name: { pt: 'pintor', en: 'painter' }, hint: { pt: 'pintou o céu do mundo de papel', en: 'painted the paper world’s sky' } },
   { id: 'walker', glyph: '道', name: { pt: 'andarilho', en: 'wanderer' }, hint: { pt: 'chegou ao fim do mundo de papel', en: 'reached the end of the paper world' } },
+  { id: 'magic', glyph: '術', name: { pt: 'palavra mágica', en: 'magic word' }, hint: { pt: 'escreveu “nanquim” no caderno de recados', en: 'typed “nanquim” in the guestbook' } },
+  { id: 'mail', glyph: '信', name: { pt: 'carteiro', en: 'mail carrier' }, hint: { pt: 'deixou um recado no correio', en: 'left a note in the mailbox' } },
   { id: 'konami', glyph: '古', name: { pt: 'código antigo', en: 'ancient code' }, hint: { pt: '↑ ↑ ↓ ↓ ← → ← → b a', en: '↑ ↑ ↓ ↓ ← → ← → b a' } },
   { id: 'owl', glyph: '夜', name: { pt: 'coruja', en: 'night owl' }, hint: { pt: 'visitou entre meia-noite e 5h', en: 'visited between midnight and 5am' } },
 ];

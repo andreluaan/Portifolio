@@ -4,6 +4,7 @@ export type Localized<T = string> = Record<Lang, T>;
 export interface Project {
   id: string;
   year: string;
+  repo?: string;
   featured: boolean;
   title: Localized;
   summary: Localized;
@@ -16,11 +17,12 @@ export const projects: Project[] = [
   {
     id: 'nanquim',
     year: '2026',
+    repo: 'https://github.com/andreluaan/Nanquim-System',
     featured: true,
     title: { pt: 'Nanquim System', en: 'Nanquim System' },
     summary: {
-      pt: 'Meu design system: tokens em CSS e Web Components. Cada marca nasce do mesmo nanquim, diluído em outro pigmento.',
-      en: 'My own design system: CSS tokens and Web Components. Every brand grows from the same ink, diluted into another pigment.',
+      pt: 'Meu design system: uma base, várias marcas. Tokens em OKLCH, CSS puro + Web Components e documentação interativa. Cada marca nasce do mesmo nanquim, diluído em outro pigmento.',
+      en: 'My design system: one base, many brands. OKLCH tokens, plain CSS + Web Components and interactive docs. Every brand grows from the same ink, diluted into another pigment.',
     },
     stat: { pt: 'Nanquim, Carvão, Vitrine, Verde-água', en: 'Nanquim, Carvão, Vitrine, Verde-água' },
     status: { pt: 'v0.5', en: 'v0.5' },
@@ -68,28 +70,44 @@ export const projects: Project[] = [
   {
     id: 'advocacia',
     year: '2026',
+    repo: 'https://github.com/andreluaan/site-si-advocacia',
     featured: false,
     title: { pt: 'SI Advocacia', en: 'SI Advocacia' },
     summary: {
-      pt: 'Site para um escritório de advocacia: sóbrio, claro e pensado para gerar confiança desde o primeiro contato.',
-      en: 'Website for a law firm: sober, clear and built to earn trust from the first visit.',
+      pt: 'Landing page do escritório SI Advocacia, em Patos-PB: sóbria, clara e pensada para gerar confiança desde o primeiro contato.',
+      en: 'Landing page for the SI Advocacia law firm in Patos, Brazil: sober, clear and built to earn trust from the first visit.',
     },
-    stat: { pt: 'site institucional', en: 'institutional website' },
+    stat: { pt: 'landing page institucional', en: 'institutional landing page' },
     status: { pt: 'no ar', en: 'live' },
-    tags: { pt: ['site', 'front-end'], en: ['website', 'front-end'] },
+    tags: { pt: ['landing page', 'css', 'front-end'], en: ['landing page', 'css', 'front-end'] },
+  },
+  {
+    id: 'adeylma',
+    year: '2026',
+    repo: 'https://github.com/andreluaan/adeylma-vieira',
+    featured: false,
+    title: { pt: 'Adeylma Vieira', en: 'Adeylma Vieira' },
+    summary: {
+      pt: 'Identidade visual de uma revendedora: cartão de visita, perfil do Instagram e textos de WhatsApp, em versão preta e bege.',
+      en: 'Visual identity for an independent reseller: business card, Instagram profile and WhatsApp copy, in black and beige versions.',
+    },
+    stat: { pt: 'cartão, Instagram, WhatsApp', en: 'card, Instagram, WhatsApp' },
+    status: { pt: 'concluído', en: 'done' },
+    tags: { pt: ['identidade visual', 'social'], en: ['visual identity', 'social'] },
   },
   {
     id: 'saideira',
     year: '2026',
+    repo: 'https://github.com/andreluaan/Jokenpo-da-saideira',
     featured: false,
-    title: { pt: 'PPT da Saideira', en: 'PPT da Saideira' },
+    title: { pt: 'Jokenpô da Saideira', en: 'Jokenpô da Saideira' },
     summary: {
-      pt: 'Um jogo casual para testar mecânicas e animação no navegador.',
-      en: 'A casual game to try out mechanics and animation in the browser.',
+      pt: 'Pedra, papel e tesoura para decidir quem paga a saideira. Um jogo casual em TypeScript para testar mecânicas e animação no navegador.',
+      en: 'Rock, paper, scissors to decide who pays the last round. A casual TypeScript game to try out mechanics and animation in the browser.',
     },
     stat: { pt: 'feito por diversão', en: 'made for fun' },
     status: { pt: 'experimento', en: 'experiment' },
-    tags: { pt: ['jogo', 'javascript'], en: ['game', 'javascript'] },
+    tags: { pt: ['jogo', 'typescript'], en: ['game', 'typescript'] },
   },
 ];
 
@@ -158,6 +176,16 @@ export const journey: Array<{ title: Localized; detail: Localized; status: 'done
     status: 'done',
   },
   {
+    title: { pt: 'Primeiros projetos web', en: 'First web projects' },
+    detail: { pt: 'landing de pizzaria, API de tarefas em Node com POO e SOLID, MovieTrack, apps em React', en: 'pizzeria landing page, Node to-do API with OOP and SOLID, MovieTrack, React apps' },
+    status: 'done',
+  },
+  {
+    title: { pt: 'Curso de JavaScript e TypeScript', en: 'JavaScript & TypeScript course' },
+    detail: { pt: 'conceitos, exercícios e projetos ao longo do aprendizado', en: 'concepts, exercises and projects along the way' },
+    status: 'done',
+  },
+  {
     title: { pt: 'Ciência da Computação', en: 'Computer Science' },
     detail: { pt: 'graduação em curso; TCC sobre assistentes com RAG', en: 'degree in progress; thesis on RAG assistants' },
     status: 'active',
@@ -188,6 +216,8 @@ export const strings = {
   'nav.varal': { pt: 'destaques', en: 'highlights' },
   'nav.estante': { pt: 'estante', en: 'bookstand' },
   'nav.sobre': { pt: 'sobre', en: 'about' },
+  'nav.atelie': { pt: 'github', en: 'github' },
+  'nav.contato': { pt: 'contato', en: 'contact' },
   'topbar.sound.on': { pt: 'som ligado', en: 'sound on' },
   'topbar.sound.off': { pt: 'som desligado', en: 'sound off' },
   'topbar.secrets': { pt: 'segredos', en: 'secrets' },
@@ -212,8 +242,8 @@ export const strings = {
   'about.level': { pt: 'nível: em evolução', en: 'level: leveling up' },
   'about.class': { pt: 'classe: artesão do front-end', en: 'class: front-end craftsman' },
   'about.bio': {
-    pt: 'Estudante de Ciência da Computação. Construo sites em que a parte visual pesa tanto quanto a técnica. Fora do código, desenho: figura, nanquim e muito caderno rabiscado.',
-    en: 'Computer Science student. I build websites where the visual side weighs as much as the technical one. Away from code, I draw: figures, ink and plenty of scribbled sketchbooks.',
+    pt: 'Estudante de Ciência da Computação na Paraíba. Construo sites em que a parte visual pesa tanto quanto a técnica. Fora do código, desenho: figura, nanquim e muito caderno rabiscado.',
+    en: 'Computer Science student in Paraíba, Brazil. I build websites where the visual side weighs as much as the technical one. Away from code, I draw: figures, ink and plenty of scribbled sketchbooks.',
   },
   'about.attributes': { pt: 'Atributos', en: 'Attributes' },
   'about.skills': { pt: 'Árvore de habilidades', en: 'Skill tree' },
@@ -236,6 +266,35 @@ export const strings = {
   'mundo.sign.varal': { pt: 'destaques →', en: 'highlights →' },
   'mundo.sign.estante': { pt: 'estante →', en: 'bookstand →' },
   'mundo.sign.sobre': { pt: 'sobre →', en: 'about →' },
+  'mundo.sign.processo': { pt: 'como eu trabalho →', en: 'how I work →' },
+  'mundo.sign.atelie': { pt: 'ateliê →', en: 'workshop →' },
+  'process.title': { pt: 'O caminho de um projeto', en: 'The path of a project' },
+  'process.s1.title': { pt: 'Conversa', en: 'Conversation' },
+  'process.s1.text': { pt: 'Entendo o negócio, o público e o que o site precisa resolver.', en: 'I learn the business, the audience and what the site must solve.' },
+  'process.s2.title': { pt: 'Esboço', en: 'Sketch' },
+  'process.s2.text': { pt: 'Desenho estrutura e visual antes do código. Você aprova o rumo cedo.', en: 'I draw structure and look before code. You approve the direction early.' },
+  'process.s3.title': { pt: 'Construção', en: 'Build' },
+  'process.s3.text': { pt: 'Código limpo sobre um design system próprio: rápido e acessível.', en: 'Clean code on my own design system: fast and accessible.' },
+  'process.s4.title': { pt: 'Entrega', en: 'Launch' },
+  'process.s4.text': { pt: 'Publicação, domínio, ajustes finos e acompanhamento.', en: 'Publishing, domain, fine-tuning and follow-up.' },
+  'repos.title': { pt: 'Ateliê · direto do GitHub', en: 'Workshop · straight from GitHub' },
+  'repos.lede': { pt: 'tudo que está na bancada, do estudo ao projeto de cliente', en: 'everything on the workbench, from study to client work' },
+  'repos.updated': { pt: 'mexido em', en: 'touched on' },
+  'repos.all': { pt: 'ver tudo no GitHub ↗', en: 'see everything on GitHub ↗' },
+  'year.title': { pt: 'Um ano em pinceladas', en: 'A year in brushstrokes' },
+  'year.lede': { pt: 'cada dia com código é uma mancha de tinta, mais escura quanto mais saiu do caderno', en: 'each day with code is an ink mark, darker the more left the sketchbook' },
+  'year.total': { pt: '{n} contribuições no último ano', en: '{n} contributions in the last year' },
+  'year.offline': { pt: 'o GitHub não respondeu no último build', en: 'GitHub didn’t answer during the last build' },
+  'mail.title': { pt: 'Correio', en: 'Mailbox' },
+  'mail.lede': { pt: 'tem um projeto em mente? deixa um recado', en: 'got a project in mind? leave a note' },
+  'mail.open': { pt: 'abrir o caderno de recados', en: 'open the guestbook' },
+  'mail.copy': { pt: 'copiar e-mail', en: 'copy e-mail' },
+  'mail.copied': { pt: 'copiado!', en: 'copied!' },
+  'notebook.title': { pt: 'caderno de recados', en: 'guestbook' },
+  'notebook.prompt': { pt: 'visitante ~ ✒', en: 'guest ~ ✒' },
+  'notebook.note': { pt: 'deixar um recado', en: 'leave a note' },
+  'notebook.draw': { pt: 'desenhar', en: 'draw' },
+  'notebook.help': { pt: 'ajuda', en: 'help' },
   'mundo.end': { pt: 'o caminho continua em breve', en: 'the path continues soon' },
   'mundo.lectern': { pt: 'todos os projetos · clique para ler', en: 'every project · click to read' },
   'mundo.desk': { pt: 'alguém esqueceu a mesa aqui…', en: 'someone left a desk here…' },
@@ -262,18 +321,19 @@ export const strings = {
   'secrets.found': { pt: 'segredo encontrado', en: 'secret found' },
   'secrets.locked': { pt: 'ainda em branco', en: 'still blank' },
 
-  'mascot.name': { pt: 'Borrão, a criaturinha de tinta', en: 'Smudge, the little ink creature' },
+  'mascot.name': { pt: 'Borrão, o cachorrinho de tinta', en: 'Smudge, the little ink dog' },
 } satisfies Record<string, Localized>;
 
 export type StringKey = keyof typeof strings;
 
 export const mascotLines: Localized<string[]> = {
-  pt: ['oi!', 'cuidado, eu mancho', 'sou feito de nanquim', 'já viu a estante?', 'já achou os segredos?', 'ei, isso faz cócegas', 'o André me desenhou num guardanapo'],
-  en: ['hi!', 'careful, I smudge', 'I’m made of ink', 'seen the bookstand yet?', 'found the secrets yet?', 'hey, that tickles', 'André drew me on a napkin'],
+  pt: ['au!', 'me leva pra passear?', 'achei um osso… não, era um pincel', 'já viu a estante?', 'cheirei uns segredos por aí', 'sou feito de nanquim, não me molhe', 'o André me desenhou num guardanapo'],
+  en: ['woof!', 'walkies?', 'found a bone… no, a brush', 'seen the bookstand yet?', 'I sniffed out some secrets', 'I’m made of ink, keep me dry', 'André drew me on a napkin'],
 };
 
 export const mascotReactions = {
-  dropped: { pt: 'ai!', en: 'ouch!' },
-  carried: { pt: 'uiii', en: 'wheee' },
+  dropped: { pt: 'cain!', en: 'yelp!' },
+  carried: { pt: 'me solta!', en: 'put me down!' },
   sleep: { pt: 'z', en: 'z' },
+  paw: { pt: 'toma a pata', en: 'here’s my paw' },
 } satisfies Record<string, Localized>;

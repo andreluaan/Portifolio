@@ -9,7 +9,7 @@ const DURATION = 2600;
 export function runIntro(): Promise<void> {
   let seen = false;
   try {
-    seen = sessionStorage.getItem(SESSION_KEY) === '1';
+    seen = sessionStorage.getItem(SESSION_KEY) === '1' || location.hash.length > 1;
   } catch {}
   const intro = document.getElementById('intro');
   if (!intro || seen || prefersReducedMotion()) {

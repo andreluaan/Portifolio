@@ -1,22 +1,30 @@
 ---
 import Base from '../layouts/Base.astro';
 import { strings, type StringKey } from '../data/content';
+import { loadGithub } from '../data/github';
 import '../styles/pieces.css';
 import '../styles/mundo.css';
 import '../styles/book.css';
+import '../styles/stations.css';
 
 const pt = (key: StringKey) => strings[key].pt;
+const github = await loadGithub();
 const navItems = [
   { station: 'hero', key: 'nav.inicio' },
   { station: 'line', key: 'nav.varal' },
   { station: 'lectern', key: 'nav.estante' },
+  { station: 'repos', key: 'nav.atelie' },
   { station: 'house', key: 'nav.sobre' },
+  { station: 'mail', key: 'nav.contato' },
 ] as const;
 const signItems = [
+  { sign: 'processo', key: 'mundo.sign.processo' },
   { sign: 'varal', key: 'mundo.sign.varal' },
   { sign: 'estante', key: 'mundo.sign.estante' },
+  { sign: 'atelie', key: 'mundo.sign.atelie' },
   { sign: 'sobre', key: 'mundo.sign.sobre' },
 ] as const;
+const processSteps = [1, 2, 3, 4] as const;
 ---
 
 <Base title="André Luan · mundo de papel">
@@ -52,7 +60,7 @@ const signItems = [
       </button>
       <button class="secrets-toggle" type="button" aria-expanded="false" aria-controls="passport">
         <span class="secrets-seal" aria-hidden="true">秘</span>
-        <span class="secrets-count">0/9</span>
+        <span class="secrets-count">0/11</span>
         <span class="visually-hidden" data-i18n="topbar.secrets">{pt('topbar.secrets')}</span>
       </button>
     </div>
@@ -84,17 +92,76 @@ const signItems = [
             <h1 class="station-hero-name">André<br />Luan</h1>
             <p class="station-hero-role" data-i18n="hero.role">{pt('hero.role')}</p>
             <p class="station-hero-lede" data-i18n="hero.lede">{pt('hero.lede')}</p>
+            <div class="station-hero-actions">
+              <button class="ink-button solid" type="button" data-frame data-go="line"><span data-i18n="nav.varal">{pt('nav.varal')}</span> →</button>
+              <button class="ink-button" type="button" data-frame data-go="mail"><span data-i18n="nav.contato">{pt('nav.contato')}</span></button>
+            </div>
             <p class="hand station-hero-hint"><span data-i18n="mundo.hint">{pt('mundo.hint')}</span> <span class="station-hero-arrow">→</span></p>
           </div>
 
           {
             signItems.map((item) => (
               <div class="mundo-station station-sign" data-sign={item.sign}>
-                <svg class="ink" viewBox="0 0 180 190" aria-hidden="true" />
+                <svg class="ink" viewBox="0 0 220 190" aria-hidden="true" />
                 <span class="hand" data-i18n={item.key}>{pt(item.key)}</span>
               </div>
             ))
           }
+
+          <div class="mundo-station station-process">
+            <p class="hand station-process-title" data-i18n="process.title">{pt('process.title')}</p>
+            {
+              processSteps.map((step) => (
+                <div class="process-flag" data-step={step}>
+                  <svg class="ink" viewBox="0 0 200 240" aria-hidden="true" />
+                  <div class="process-flag-text">
+                    <span class="process-flag-number">{step}</span>
+                    <strong data-i18n={`process.s${step}.title`}>{pt(`process.s${step}.title` as StringKey)}</strong>
+                    <span data-i18n={`process.s${step}.text`}>{pt(`process.s${step}.text` as StringKey)}</span>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+
+          <div class="mundo-station station-repos">
+            <svg class="ink station-repos-art" aria-hidden="true"></svg>
+            <div class="station-repos-board">
+              <div class="station-repos-head">
+                <h2 data-i18n="repos.title">{pt('repos.title')}</h2>
+                <p class="hand" data-i18n="repos.lede">{pt('repos.lede')}</p>
+              </div>
+              <ul class="station-repos-list"></ul>
+              <a class="brush-link station-repos-all" href="https://github.com/andreluaan" target="_blank" rel="noopener" data-i18n="repos.all">{pt('repos.all')}</a>
+            </div>
+          </div>
+
+          <div class="mundo-station station-year">
+            <svg class="ink station-year-rods" aria-hidden="true"></svg>
+            <div class="station-year-paper">
+              <p class="hand station-year-title" data-i18n="year.title">{pt('year.title')}</p>
+              <svg class="ink station-year-grid" role="img" aria-label={pt('year.title')}></svg>
+              <p class="station-year-caption"><span class="station-year-total"></span> · <span data-i18n="year.lede">{pt('year.lede')}</span></p>
+            </div>
+          </div>
+
+          <div class="mundo-station station-mail">
+            <button class="station-mail-box" type="button" data-i18n-label="mail.open" aria-label={pt('mail.open')}>
+              <svg class="ink station-mail-art" viewBox="0 0 120 220" aria-hidden="true"></svg>
+              <svg class="ink station-mail-flag" viewBox="0 0 30 64" aria-hidden="true"></svg>
+            </button>
+            <div class="station-mail-note">
+              <svg class="ink station-mail-note-frame" aria-hidden="true"></svg>
+              <p class="hand" data-i18n="mail.title">{pt('mail.title')}</p>
+              <p class="station-mail-lede" data-i18n="mail.lede">{pt('mail.lede')}</p>
+              <p class="station-mail-email">andre.luanbq@gmail.com</p>
+              <div class="station-mail-actions">
+                <button class="ink-button solid small" type="button" data-frame data-open-notebook><span data-i18n="mail.open">{pt('mail.open')}</span></button>
+                <button class="ink-button small" type="button" data-frame data-copy-email><span data-i18n="mail.copy">{pt('mail.copy')}</span></button>
+              </div>
+              <p class="station-mail-links"><a class="brush-link" href="https://github.com/andreluaan" target="_blank" rel="noopener">github ↗</a> <a class="brush-link" href="mailto:andre.luanbq@gmail.com">e-mail ↗</a></p>
+            </div>
+          </div>
 
           <div class="mundo-station station-line">
             <svg class="ink station-line-art" aria-hidden="true"></svg>
@@ -164,6 +231,8 @@ const signItems = [
     </div>
     <p class="hand book-hint" data-i18n="book.hint">{pt('book.hint')}</p>
   </dialog>
+
+  <script type="application/json" id="github-data" set:html={JSON.stringify(github)} />
 
   <script>
     import { boot } from '../lib/app';

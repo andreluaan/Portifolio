@@ -176,9 +176,14 @@ export const deskObjects = {
 
 export const worldProps = {
   signpost: (seed: number): Stroke[] => [
-    stroke([[60, 30], [62, 180]], 5, { seed, start: 0.02, end: 0.05 }),
-    stroke([[10, 40], [150, 34], [170, 54], [150, 74], [14, 78], [10, 40]], 2.6, { seed: seed + 1, start: 0.01, end: 0.03 }),
-    stroke([[40, 178], [84, 180]], 4, { seed: seed + 2, dry: true }),
+    stroke([[40, 182], [104, 184]], 10, { tone: 'mist', filter: 'wash', seed: seed + 3 }),
+    stroke([[70, 28], [72, 184]], 5.5, { seed, start: 0.02, end: 0.05 }),
+    stroke([[8, 34], [186, 28], [212, 52], [188, 76], [12, 80], [8, 34]], 2.8, { seed: seed + 1, start: 0.01, end: 0.03 }),
+    stroke([[20, 70], [176, 66]], 1, { tone: 'wash', seed: seed + 4 }),
+    stroke([[66, 44], [68, 46]], 3.4, { seed: seed + 5 }),
+    stroke([[66, 62], [68, 64]], 3.4, { seed: seed + 6 }),
+    stroke([[60, 184], [56, 170], [62, 160]], 1.6, { seed: seed + 2 }),
+    stroke([[82, 184], [88, 168], [84, 156]], 1.6, { seed: seed + 7 }),
   ],
   pole: (seed: number, height: number): Stroke[] => [
     stroke([[10, 0], [12, height]], 4.5, { seed, start: 0.02, end: 0.05 }),
@@ -227,6 +232,34 @@ export const worldProps = {
     stroke([[46, 70], [70, 66]], 1.1, { seed: seed + 22, tone: 'wash' }),
     stroke([[92, 64], [116, 60]], 1.1, { seed: seed + 23, tone: 'wash' }),
     stroke([[108, 70], [110, 98], [104, 106]], 4, { seed: seed + 24, start: 0.1, end: 0.6 }),
+  ],
+  flag: (seed: number): Stroke[] => [
+    stroke([[14, 6], [16, 230]], 3.4, { seed, start: 0.02, end: 0.05 }),
+    stroke([[16, 10], [190, 18], [176, 70], [192, 120], [18, 112]], 2, { seed: seed + 1, start: 0.01, end: 0.03 }),
+    stroke([[0, 230], [34, 232]], 8, { tone: 'mist', filter: 'wash', seed: seed + 2 }),
+  ],
+  mailbox: (seed: number): Stroke[] => [
+    stroke([[0, 214], [120, 216]], 12, { tone: 'mist', filter: 'wash', seed: seed + 1 }),
+    stroke([[58, 96], [60, 214]], 6, { seed: seed + 2, start: 0.02, end: 0.05 }),
+    stroke([[10, 96], [10, 52], [30, 30], [76, 30], [100, 50], [102, 96], [10, 96]], 3.2, { seed: seed + 3, start: 0.01, end: 0.03 }),
+    stroke([[30, 30], [52, 52], [54, 96]], 2.2, { seed: seed + 4 }),
+    stroke([[60, 62], [92, 60]], 12, { tone: 'wash', filter: 'wash', seed: seed + 5 }),
+    stroke([[18, 76], [44, 76]], 2.4, { seed: seed + 6 }),
+  ],
+  mailFlag: (seed: number): Stroke[] => [
+    stroke([[4, 60], [4, 4]], 3, { seed }),
+    stroke([[4, 6], [26, 10], [24, 22], [4, 20]], 6, { seed: seed + 1, start: 0.02, end: 0.05 }),
+  ],
+  scrollRods: (seed: number, width: number, height: number): Stroke[] => [
+    stroke([[6, -8], [8, height + 8]], 7, { seed, start: 0.05, end: 0.05 }),
+    stroke([[width - 8, -8], [width - 6, height + 8]], 7, { seed: seed + 1, start: 0.05, end: 0.05 }),
+    stroke([[0, 4], [width, 2]], 1.4, { tone: 'wash', seed: seed + 2 }),
+    stroke([[0, height - 2], [width, height]], 1.4, { tone: 'wash', seed: seed + 3 }),
+  ],
+  boardLegs: (seed: number, width: number, height: number): Stroke[] => [
+    stroke([[24, height - 20], [16, height + 70]], 5, { seed, start: 0.02, end: 0.05 }),
+    stroke([[width - 24, height - 20], [width - 16, height + 70]], 5, { seed: seed + 1, start: 0.02, end: 0.05 }),
+    stroke([[0, height + 72], [width, height + 74]], 12, { tone: 'mist', filter: 'wash', seed: seed + 2 }),
   ],
   lecternPage: (seed: number): Stroke[] => [
     stroke([[4, 40], [26, 14], [56, 18]], 10, { tone: 'paper', seed: seed + 1, start: 0.02, end: 0.05, filter: 'none' }),

@@ -107,11 +107,26 @@ function setupDialog() {
   dialog.addEventListener('close', () => sounds.paper());
 }
 
+const HASH_TO_STATION: Record<string, StationName> = {
+  inicio: 'hero',
+  processo: 'process',
+  destaques: 'line',
+  estante: 'lectern',
+  github: 'repos',
+  ano: 'year',
+  sobre: 'house',
+  contato: 'mail',
+  mesinha: 'desk',
+};
+const STATION_TO_HASH = Object.fromEntries(Object.entries(HASH_TO_STATION).map(([hash, station]) => [station, hash]));
+
 function setupNavigation(world: ReturnType<typeof mountWorld>) {
   document.querySelectorAll<HTMLElement>('[data-go]').forEach((button) =>
     button.addEventListener('click', (event) => {
       event.preventDefault();
-      world.goTo(button.dataset.go as StationName);
+      const station = button.dataset.go as StationName;
+      world.goTo(station);
+      history.replaceState(null, '', station === 'hero' ? location.pathname : `#${STATION_TO_HASH[station] ?? station}`);
       sounds.brush();
     })
   );
@@ -133,6 +148,8 @@ export async function boot() {
   setupNavigation(world);
   applyStrings();
   ScrollTrigger.refresh();
+  const linked = HASH_TO_STATION[location.hash.slice(1)] ?? location.hash.slice(1);
+  if (linked && world.has(linked)) requestAnimationFrame(() => world.goTo(linked, true));
   (document.fonts?.ready ?? Promise.resolve()).then(() => {
     frameAll();
     ScrollTrigger.refresh();
