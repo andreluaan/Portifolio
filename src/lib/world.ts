@@ -172,7 +172,7 @@ export function mountWorld(scrollTo: (y: number) => void) {
     place(signs.estante, x, { top: `${ground - 190}px` });
     x += 250;
 
-    const lecternScale = Math.min(1.15, (ground - topbar - 90) / 280);
+    const lecternScale = Math.min(1.45, (ground - topbar - 90) / 270);
     stations.lectern = x;
     place(lectern, x, { top: `${ground - 256 * lecternScale}px`, width: `${160 * lecternScale}px`, height: `${260 * lecternScale}px` });
     x += 160 * lecternScale + viewport * 0.25;

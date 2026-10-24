@@ -408,9 +408,9 @@
 .station-lectern-label {
   position: absolute;
   left: 50%;
-  top: -18%;
+  top: -16%;
   width: max-content;
-  max-width: 240px;
+  white-space: nowrap;
   font-size: 1.35rem;
   text-align: center;
   translate: -50% 0;
