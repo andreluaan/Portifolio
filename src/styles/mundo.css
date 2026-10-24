@@ -382,10 +382,10 @@
 .station-lectern-page {
   position: absolute;
   left: 50%;
-  top: 22%;
-  width: 36%;
+  top: 15%;
+  width: 30%;
   height: auto;
-  aspect-ratio: 74 / 44;
+  aspect-ratio: 60 / 44;
   transform-origin: 0 90%;
   animation: page-flutter 2.8s ease-in-out infinite;
   rotate: calc(var(--wind, 0) * -3deg);
@@ -408,9 +408,9 @@
 .station-lectern-label {
   position: absolute;
   left: 50%;
-  top: -10%;
+  top: -18%;
   width: max-content;
-  max-width: 260px;
+  max-width: 240px;
   font-size: 1.35rem;
   text-align: center;
   translate: -50% 0;
