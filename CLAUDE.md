@@ -20,7 +20,8 @@ Astro + GSAP (ScrollTrigger) + Lenis. Canvas/WebGL quando o efeito pedir. Servid
 
 ## Pastas
 - `src/lib/brush.ts` — motor de pincel (traços em SVG, máscaras de desenho, molduras à mão). `scenes.ts` guarda os desenhos.
-- `src/lib/mascot.ts` — Borrão, o cachorrinho de tinta: rig procedural (IK nas pernas, marcha passo/trote, rabo e orelha com molas) e estados. Para ajustar poses, crie uma página de teste temporária que instancie `Mascot` em escala grande e use `preview(estado)`.
+- `src/lib/mascot.ts` — Borrão, a criaturinha de tinta (estados, física de mola, arrastar e soltar). O André prefere esta versão.
+- `src/lib/mascot-dog.ts` + `src/styles/mascot-dog.css` — versão cachorrinho guardada para uso futuro (não importada). Ele não gostou dela como personagem principal.
 - `src/lib/world.ts` — o mundo de papel (estações, camadas, rolagem lateral). `book.ts` (estante), `character.ts` (ficha), `notebook.ts` (recados), `painting.ts` (mesinha).
 - `src/data/github.ts` — repositórios e contribuições do GitHub lidos no build, com fallback.
 - `src/lib/secrets.ts`, `sound.ts` (sons sintetizados, mudos por padrão), `i18n.ts` + `src/data/content.ts` (textos PT/EN).

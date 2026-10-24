@@ -321,19 +321,19 @@ export const strings = {
   'secrets.found': { pt: 'segredo encontrado', en: 'secret found' },
   'secrets.locked': { pt: 'ainda em branco', en: 'still blank' },
 
-  'mascot.name': { pt: 'Borrão, o cachorrinho de tinta', en: 'Smudge, the little ink dog' },
+  'mascot.name': { pt: 'Borrão, a criaturinha de tinta', en: 'Smudge, the little ink creature' },
 } satisfies Record<string, Localized>;
 
 export type StringKey = keyof typeof strings;
 
 export const mascotLines: Localized<string[]> = {
-  pt: ['au!', 'me leva pra passear?', 'achei um osso… não, era um pincel', 'já viu a estante?', 'cheirei uns segredos por aí', 'sou feito de nanquim, não me molhe', 'o André me desenhou num guardanapo'],
-  en: ['woof!', 'walkies?', 'found a bone… no, a brush', 'seen the bookstand yet?', 'I sniffed out some secrets', 'I’m made of ink, keep me dry', 'André drew me on a napkin'],
+  pt: ['oi!', 'cuidado, eu mancho', 'sou feito de nanquim', 'já viu a estante?', 'já achou os segredos?', 'ei, isso faz cócegas', 'o André me desenhou num guardanapo'],
+  en: ['hi!', 'careful, I smudge', 'I’m made of ink', 'seen the bookstand yet?', 'found the secrets yet?', 'hey, that tickles', 'André drew me on a napkin'],
 };
 
 export const mascotReactions = {
-  dropped: { pt: 'cain!', en: 'yelp!' },
-  carried: { pt: 'me solta!', en: 'put me down!' },
+  dropped: { pt: 'ai!', en: 'ouch!' },
+  carried: { pt: 'uiii', en: 'wheee' },
   sleep: { pt: 'z', en: 'z' },
   paw: { pt: 'toma a pata', en: 'here’s my paw' },
 } satisfies Record<string, Localized>;

@@ -1,0 +1,101 @@
+/* Archived styles for the ink dog version of Borrão (see src/lib/mascot-dog.ts). */
+:root {
+  --dog-fur: #5e605c;
+  --dog-far: #a4a6a2;
+}
+
+.dog-fur { fill: var(--dog-fur); }
+.dog-fur-far { fill: var(--dog-far); }
+
+/* Mascot: Borrão, the ink dog */
+.mascot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 40;
+  width: 116px;
+  height: 89px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mascot[data-state='carried'] {
+  cursor: grabbing;
+}
+
+.mascot-flip {
+  width: 100%;
+  height: 100%;
+  transform: scaleX(var(--facing, 1));
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dog-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 1.2px var(--paper)) drop-shadow(0 0 0.6px var(--paper));
+}
+
+.dog-shadow {
+  fill: var(--ink);
+}
+
+.dog-near-rear,
+.dog-near-front,
+.dog-haunch {
+  stroke: var(--ink);
+  stroke-width: 0.7;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+.dog-collar {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.dog-eye-closed {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  opacity: 0;
+}
+
+.dog-tongue {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  transition: opacity 0.2s;
+}
+
+.mascot.is-blinking .dog-eye { opacity: 0; }
+.mascot.is-blinking .dog-eye-closed { opacity: 1; }
+.mascot.is-panting .dog-tongue { opacity: 1; animation: pant 0.22s ease-in-out infinite alternate; }
+
+@keyframes pant {
+  to { transform: scaleY(1.25); }
+}
+
+.dog-dust {
+  position: absolute;
+  z-index: 4;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--mist);
+  pointer-events: none;
+  filter: url(#wash);
+  animation: dust 0.9s ease-out forwards;
+}
+
+@keyframes dust {
+  from { opacity: 0.8; transform: translate(0, 0) scale(0.6); }
+  to { opacity: 0; transform: translate(var(--drift, 0), -14px) scale(2); }
+}
+
