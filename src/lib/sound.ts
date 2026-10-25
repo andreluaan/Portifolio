@@ -94,5 +94,9 @@ export const sounds = {
     playNoise({ duration: 0.25, frequency: 300, sweepTo: 120, q: 0.6, gain: 0.4, type: 'lowpass' });
     playTone(160, 0.2, 0.08, 70);
   },
+  bark: () => {
+    playNoise({ duration: 0.07, frequency: 900, q: 1.2, gain: 0.18, type: 'bandpass' });
+    playTone(640, 0.09, 0.08, 380);
+  },
   paper: () => playNoise({ duration: 0.18, frequency: 3200, q: 0.5, gain: 0.08 }),
 };

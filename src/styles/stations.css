@@ -18,15 +18,24 @@
   height: 100%;
 }
 
+.station-sign-plank {
+  fill: #f7f7f5;
+}
+
+.station-sign-shadow {
+  fill: var(--wash);
+  opacity: 0.35;
+}
+
 .station-sign .hand {
   position: absolute;
-  left: 18px;
-  top: 34px;
+  left: 14px;
+  top: 32px;
   display: grid;
   place-items: center;
-  width: 170px;
-  height: 42px;
-  font-size: 1.55rem;
+  width: 180px;
+  height: 46px;
+  font-size: 1.7rem;
   line-height: 1;
   color: var(--ink);
   text-align: center;

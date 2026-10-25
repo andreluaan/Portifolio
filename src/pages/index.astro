@@ -54,11 +54,12 @@ const processSteps = [1, 2, 3, 4] as const;
       <div class="lang-switch" role="group" aria-label="Idioma / Language">
         <button type="button" data-lang="pt" aria-pressed="true">pt</button>
         <button type="button" data-lang="en" aria-pressed="false">en</button>
+        <span class="lang-drop" aria-hidden="true"></span>
       </div>
-      <button class="sound-toggle" type="button" aria-pressed="false" data-i18n-label="topbar.sound.off" aria-label={pt('topbar.sound.off')}>
+      <button class="sound-toggle" type="button" data-frame="ring" aria-pressed="false" data-i18n-label="topbar.sound.off" aria-label={pt('topbar.sound.off')}>
         <svg class="ink" viewBox="0 0 32 28" aria-hidden="true"></svg>
       </button>
-      <button class="secrets-toggle" type="button" aria-expanded="false" aria-controls="passport">
+      <button class="secrets-toggle" type="button" data-frame="plain" aria-expanded="false" aria-controls="passport">
         <span class="secrets-seal" aria-hidden="true">秘</span>
         <span class="secrets-count">0/11</span>
         <span class="visually-hidden" data-i18n="topbar.secrets">{pt('topbar.secrets')}</span>
@@ -76,8 +77,9 @@ const processSteps = [1, 2, 3, 4] as const;
       <div class="mundo-pin">
         <div class="mundo-sky"></div>
         <canvas class="mundo-paint" aria-hidden="true"></canvas>
-        <div class="mundo-layer mundo-far"><svg class="ink" preserveAspectRatio="none" aria-hidden="true"></svg></div>
-        <div class="mundo-layer mundo-mid"><svg class="ink" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+        <div class="mundo-layer mundo-peaks" aria-hidden="true"><div class="mundo-plane"></div><div class="mundo-mist is-high"></div></div>
+        <div class="mundo-layer mundo-ridge" aria-hidden="true"><div class="mundo-plane"></div><div class="mundo-mist is-low"></div></div>
+        <div class="mundo-layer mundo-hills" aria-hidden="true"><div class="mundo-plane"></div></div>
         <div class="mundo-layer mundo-ground">
           <svg class="ink mundo-ground-art" aria-hidden="true"></svg>
 

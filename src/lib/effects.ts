@@ -49,7 +49,11 @@ export function paintPortrait(
     clock += 0.2;
   });
   const settle = svgElement('rect', { x: -10, y: -10, width: width + 20, height: height + 20, fill: '#fff', opacity: 0 }, mask);
-  gsap.to(settle, { attr: { opacity: 1 }, duration: 0.6, delay: clock + 0.4 });
+  // Once fully painted, the mask (and its displacement filter over the whole portrait) is dropped for good
+  gsap.to(settle, { attr: { opacity: 1 }, duration: 0.6, delay: clock + 0.4, onComplete: () => {
+    image.removeAttribute('mask');
+    defs.remove();
+  } });
   image.setAttribute('mask', `url(#${id})`);
   target.append(image);
   return clock + 1;
@@ -108,15 +112,14 @@ export function inkTransition(origin: { x: number; y: number }, swap: () => void
 
 let boilTimer = 0;
 
-/** Cycles the turbulence seed behind `filter="url(#boil)"` so linework trembles like hand-drawn animation. */
+/** Steps every boiling drawing through its three baked frames (see `scheduleBake`), so linework trembles like
+ * hand-drawn animation. Changing the turbulence seed instead would re-run the filter on all of them each step. */
 export function startBoiling() {
   if (prefersReducedMotion() || boilTimer) return;
-  const noise = document.getElementById('boil-noise');
-  if (!noise) return;
-  let seed = 1;
+  let frame = 1;
   boilTimer = window.setInterval(() => {
     if (document.hidden) return;
-    seed = (seed % 3) + 1;
-    noise.setAttribute('seed', String(seed));
+    frame = (frame % 3) + 1;
+    document.documentElement.dataset.boil = String(frame);
   }, 120);
 }

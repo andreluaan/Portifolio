@@ -44,6 +44,48 @@
   will-change: transform;
 }
 
+.mundo-plane {
+  position: absolute;
+  inset: 0;
+}
+
+.mundo-baked {
+  position: absolute;
+  top: 0;
+  animation: plane-in 0.8s ease-out;
+}
+
+@keyframes plane-in {
+  from { opacity: 0; }
+}
+
+/* Atmospheric perspective: the farther the plane, the more it dissolves into the paper, so the sky stays mostly
+   paper and the text above it stays easy to read */
+.mundo-peaks .mundo-plane { opacity: 0.42; }
+.mundo-ridge .mundo-plane { opacity: 0.72; }
+
+/* Paper mist that drifts by itself between the distances */
+.mundo-mist {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-repeat: repeat-x;
+  pointer-events: none;
+  animation: mist-drift 90s linear infinite;
+}
+
+.mundo-mist.is-low {
+  animation-duration: 60s;
+}
+
+@keyframes mist-drift {
+  to { transform: translateX(var(--drift-by, -50%)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mundo-mist { animation: none; }
+}
+
 .mundo-layer > svg {
   position: absolute;
   inset: 0;
@@ -71,6 +113,17 @@
   pointer-events: auto;
 }
 
+/* Set by an IntersectionObserver in world.ts for stations well outside the view */
+.mundo-station.is-far svg,
+.mundo-station.is-far canvas {
+  visibility: hidden;
+}
+
+.mundo-station.is-far *,
+.mascot.is-paused * {
+  animation-play-state: paused !important;
+}
+
 .mundo-station {
   position: absolute;
 }
@@ -79,6 +132,8 @@
 .station-hero-sheet {
   position: absolute;
   background: #f5f5f3;
+  /* Keeps the portrait's multiply blend inside the sheet instead of against every parallax layer, which janked scrolling. */
+  isolation: isolate;
   transform: rotate(-1.5deg);
   transform-origin: 50% 100%;
   box-shadow: 0 20px 30px -24px var(--shadow);
@@ -237,6 +292,7 @@
   bottom: 0;
   padding: 28px;
   background: #f5f5f3;
+  isolation: isolate;
   box-shadow: 0 20px 30px -24px var(--shadow);
 }
 

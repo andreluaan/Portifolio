@@ -20,6 +20,8 @@ export const secrets: Secret[] = [
   { id: 'magic', glyph: '術', name: { pt: 'palavra mágica', en: 'magic word' }, hint: { pt: 'escreveu “nanquim” no caderno de recados', en: 'typed “nanquim” in the guestbook' } },
   { id: 'mail', glyph: '信', name: { pt: 'carteiro', en: 'mail carrier' }, hint: { pt: 'deixou um recado no correio', en: 'left a note in the mailbox' } },
   { id: 'konami', glyph: '古', name: { pt: 'código antigo', en: 'ancient code' }, hint: { pt: '↑ ↑ ↓ ↓ ← → ← → b a', en: '↑ ↑ ↓ ↓ ← → ← → b a' } },
+  { id: 'carinho', glyph: '愛', name: { pt: 'carinho', en: 'belly rubs' }, hint: { pt: 'fez carinho na Mel cinco vezes', en: 'petted Mel five times' } },
+  { id: 'mel', glyph: '蜜', name: { pt: 'chamou a Mel', en: 'called Mel' }, hint: { pt: 'escreveu o nome dela', en: 'typed her name' } },
   { id: 'owl', glyph: '夜', name: { pt: 'coruja', en: 'night owl' }, hint: { pt: 'visitou entre meia-noite e 5h', en: 'visited between midnight and 5am' } },
 ];
 

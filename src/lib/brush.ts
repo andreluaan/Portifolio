@@ -1,3 +1,5 @@
+import { scheduleBake } from './bake';
+
 export type Point = [number, number];
 export type Tone = 'ink' | 'soft' | 'wash' | 'mist' | 'paper';
 export type InkFilter = 'bleed' | 'dry' | 'wash' | 'boil' | 'none';
@@ -194,9 +196,7 @@ export function strokeToPath(item: Stroke, index = 0) {
     }),
     class: `ink-${item.tone ?? 'ink'}`,
   });
-  const filter = filterFor(item);
-  if (filter) path.setAttribute('filter', filter);
-  return { path, centerline };
+  return { path, centerline, filter: filterFor(item) };
 }
 
 /** Draws strokes into an SVG; when animated, each stroke is revealed by a mask that follows its centerline. Returns the total duration in seconds. */
@@ -206,9 +206,13 @@ export function renderScene(target: SVGElement, strokes: Stroke[], { animate = f
   const shouldAnimate = animate && !prefersReducedMotion();
   let clock = delay;
   let finish = delay;
+  // Consecutive strokes that share a filter go into one filtered group: a filter per path costs an offscreen pass each,
+  // which is what made scrolling stutter on phones. Keeping runs consecutive preserves the paint order.
+  let group: SVGGElement | null = null;
+  let groupFilter: string | null = null;
 
   strokes.forEach((item, index) => {
-    const { path, centerline } = strokeToPath(item, index);
+    const { path, centerline, filter } = strokeToPath(item, index);
 
     if (shouldAnimate) {
       const duration = Math.min(0.9, Math.max(0.18, pathLength(centerline) / 520)) / pace;
@@ -233,9 +237,19 @@ export function renderScene(target: SVGElement, strokes: Stroke[], { animate = f
       finish = Math.max(finish, clock + duration);
       clock += duration * 0.55;
     }
-    target.append(path);
+    if (!filter) {
+      group = groupFilter = null;
+      target.append(path);
+      return;
+    }
+    if (!group || groupFilter !== filter) {
+      group = svgElement('g', { filter }, target);
+      groupFilter = filter;
+    }
+    group.append(path);
   });
 
+  if (target instanceof SVGSVGElement) scheduleBake(target, shouldAnimate ? finish : 0);
   return finish;
 }
 
@@ -255,8 +269,72 @@ export function drawWhenVisible(target: SVGElement, strokes: Stroke[], options: 
   return () => observer.disconnect();
 }
 
-/** Gives a button or box a hand-drawn frame plus an ink blot that floods it on hover. */
-export function frameElement(element: HTMLElement, { blot = true, width = 1.8 } = {}) {
+/** A hand frame in two long strokes that cross past the corners, leaving a small gap near the top-right (the
+ * breathing gap of an ensō). The dry tail is drawn as hairline paper streaks, so no filter is needed. */
+export function inkFrame(x: number, y: number, w: number, h: number, width = 2, seed = 1): Stroke[] {
+  const random = seededRandom(seed);
+  const j = () => (random() - 0.5) * 2.4;
+  const gap = Math.min(w * 0.3, 10 + random() * 14);
+  const strokes: Stroke[] = [
+    stroke([[x + w - gap, y + j()], [x + w * 0.5, y - 1 + j()], [x - 3, y + j()], [x + j(), y + h * 0.5], [x - 1 + j(), y + h + 3]], width, { seed: seed + 1, start: 0.04, end: 0.22, filter: 'none' }),
+    stroke([[x - 4, y + h + j()], [x + w * 0.5, y + h + 1 + j()], [x + w + 2, y + h + j()], [x + w + j(), y + h * 0.5], [x + w + 1 + j(), y + gap * 0.4]], width * 1.15, { seed: seed + 2, start: 0.03, end: 0.3, filter: 'none' }),
+  ];
+  for (let i = 0; i < 3; i++) {
+    const offset = (i - 1) * width * 0.35;
+    strokes.push(stroke([[x + w + offset, y + h * (0.55 - i * 0.05)], [x + w + offset + j() * 0.2, y + gap * 0.6]], 0.6, { tone: 'paper', seed: seed + 10 + i, start: 0.2, end: 0.6, filter: 'none' }));
+  }
+  return strokes;
+}
+
+/** An organic blot outline with the bleed baked into the geometry: lobes, paper tooth, and capillary "fingers" that
+ * only appear late in the growth, like ink running along paper fibres. */
+export function blotOutline(cx: number, cy: number, rx: number, ry: number, growth: number, seed: number): string {
+  const random = seededRandom(seed);
+  const lobes = Array.from({ length: 4 }, () => ({ k: 2 + Math.floor(random() * 5), phase: random() * Math.PI * 2, amp: 0.04 + random() * 0.07 }));
+  const fingers = Array.from({ length: 3 + Math.floor(random() * 3) }, () => ({ angle: random() * Math.PI * 2, reach: 0.12 + random() * 0.22 }));
+  const points: Point[] = [];
+  for (let i = 0; i < 72; i++) {
+    const angle = (i / 72) * Math.PI * 2;
+    let r = 1;
+    for (const lobe of lobes) r += Math.sin(angle * lobe.k + lobe.phase) * lobe.amp;
+    for (const finger of fingers) {
+      const distance = Math.abs(Math.atan2(Math.sin(angle - finger.angle), Math.cos(angle - finger.angle)));
+      r += Math.max(0, 1 - distance / 0.18) * finger.reach * Math.max(0, growth - 0.6) * 2.5;
+    }
+    r += (random() - 0.5) * 0.03;
+    points.push([cx + Math.cos(angle) * rx * r * growth, cy + Math.sin(angle) * ry * r * growth]);
+  }
+  return `M${points.map(([px, py]) => `${px.toFixed(1)} ${py.toFixed(1)}`).join('L')}Z`;
+}
+
+export const BLOT_FRAMES = 8;
+const blotSprites = new Map<string, string>();
+
+/** A horizontal strip of blot frames as an SVG data URL, used as a CSS mask and stepped through frame by frame. The
+ * same seed in every frame keeps the lobes and only grows them; the centre walks from the entry point to the middle,
+ * so the flood feels poured rather than scaled. */
+export function blotSprite(w: number, h: number, seed: number) {
+  const key = `${w}x${h}:${seed}`;
+  const cached = blotSprites.get(key);
+  if (cached) return cached;
+  // Fully grown (growth 1.2) the blot just fills the layer, so its edge stays organic instead of being clipped square
+  const origin: Point = [w * 0.3, h * 0.6];
+  const paths = Array.from({ length: BLOT_FRAMES }, (_, f) => {
+    const t = (f + 1) / BLOT_FRAMES;
+    const growth = 0.15 + 1.05 * (1 - Math.pow(1 - t, 2.2));
+    const cx = origin[0] + (w / 2 - origin[0]) * t;
+    const cy = origin[1] + (h / 2 - origin[1]) * t;
+    return `<path transform="translate(${f * w} 0)" d="${blotOutline(cx, cy, w * 0.4, h * 0.38, growth, seed)}"/>`;
+  });
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w * BLOT_FRAMES}" height="${h}" viewBox="0 0 ${w * BLOT_FRAMES} ${h}">${paths.join('')}</svg>`;
+  const url = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  blotSprites.set(key, url);
+  return url;
+}
+
+/** Gives a button or box a hand-drawn frame. Buttons also get an ink layer: a full blot on solid buttons (it drinks
+ * into the paper and soaks back on hover) or a wash that sweeps in on outlined ones. `ring` draws an ensō instead. */
+export function frameElement(element: HTMLElement, { blot = true, width = 1.8, ring = false } = {}) {
   const w = element.offsetWidth;
   const h = element.offsetHeight;
   if (!w || !h) return;
@@ -267,18 +345,21 @@ export function frameElement(element: HTMLElement, { blot = true, width = 1.8 } 
   }
   svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
   const seed = Math.round(w + h);
-  renderScene(svg, roughRect(3, 3, w - 6, h - 6, width, seed));
+  const frame = ring
+    ? [stroke(ellipsePoints(w / 2, h / 2, w / 2 - 3, h / 2 - 3, { seed, from: -1.2, sweep: 5.9, count: 18 }), width, { seed, start: 0.05, end: 0.4, filter: 'none' })]
+    : inkFrame(3, 3, w - 6, h - 6, width, seed);
+  renderScene(svg, frame);
   if (!blot) return;
-  const group = svgElement('g', { class: 'blot' }, svg);
-  svgElement(
-    'path',
-    {
-      d: brushPath([[6, h / 2 + 1], [w / 2, h / 2 - 2], [w - 6, h / 2 + 1]], h - 4, { seed, start: 0.06, end: 0.12, wobble: 0.2 }),
-      class: 'ink-ink',
-      filter: 'url(#bleed)',
-    },
-    group
-  );
+  // The ink sits a little beyond the frame on every side, so its organic edge can bleed past the strokes
+  const pad = 4;
+  let ink = element.querySelector<HTMLSpanElement>(':scope > .ink-layer');
+  if (!ink) {
+    ink = document.createElement('span');
+    ink.className = 'ink-layer';
+    ink.setAttribute('aria-hidden', 'true');
+    element.prepend(ink);
+  }
+  ink.style.setProperty('--blot', blotSprite(w + pad * 2, h + pad * 2, seed));
 }
 
 const frameSizes = new WeakMap<Element, string>();
@@ -291,14 +372,16 @@ const frameObserver =
           const size = `${Math.round(entry.contentRect.width)}x${Math.round(entry.contentRect.height)}`;
           if (frameSizes.get(element) === size) continue;
           frameSizes.set(element, size);
-          frameElement(element, { blot: element.dataset.frame !== 'plain' });
+          frameElement(element, frameOptions(element));
         }
       });
+
+const frameOptions = (element: HTMLElement) => ({ blot: !['plain', 'ring'].includes(element.dataset.frame ?? ''), ring: element.dataset.frame === 'ring' });
 
 /** Frames every `[data-frame]` element and keeps redrawing it whenever its size changes (late fonts, language switch). */
 export function frameAll(root: ParentNode = document) {
   root.querySelectorAll<HTMLElement>('[data-frame]').forEach((element) => {
-    frameElement(element, { blot: element.dataset.frame !== 'plain' });
+    frameElement(element, frameOptions(element));
     frameObserver?.observe(element);
   });
 }

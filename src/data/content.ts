@@ -322,6 +322,7 @@ export const strings = {
   'secrets.locked': { pt: 'ainda em branco', en: 'still blank' },
 
   'mascot.name': { pt: 'Borrão, a criaturinha de tinta', en: 'Smudge, the little ink creature' },
+  'mel.name': { pt: 'Mel, a cachorrinha do André. Passe o mouse para fazer carinho', en: 'Mel, André’s little dog. Hover to pet her' },
 } satisfies Record<string, Localized>;
 
 export type StringKey = keyof typeof strings;

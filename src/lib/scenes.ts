@@ -1,4 +1,4 @@
-import { ellipsePoints, roughRect, seededRandom, stroke, type Point, type Stroke } from './brush';
+import { densify, ellipsePoints, roughRect, seededRandom, stroke, type Point, type Stroke } from './brush';
 
 /** Project thumbnails, drawn in a 240×160 box. */
 export const projectSketches: Record<string, Stroke[]> = {
@@ -55,6 +55,20 @@ export const projectSketches: Record<string, Stroke[]> = {
     stroke([[96, 126], [120, 122], [146, 126]], 6, { seed: 109 }),
     stroke([[40, 140], [200, 138]], 12, { tone: 'mist', filter: 'wash', seed: 110 }),
   ],
+  adeylma: [
+    stroke([[52, 62], [132, 50], [140, 102], [60, 114], [52, 62]], 2.6, { seed: 211, start: 0.02, end: 0.05 }),
+    stroke([[66, 76], [104, 70]], 3.4, { seed: 212 }),
+    stroke([[68, 88], [96, 84]], 1.2, { tone: 'soft', seed: 213 }),
+    stroke([[70, 96], [110, 90]], 1.2, { tone: 'soft', seed: 214 }),
+    stroke([[118, 66], [126, 86]], 9, { tone: 'wash', filter: 'wash', seed: 215 }),
+    stroke([[150, 32], [184, 32], [186, 120], [152, 120], [150, 32]], 2.6, { seed: 216, start: 0.02, end: 0.05 }),
+    stroke([[164, 112], [172, 112]], 2, { seed: 217 }),
+    stroke(ellipsePoints(168, 48, 7, 7, { seed: 218, count: 9 }), 2, { seed: 218 }),
+    stroke([[158, 66], [178, 64], [178, 78], [166, 78], [160, 84], [160, 78], [158, 66]], 1.6, { seed: 219 }),
+    stroke([[158, 92], [178, 92]], 1.2, { tone: 'soft', seed: 220 }),
+    stroke([[158, 100], [172, 100]], 1.2, { tone: 'soft', seed: 221 }),
+    stroke([[40, 136], [200, 138]], 12, { tone: 'mist', filter: 'wash', seed: 222 }),
+  ],
   saideira: [
     stroke([[88, 40], [94, 126], [146, 126], [152, 40]], 2.6, { seed: 201, start: 0.02, end: 0.05 }),
     stroke([[92, 66], [148, 66]], 1.4, { seed: 202 }),
@@ -65,6 +79,12 @@ export const projectSketches: Record<string, Stroke[]> = {
     stroke([[60, 136], [180, 138]], 12, { tone: 'mist', filter: 'wash', seed: 207 }),
   ],
 };
+
+/** A project without its own drawing gets a blank sheet with a seal instead of breaking the page that shows it. */
+export const sketchFor = (id: string): Stroke[] => projectSketches[id] ?? [
+  stroke([[60, 40], [180, 36], [184, 124], [56, 128], [60, 40]], 2.4, { seed: 230, start: 0.02, end: 0.05 }),
+  stroke([[40, 140], [200, 138]], 12, { tone: 'mist', filter: 'wash', seed: 231 }),
+];
 
 export const decorations = {
   underline: [stroke([[2, 9], [90, 6], [186, 10]], 4.5, { seed: 10, dry: true, start: 0.04, end: 0.3 })],
@@ -177,14 +197,16 @@ export const deskObjects = {
 export const worldProps = {
   signpost: (seed: number): Stroke[] => [
     stroke([[40, 182], [104, 184]], 10, { tone: 'mist', filter: 'wash', seed: seed + 3 }),
-    stroke([[70, 28], [72, 184]], 5.5, { seed, start: 0.02, end: 0.05 }),
+    stroke([[70, 80], [72, 184]], 5.5, { seed, start: 0.02, end: 0.05 }),
     stroke([[8, 34], [186, 28], [212, 52], [188, 76], [12, 80], [8, 34]], 2.8, { seed: seed + 1, start: 0.01, end: 0.03 }),
-    stroke([[20, 70], [176, 66]], 1, { tone: 'wash', seed: seed + 4 }),
-    stroke([[66, 44], [68, 46]], 3.4, { seed: seed + 5 }),
-    stroke([[66, 62], [68, 64]], 3.4, { seed: seed + 6 }),
     stroke([[60, 184], [56, 170], [62, 160]], 1.6, { seed: seed + 2 }),
     stroke([[82, 184], [88, 168], [84, 156]], 1.6, { seed: seed + 7 }),
   ],
+  /** Flat shapes painted under the signpost strokes so the board reads as a solid plank over the hills. */
+  signBoard: {
+    shadow: 'M14 42 L192 36 L216 60 L194 84 L18 88 Z',
+    plank: 'M9 35 L186 29 L211 52 L188 75 L13 79 Z',
+  },
   pole: (seed: number, height: number): Stroke[] => [
     stroke([[10, 0], [12, height]], 4.5, { seed, start: 0.02, end: 0.05 }),
     stroke([[0, 8], [24, 6]], 3, { seed: seed + 1 }),
@@ -277,3 +299,97 @@ export const worldProps = {
     stroke([[30, 90], [36, 70], [110, 66], [112, 88]], 1.6, { seed: seed + 9, tone: 'wash' }),
   ],
 };
+
+// Landscape planes (shan shui): farther = lighter, wetter, no outline; mist is painted in paper between distances.
+
+/** Tall "high distance" peaks: steep sides, no outline, a washed base that dissolves into mist. */
+export function farPeaks(width: number, height: number, seed = 1): Stroke[] {
+  const random = seededRandom(seed);
+  const strokes: Stroke[] = [];
+  const count = Math.max(3, Math.round(width / 520));
+  for (let i = 0; i < count; i++) {
+    const cx = ((i + 0.3 + random() * 0.4) / count) * width;
+    const top = height * (0.18 + random() * 0.14);
+    const base = height * 0.62;
+    const half = 120 + random() * 160;
+    // One wide wet stroke climbs the peak, so the mass reads as wash, not line
+    strokes.push(stroke([[cx - half, base], [cx - half * 0.35, top + 60], [cx, top], [cx + half * 0.3, top + 50], [cx + half, base]], 70 + random() * 50, { tone: 'mist', filter: 'wash', seed: seed + i * 10, start: 0.02, end: 0.02, wobble: 0.5 }));
+    for (let v = 0; v < 2 + Math.floor(random() * 2); v++) {
+      const vx = cx + (random() - 0.5) * half * 0.8;
+      strokes.push(stroke([[vx, top + 40 + random() * 40], [vx + (random() - 0.5) * 20, base - 40]], 6 + random() * 8, { tone: 'wash', filter: 'wash', seed: seed + i * 10 + v + 1, start: 0.1, end: 0.6 }));
+    }
+  }
+  return strokes;
+}
+
+/** A band of mist painted in paper tone over the plane behind it: the emptiness that separates distances. */
+export function mistBand(width: number, y: number, thickness: number, seed = 1): Stroke[] {
+  const random = seededRandom(seed);
+  const points: Point[] = [];
+  for (let x = -80; x <= width + 80; x += 220) points.push([x, y + (random() - 0.5) * thickness * 0.5]);
+  return [
+    stroke(points, thickness, { tone: 'paper', filter: 'wash', seed, start: 0.01, end: 0.01, wobble: 0.6 }),
+    stroke(points.map(([x, py]) => [x + 40, py - thickness * 0.45] as Point), thickness * 0.18, { tone: 'mist', filter: 'wash', seed: seed + 1, start: 0.05, end: 0.05 }),
+  ];
+}
+
+/** A distant pine: a few short dabs stacked on a hairline trunk (Tōhaku's far pines: pale, few touches). */
+export function distantPine(x: number, baseY: number, size: number, seed = 1, tone: Stroke['tone'] = 'wash'): Stroke[] {
+  const random = seededRandom(seed);
+  const strokes: Stroke[] = [stroke([[x, baseY], [x + (random() - 0.5) * 2, baseY - size]], Math.max(1, size * 0.05), { tone, filter: 'none', seed, start: 0.05, end: 0.3 })];
+  const tiers = 5 + Math.floor(random() * 3);
+  for (let t = 0; t < tiers; t++) {
+    const ty = baseY - size * (0.25 + (t / tiers) * 0.75);
+    const span = size * 0.32 * (1 - t / tiers) + size * 0.06;
+    strokes.push(stroke([[x - span, ty + span * 0.25], [x, ty - span * 0.1], [x + span, ty + span * 0.2]], size * 0.11, { tone, filter: 'none', seed: seed + t + 1, start: 0.1, end: 0.5 }));
+  }
+  return strokes;
+}
+
+/** Pines along a ridge line, thinned so they never form a fence. */
+export function pinesOnRidge(ridgePoints: Point[], every: number, seed = 1): Stroke[] {
+  const random = seededRandom(seed);
+  const strokes: Stroke[] = [];
+  densify(ridgePoints, every).forEach(([x, y], i) => {
+    if (random() < 0.45) return; // gaps let the mist through
+    strokes.push(...distantPine(x + (random() - 0.5) * every * 0.6, y + 4, 14 + random() * 18, seed + i * 9));
+  });
+  return strokes;
+}
+
+/** A mid-ground ink tree: dry leaning trunk, two branches, clustered leaf dabs. Drawn around its base at (0, 0). */
+export function inkTree(seed = 1, height = 160): Stroke[] {
+  const random = seededRandom(seed);
+  const lean = (random() - 0.5) * 30;
+  const strokes: Stroke[] = [stroke([[0, 0], [lean * 0.3, -height * 0.4], [lean, -height * 0.85]], 7, { tone: 'soft', dry: true, seed, start: 0.02, end: 0.5 })];
+  const branches: Point[][] = [
+    [[lean * 0.3, -height * 0.45], [lean * 0.3 - 40, -height * 0.6], [lean * 0.3 - 62, -height * 0.58]],
+    [[lean * 0.7, -height * 0.7], [lean + 34, -height * 0.82], [lean + 58, -height * 0.78]],
+  ];
+  branches.forEach((points, b) => strokes.push(stroke(points, 3, { tone: 'soft', dry: true, seed: seed + 10 + b, start: 0.05, end: 0.7 })));
+  const clusters: Point[] = [[lean, -height * 0.9], branches[0][2], branches[1][2]];
+  clusters.forEach(([cx, cy], c) => {
+    for (let d = 0; d < 7; d++) {
+      const dx = cx + (random() - 0.5) * 50;
+      const dy = cy + (random() - 0.5) * 22;
+      strokes.push(stroke([[dx - 9, dy + 2], [dx, dy - 1], [dx + 10, dy + 1]], 6 + random() * 5, { tone: d < 2 ? 'ink' : 'soft', filter: 'bleed', seed: seed + 30 + c * 10 + d, start: 0.2, end: 0.4 }));
+    }
+  });
+  return strokes;
+}
+
+/** A pine branch hanging in from the top edge, close to the eye (the near pines of Tōhaku's screens). */
+export function foregroundBranch(seed = 1, length = 420): Stroke[] {
+  const random = seededRandom(seed);
+  const spine: Point[] = [[-20, -10], [length * 0.35, 40], [length * 0.7, 70], [length, 64]];
+  const strokes: Stroke[] = [stroke(spine, 16, { tone: 'ink', filter: 'none', seed, start: 0.01, end: 0.6 })];
+  densify(spine, 34).forEach(([x, y], i) => {
+    if (i < 2) return;
+    for (let n = 0; n < 5; n++) {
+      const angle = Math.PI * (0.25 + random() * 0.5);
+      const reach = 26 + random() * 22;
+      strokes.push(stroke([[x, y], [x + Math.cos(angle) * reach, y + Math.sin(angle) * reach]], 2.6, { tone: 'ink', filter: 'none', seed: seed + i * 7 + n, start: 0.05, end: 0.8 }));
+    }
+  });
+  return strokes;
+}

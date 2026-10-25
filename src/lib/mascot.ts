@@ -1,5 +1,6 @@
 import { mascotLines, mascotReactions } from '../data/content';
 import { brushPath, ellipsePoints, inkSplat, prefersReducedMotion, renderScene, svgElement } from './brush';
+import { bakeBoilingShape } from './bake';
 import { pick, t } from './i18n';
 import { unlock } from './secrets';
 import { sounds } from './sound';
@@ -45,7 +46,7 @@ function mascotSvg() {
       <g class="mascot-body">
         <path class="mascot-arm arm-a" d="M17 31 L10 36"/>
         <path class="mascot-arm arm-b" d="M43 31 L50 36"/>
-        <path d="${body}" class="ink-ink" filter="url(#boil)"/>
+        <path d="${body}" class="ink-ink mascot-ink-body" filter="url(#boil)"/>
         <path d="${tuft}" class="ink-ink"/>
         <path d="${tuftSmall}" class="ink-ink"/>
         <g class="mascot-eyes">
@@ -58,8 +59,12 @@ function mascotSvg() {
     </svg>`;
 }
 
+export type MascotEvent = 'hop' | 'say' | 'poke' | 'carried' | 'knocked' | 'sleep' | 'wake';
+
 export class Mascot {
   readonly el: HTMLDivElement;
+  /** Announces what Borrão does, so companions (Mel) can react without him knowing about them. */
+  readonly events = new EventTarget();
   private readonly options: Required<Omit<MascotOptions, 'startX'>>;
   private readonly reduced = prefersReducedMotion();
   private readonly bubble: HTMLDivElement;
@@ -112,6 +117,7 @@ export class Mascot {
     this.bindEvents();
     this.render();
     if (!this.reduced) this.frame = requestAnimationFrame(this.tick);
+    void bakeBoilingShape(this.el.querySelector<SVGPathElement>('.mascot-ink-body')!);
     this.sleepTimer = window.setInterval(this.spawnSnore, 1700);
   }
 
@@ -135,8 +141,24 @@ export class Mascot {
     if (this.reduced) this.render();
   }
 
+  /** Puts him somewhere without walking there (used when the world is rebuilt). */
+  place(x: number) {
+    this.x = x;
+    this.targetX = x;
+    this.render();
+  }
+
+  get direction() {
+    return this.facing;
+  }
+
+  private emit(event: MascotEvent) {
+    this.events.dispatchEvent(new Event(event));
+  }
+
   hop(strength = 520) {
     if (this.state === 'falling' || this.state === 'carried') return;
+    this.emit('hop');
     this.wake();
     this.fallStartY = this.y;
     this.vy = -strength;
@@ -145,6 +167,7 @@ export class Mascot {
   }
 
   say(text: string, duration = 2200) {
+    this.emit('say');
     this.bubble.textContent = text;
     this.bubble.hidden = false;
     this.bubble.classList.remove('is-popping');
@@ -220,6 +243,7 @@ export class Mascot {
 
   private poke() {
     this.wake();
+    this.emit('poke');
     unlock('tickle');
     sounds.pop();
     const lines = pick(mascotLines);
@@ -240,6 +264,10 @@ export class Mascot {
   }
 
   private setState(state: MascotState) {
+    if (state !== this.state) {
+      if (state === 'carried' || state === 'knocked' || state === 'sleep') this.emit(state);
+      else if (this.state === 'sleep') this.emit('wake');
+    }
     this.state = state;
     this.el.dataset.state = state;
     if (state === 'carried') this.setMouth('open');
@@ -248,6 +276,20 @@ export class Mascot {
 
   private setMouth(shape: keyof typeof MOUTHS) {
     this.mouth.setAttribute('d', MOUTHS[shape]);
+  }
+
+  /** Stops the simulation while Borrão is out of sight; `resume` picks up without a jump. */
+  pause() {
+    cancelAnimationFrame(this.frame);
+    this.frame = 0;
+    this.el.classList.add('is-paused');
+  }
+
+  resume() {
+    if (this.frame || this.reduced || this.destroyed) return;
+    this.el.classList.remove('is-paused');
+    this.lastTime = performance.now();
+    this.frame = requestAnimationFrame(this.tick);
   }
 
   private tick = (now: number) => {

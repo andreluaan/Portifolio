@@ -1,8 +1,19 @@
-@import '@fontsource/shippori-mincho-b1/500.css';
-@import '@fontsource/shippori-mincho-b1/700.css';
-@import '@fontsource/shippori-mincho-b1/800.css';
-@import '@fontsource/nanum-pen-script/400.css';
+@import '@fontsource/shippori-mincho-b1/latin-500.css';
+@import '@fontsource/shippori-mincho-b1/latin-700.css';
+@import '@fontsource/shippori-mincho-b1/latin-800.css';
+@import '@fontsource/shippori-mincho-b1/latin-ext-500.css';
+@import '@fontsource/shippori-mincho-b1/latin-ext-700.css';
+@import '@fontsource/shippori-mincho-b1/latin-ext-800.css';
+@import '@fontsource/nanum-pen-script/latin-400.css';
 @import '@fontsource-variable/hanken-grotesk';
+
+/* The scroll wind (world.ts) is written every frame on the few elements that tilt with it; not inheriting keeps
+   each write from restyling their contents */
+@property --wind {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
 
 :root {
   --paper: #eeeeec;
@@ -176,30 +187,75 @@ svg.ink {
   overflow: visible;
 }
 
-.ink-button .blot {
-  transform-origin: 50% 60%;
-  transform: scale(0.2);
+.ink-button.solid > svg.ink-frame {
   opacity: 0;
-  transition: transform 0.45s var(--ease-ink), opacity 0.3s;
 }
 
+/* The ink layer is a mask strip of blot frames (see blotSprite); --frame picks one, so the flood is stepped like
+   hand-drawn animation and never runs an SVG filter */
+@property --frame {
+  syntax: '<integer>';
+  inherits: false;
+  initial-value: 7;
+}
+
+.ink-layer {
+  position: absolute;
+  inset: -4px;
+  z-index: -2;
+  --frame: 7;
+  -webkit-mask: var(--blot) no-repeat;
+  mask: var(--blot) no-repeat;
+  -webkit-mask-size: 800% 100%;
+  mask-size: 800% 100%;
+  -webkit-mask-position: calc(var(--frame) / 7 * 100%) 0;
+  mask-position: calc(var(--frame) / 7 * 100%) 0;
+  pointer-events: none;
+}
+
+/* Primary: a full blot. On hover the paper drinks it back, then it soaks out again (one breath) */
 .ink-button.solid {
   color: var(--paper);
 }
 
-.ink-button.solid .blot,
-.ink-button:hover .blot,
-.ink-button:focus-visible .blot {
-  transform: scale(1);
-  opacity: 1;
+.ink-button.solid .ink-layer {
+  background: var(--ink);
 }
 
-.ink-button:hover:not(.solid) {
-  color: var(--paper);
+.ink-button.solid:hover .ink-layer,
+.ink-button.solid:focus-visible .ink-layer {
+  animation: ink-breathe 0.42s linear;
 }
 
-.ink-button:not(.solid) .blot path {
-  fill: var(--ink-soft);
+@keyframes ink-breathe {
+  35% { --frame: 4; }
+}
+
+/* Secondary: a wash sweeps in under the text from the left; the text keeps its ink */
+.ink-button:not(.solid) .ink-layer {
+  /* A touch deeper than --mist, so the wash still reads on bright screens */
+  background: #b9bbb7;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.42s cubic-bezier(0.45, 0.05, 0.3, 1);
+}
+
+.ink-button:not(.solid):hover .ink-layer,
+.ink-button:not(.solid):focus-visible .ink-layer {
+  clip-path: inset(0 0 0 0);
+}
+
+/* Press: a stamp. It sinks fast and springs back */
+.ink-button {
+  transition: transform 0.38s cubic-bezier(0.3, 1.8, 0.5, 1);
+}
+
+.ink-button:active {
+  transform: scale(0.94) translateY(1.5px);
+  transition-duration: 0.07s;
+}
+
+.ink-button:not(.solid):active .ink-layer {
+  background: var(--wash);
 }
 
 .ink-button.small {
@@ -227,4 +283,16 @@ svg.ink {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Baked drawings that boil carry three frames; startBoiling flips html[data-boil] through them */
+.boil-frame:not(.boil-frame-1),
+[data-boil='2'] .boil-frame-1,
+[data-boil='3'] .boil-frame-1 {
+  visibility: hidden;
+}
+
+[data-boil='2'] .boil-frame-2,
+[data-boil='3'] .boil-frame-3 {
+  visibility: visible;
 }

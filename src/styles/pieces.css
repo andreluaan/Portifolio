@@ -97,9 +97,21 @@
 }
 
 .lang-switch {
+  position: relative;
   display: flex;
   font-family: var(--font-hand);
   font-size: 1.4rem;
+}
+
+.lang-drop {
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 6px;
+  height: 7px;
+  background: var(--ink);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  pointer-events: none;
 }
 
 .lang-switch button {
@@ -112,20 +124,42 @@
 
 .lang-switch button[aria-pressed='true'] {
   color: var(--ink);
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
 }
 
 .sound-toggle {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   padding: 0;
   background: none;
   border: 0;
   cursor: pointer;
+  isolation: isolate;
+  transition: transform 0.3s cubic-bezier(0.3, 1.8, 0.5, 1);
+}
+
+/* Hanko-like toggles: they tilt when you reach for them and press like a stamp */
+.sound-toggle:hover,
+.secrets-toggle:hover {
+  transform: rotate(-6deg) scale(1.06);
+}
+
+.sound-toggle:active,
+.secrets-toggle:active {
+  transform: scale(0.94) translateY(1px);
+  transition-duration: 0.07s;
+}
+
+.sound-toggle > svg.ink-frame,
+.secrets-toggle > svg.ink-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: visible;
 }
 
 .sound-toggle svg {
@@ -134,13 +168,16 @@
 }
 
 .secrets-toggle {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 10px 4px 4px;
+  padding: 6px 12px 6px 6px;
   background: none;
-  border: 1.5px solid var(--ink);
+  border: 0;
   cursor: pointer;
+  isolation: isolate;
+  transition: transform 0.3s cubic-bezier(0.3, 1.8, 0.5, 1);
   font-family: var(--font-hand);
   font-size: 1.3rem;
   line-height: 1;
@@ -1111,25 +1148,35 @@
   white-space: nowrap;
 }
 
-.world-nav button::after {
-  content: '';
+.world-nav {
+  position: relative;
+}
+
+/* One brushstroke travels between the items (setupNavBrush): its tapered ends stay intact because it moves, never
+   scales from zero, and it carries no filter */
+.nav-brush {
   position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 2px;
-  height: 3px;
+  left: 0;
+  bottom: 0;
+  height: 7px;
+  opacity: 0;
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+.nav-drip {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  height: 4px;
   background: var(--ink);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.35s var(--ease-ink);
-  filter: url(#bleed);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.world-nav button:hover::after,
-.world-nav button[aria-current='true']::after {
-  transform: scaleX(1);
-}
-
+.world-nav button:hover,
 .world-nav button[aria-current='true'] {
   color: var(--ink);
 }
@@ -1138,3 +1185,51 @@
   .world-nav { grid-column: 1 / -1; grid-row: 2; }
   .world-nav button { padding: 6px 8px; font-size: 1.25rem; }
 }
+
+/* Mel, André's dog: a transform-only rig, so nothing here may add filters */
+.mel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 39;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mel-flip {
+  width: 100%;
+  height: 100%;
+  transform: scaleX(var(--facing, 1));
+  transition: transform 0.18s;
+}
+
+.mel-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.mel-bubble {
+  bottom: calc(100% - 6px);
+  left: 70%;
+}
+
+.mel-heart {
+  position: absolute;
+  left: 62%;
+  top: -6px;
+  width: 22px;
+  height: 20px;
+  pointer-events: none;
+  animation: mel-heart 1.4s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+}
+
+@keyframes mel-heart {
+  0% { transform: translateY(6px) scale(0.3); opacity: 0; }
+  20% { transform: translateY(0) scale(1.1); opacity: 1; }
+  66% { opacity: 1; }
+  100% { transform: translate(6px, -26px) scale(1) rotate(8deg); opacity: 0; }
+}
+

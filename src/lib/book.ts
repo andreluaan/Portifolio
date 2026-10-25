@@ -2,7 +2,7 @@ import gsap from 'gsap';
 import { projects, type Project } from '../data/content';
 import { prefersReducedMotion, renderScene, stroke } from './brush';
 import { pick, t } from './i18n';
-import { decorations, projectSketches, worldProps } from './scenes';
+import { decorations, sketchFor, worldProps } from './scenes';
 import { unlock } from './secrets';
 import { sounds } from './sound';
 
@@ -157,7 +157,7 @@ class Book {
     element.querySelector('.book-year')!.textContent = project.year;
     element.querySelector('h3')!.textContent = pick(project.title);
     element.querySelector('.book-status')!.textContent = pick(project.status);
-    renderScene(element.querySelector('svg')!, projectSketches[project.id]);
+    renderScene(element.querySelector('svg')!, sketchFor(project.id));
     return element;
   }
 
@@ -292,7 +292,7 @@ class Book {
       if (this.drawn.has(element)) return;
       this.drawn.add(element);
       if (element.classList.contains('book-project-left')) {
-        renderScene(element.querySelector('svg')!, projectSketches[element.dataset.project!], { animate: true, pace: 1.3 });
+        renderScene(element.querySelector('svg')!, sketchFor(element.dataset.project!), { animate: true, pace: 1.3 });
       } else if (element.classList.contains('book-intro')) {
         renderScene(element.querySelector('.book-underline')!, decorations.underline, { animate: true, delay: 0.2 });
       } else if (element.classList.contains('book-index') && !this.reduced) {
