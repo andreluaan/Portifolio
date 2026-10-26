@@ -50,7 +50,7 @@ export function openCharacterSheet() {
       <p class="hand cs-class"></p>
       <p class="cs-bio"></p>
       <div class="cs-contact">
-        <a class="ink-button solid small" data-frame href="mailto:andre.luanbq@gmail.com"><span></span></a>
+        <a class="ink-button small" data-frame href="mailto:andre.luanbq@gmail.com"><span></span></a>
         <a class="brush-link" href="https://github.com/andreluaan" target="_blank" rel="noopener">github ↗</a>
       </div>
     </div>`;

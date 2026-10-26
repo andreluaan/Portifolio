@@ -316,8 +316,8 @@ export function blotSprite(w: number, h: number, seed: number) {
   return url;
 }
 
-/** Gives a button or box a hand-drawn frame. Buttons also get an ink layer that sweeps in on hover: black ink on solid
- * buttons, a grey wash on the others. `ring` draws an ensō instead. */
+/** Gives a button or box a hand-drawn frame. Buttons also get an ink layer, a grey wash that sweeps in on hover.
+ * `ring` draws an ensō instead. */
 export function frameElement(element: HTMLElement, { blot = true, width = 1.8, ring = false } = {}) {
   const w = element.offsetWidth;
   const h = element.offsetHeight;

@@ -216,17 +216,12 @@ svg.ink {
   pointer-events: none;
 }
 
-/* Every button is a hand-drawn frame; on hover a wash sweeps in under the text from the left. Secondary buttons take
-   a grey wash and keep their ink; primary ones take black ink, and their text turns to paper as it passes */
+/* Every button is a hand-drawn frame; on hover a grey wash sweeps in under the text from the left */
 .ink-button .ink-layer {
   /* A touch deeper than --mist, so the wash still reads on bright screens */
   background: #b9bbb7;
   clip-path: inset(0 100% 0 0);
   transition: clip-path 0.42s cubic-bezier(0.45, 0.05, 0.3, 1);
-}
-
-.ink-button.solid .ink-layer {
-  background: var(--ink);
 }
 
 .ink-button:hover .ink-layer,
@@ -236,12 +231,7 @@ svg.ink {
 
 /* Press: a stamp. It sinks fast and springs back */
 .ink-button {
-  transition: transform 0.38s cubic-bezier(0.3, 1.8, 0.5, 1), color 0.3s ease 0.08s;
-}
-
-.ink-button.solid:hover,
-.ink-button.solid:focus-visible {
-  color: var(--paper);
+  transition: transform 0.38s cubic-bezier(0.3, 1.8, 0.5, 1);
 }
 
 .ink-button:active {
@@ -249,7 +239,7 @@ svg.ink {
   transition-duration: 0.07s;
 }
 
-.ink-button:not(.solid):active .ink-layer {
+.ink-button:active .ink-layer {
   background: var(--wash);
 }
 
