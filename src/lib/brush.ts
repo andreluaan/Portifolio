@@ -253,22 +253,6 @@ export function renderScene(target: SVGElement, strokes: Stroke[], { animate = f
   return finish;
 }
 
-/** Renders a scene statically now and redraws it with animation the first time it scrolls into view. */
-export function drawWhenVisible(target: SVGElement, strokes: Stroke[], options: RenderOptions = {}) {
-  renderScene(target, strokes);
-  if (prefersReducedMotion()) return () => {};
-  const observer = new IntersectionObserver(
-    (entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      observer.disconnect();
-      renderScene(target, strokes, { animate: true, ...options });
-    },
-    { threshold: 0.3 }
-  );
-  observer.observe(target);
-  return () => observer.disconnect();
-}
-
 /** A hand frame in two long strokes that cross past the corners, leaving a small gap near the top-right (the
  * breathing gap of an ensō). The dry tail is drawn as hairline paper streaks, so no filter is needed. */
 export function inkFrame(x: number, y: number, w: number, h: number, width = 2, seed = 1): Stroke[] {
@@ -332,8 +316,8 @@ export function blotSprite(w: number, h: number, seed: number) {
   return url;
 }
 
-/** Gives a button or box a hand-drawn frame. Buttons also get an ink layer: a full blot on solid buttons (it drinks
- * into the paper and soaks back on hover) or a wash that sweeps in on outlined ones. `ring` draws an ensō instead. */
+/** Gives a button or box a hand-drawn frame. Buttons also get an ink layer that sweeps in on hover: black ink on solid
+ * buttons, a grey wash on the others. `ring` draws an ensō instead. */
 export function frameElement(element: HTMLElement, { blot = true, width = 1.8, ring = false } = {}) {
   const w = element.offsetWidth;
   const h = element.offsetHeight;

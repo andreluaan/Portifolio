@@ -26,70 +26,6 @@
   white-space: nowrap;
 }
 
-.metaphor-switch {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  min-width: 0;
-}
-
-.metaphor-label {
-  font-size: 1.2rem;
-  color: var(--wash);
-  white-space: nowrap;
-}
-
-.metaphor-options {
-  position: relative;
-  display: flex;
-  gap: 4px;
-}
-
-.metaphor-blot {
-  position: absolute;
-  left: 0;
-  top: 2px;
-  bottom: 2px;
-  width: 0;
-  pointer-events: none;
-}
-
-.metaphor-blot svg {
-  width: 100%;
-  height: 100%;
-}
-
-.metaphor-option {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: none;
-  border: 0;
-  font-family: var(--font-hand);
-  font-size: 1.35rem;
-  line-height: 1;
-  color: var(--ink-soft);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.metaphor-option[aria-checked='true'] {
-  color: var(--ink);
-}
-
-.metaphor-icon {
-  width: 26px;
-  height: 24px;
-  transition: transform 0.3s var(--ease-ink);
-}
-
-.metaphor-option:hover .metaphor-icon {
-  transform: rotate(-8deg) scale(1.1);
-}
-
 .topbar-tools {
   display: flex;
   align-items: center;
@@ -612,90 +548,6 @@
   to { opacity: 0; transform: scale(0.6); }
 }
 
-/* Project cards */
-.project-card {
-  display: grid;
-  gap: 12px;
-  align-content: start;
-  min-width: 0;
-  cursor: default;
-}
-
-.project-card[tabindex] {
-  cursor: pointer;
-}
-
-.project-sheet {
-  position: relative;
-  aspect-ratio: 3 / 2;
-  max-width: 100%;
-  background: var(--paper-deep);
-  transform: rotate(-0.6deg);
-  transition: transform 0.4s var(--ease-ink), box-shadow 0.4s;
-}
-
-.project-card:nth-child(even) .project-sheet {
-  transform: rotate(0.7deg);
-}
-
-.project-card:hover .project-sheet {
-  transform: rotate(0deg) translateY(-4px);
-  box-shadow: 0 12px 24px -14px var(--shadow);
-}
-
-.project-sheet svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.project-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.project-meta h3 {
-  font-size: var(--text-h3);
-}
-
-.project-status {
-  font-size: 1.3rem;
-  white-space: nowrap;
-}
-
-.project-summary {
-  color: var(--ink-soft);
-}
-
-.project-foot {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 6px 16px;
-}
-
-.project-stat {
-  font-family: var(--font-display);
-  font-weight: 700;
-}
-
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-  gap: 40px 32px;
-}
-
-/* Character sheet */
-.character-sheet {
-  display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-  gap: 40px;
-}
-
 .character-identity {
   display: grid;
   gap: 14px;
@@ -725,13 +577,6 @@
   color: var(--ink-soft);
 }
 
-.character-stats {
-  display: grid;
-  gap: 22px;
-  align-content: start;
-  min-width: 0;
-}
-
 .character-attributes {
   display: grid;
   gap: 8px;
@@ -754,37 +599,6 @@
 .character-attributes svg {
   width: 100%;
   height: 14px;
-}
-
-.character-inventory {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px 24px;
-  margin: 8px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.character-inventory li {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  padding-bottom: 4px;
-  border-bottom: 1px dashed var(--rule);
-  min-width: 0;
-  font-size: 0.95rem;
-}
-
-.character-inventory .hand {
-  font-size: 1.25rem;
-  white-space: nowrap;
-}
-
-.character-move {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 500;
-  line-height: 1.35;
 }
 
 /* Sheet dialog */
@@ -840,15 +654,6 @@
   max-height: calc(100svh - 48px);
 }
 
-.sheet-heading {
-  display: grid;
-  gap: 4px;
-}
-
-.sheet-heading h2 {
-  font-size: var(--text-h2);
-}
-
 @media (max-width: 760px) {
   :root { --topbar-height: 104px; }
 
@@ -859,19 +664,7 @@
   }
 
   .topbar-tools { justify-self: end; }
-
-  .metaphor-switch {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  .metaphor-option { padding: 6px 8px; font-size: 1.2rem; }
-  .metaphor-icon { width: 22px; height: 20px; }
-
-  .character-sheet { grid-template-columns: minmax(0, 1fr); }
-  .character-inventory { grid-template-columns: minmax(0, 1fr); }
 }
-
 
 /* Full character sheet */
 .sheet-dialog.is-character {

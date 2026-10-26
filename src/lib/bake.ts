@@ -1,43 +1,7 @@
-import { renderScene, SVG_NS, svgElement, type Stroke } from './brush';
+import { SVG_NS, svgElement } from './brush';
 
-/** The tone classes, inlined: an SVG drawn as an image cannot see the page's stylesheet. */
-const TONES = '.ink-ink{fill:#151515}.ink-soft{fill:#3b3c3a}.ink-wash{fill:#8d8f8b;opacity:.55}.ink-mist{fill:#c6c8c4;opacity:.85}.ink-paper{fill:#eeeeec}';
-/** Wide planes are cut into tiles that stay inside every phone's texture limit. */
+/** Baked drawings are cut into tiles that stay inside every phone's texture limit. */
 const TILE = 2048;
-
-/** Draws strokes once into a canvas covering [x0, x0 + width): the SVG filters run a single time here, instead of on
- * every paint while the world scrolls. */
-async function rasterize(strokes: Stroke[], x0: number, width: number, height: number, scale: number) {
-  const filters = document.getElementById('bleed')?.parentElement?.innerHTML ?? '';
-  const svg = svgElement('svg', { xmlns: SVG_NS, width, height, viewBox: `${x0} 0 ${width} ${height}` });
-  svg.innerHTML = `<style>${TONES}</style><defs>${filters}</defs>`;
-  const reach = 260;
-  const visible = strokes.filter((item) => item.points.some(([x]) => x > x0 - reach - item.width && x < x0 + width + reach + item.width));
-  renderScene(svgElement('g', {}, svg) as unknown as SVGElement, visible);
-  const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' }));
-  const image = new Image();
-  image.src = url;
-  await image.decode();
-  URL.revokeObjectURL(url);
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.ceil(width * scale);
-  canvas.height = Math.ceil(height * scale);
-  canvas.getContext('2d')!.drawImage(image, 0, 0, canvas.width, canvas.height);
-  return canvas;
-}
-
-/** Bakes a whole parallax plane into canvas tiles inside `host`. Soft, washed planes can use a lower `scale`. */
-export async function bakePlane(host: HTMLElement, width: number, height: number, strokes: Stroke[], scale = 1) {
-  const tiles: HTMLCanvasElement[] = [];
-  for (let x0 = 0; x0 < width; x0 += TILE) {
-    const w = Math.min(TILE, width - x0);
-    const canvas = await rasterize(strokes, x0, w, height, scale);
-    canvas.className = 'mundo-baked';
-    Object.assign(canvas.style, { left: `${x0}px`, width: `${w}px`, height: `${height}px` });
-    tiles.push(canvas);
-  }
-  host.replaceChildren(...tiles);
-}
 
 type Box = { x: number; y: number; width: number; height: number };
 
@@ -250,10 +214,3 @@ export async function bakeBoilingShape(shape: SVGGraphicsElement, oversample = 1
   shape.replaceWith(frames);
 }
 
-/** Bakes strokes that repeat every `period` px into one seamless tile, returned as an image URL for a repeating
- * background (the drifting mist). */
-export async function bakeRepeatingTile(strokes: Stroke[], period: number, height: number, scale = 0.5) {
-  const shift = (offset: number) => strokes.map((item) => ({ ...item, points: item.points.map(([x, y]) => [x + offset, y] as [number, number]) }));
-  const canvas = await rasterize([...shift(-period), ...strokes, ...shift(period)], 0, period, height, scale);
-  return new Promise<string>((resolve) => canvas.toBlob((blob) => resolve(URL.createObjectURL(blob!)), 'image/png'));
-}

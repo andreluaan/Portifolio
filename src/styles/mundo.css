@@ -11,6 +11,38 @@
   pointer-events: none;
 }
 
+/* Dusk deepens the sky from the top, leaving a pale band where the sun goes down */
+.mundo-sky::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #b2b3af 0%, #cbccc8 38%, #e4e4e1 66%, rgba(238, 238, 236, 0) 100%);
+  opacity: var(--dusk, 0);
+}
+
+/* A wash disc: denser in the middle, its rim bleeding into the paper */
+.mundo-sun {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 130px;
+  height: 130px;
+  margin: -65px 0 0 -65px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(141, 143, 139, 0.6) 0 52%, rgba(141, 143, 139, 0.32) 62%, rgba(141, 143, 139, 0) 71%);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* Fog between the far planes and the near hills */
+.mundo-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(180deg, rgba(238, 238, 236, 0) 12%, rgba(238, 238, 236, 0.85) 42%, rgba(238, 238, 236, 0.75) 72%, rgba(238, 238, 236, 0) 90%);
+}
+
 .mundo-cloud {
   position: absolute;
   width: 220px;
@@ -61,8 +93,8 @@
 
 /* Atmospheric perspective: the farther the plane, the more it dissolves into the paper, so the sky stays mostly
    paper and the text above it stays easy to read */
-.mundo-peaks .mundo-plane { opacity: 0.42; }
-.mundo-ridge .mundo-plane { opacity: 0.72; }
+.mundo-peaks .mundo-plane { opacity: 0.6; }
+.mundo-ridge .mundo-plane { opacity: 0.9; }
 
 /* Paper mist that drifts by itself between the distances */
 .mundo-mist {

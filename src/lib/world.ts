@@ -1,7 +1,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { projects } from '../data/content';
-import { brushPath, frameAll, inkSplat, prefersReducedMotion, renderScene, roughRect, seededRandom, stroke, svgElement, type Point, type Stroke } from './brush';
+import { frameAll, inkSplat, prefersReducedMotion, renderScene, roughRect, seededRandom, stroke, svgElement, type Point, type Stroke } from './brush';
 import { openBook } from './book';
 import { openCharacterSheet } from './character';
 import { openNotebook } from './notebook';
@@ -11,13 +11,13 @@ import { getLang, onLangChange, pick, t } from './i18n';
 import { Mascot } from './mascot';
 import { Mel } from './mel';
 import { InkPainter } from './painting';
-import { bakePlane, bakeRepeatingTile } from './bake';
-import { deskObjects, farPeaks, foregroundBranch, grassTufts, inkTree, mistBand, pinesOnRidge, ridge, sketchFor, worldProps } from './scenes';
+import { mistStrip, paintHills, paintPeaks, paintRidge, type Biome, type PlaneSpec } from './landscape';
+import { deskObjects, foregroundBranch, grassTufts, sketchFor, worldProps } from './scenes';
 import { unlock } from './secrets';
 import { attributeList, characterIdentity, portraits } from './sections';
 import { sounds } from './sound';
 
-export type StationName = 'hero' | 'processo' | 'process' | 'varal' | 'line' | 'estante' | 'lectern' | 'atelie' | 'repos' | 'year' | 'sobre' | 'house' | 'mail' | 'end' | 'desk';
+export type StationName = 'hero' | 'processo' | 'process' | 'varal' | 'line' | 'estante' | 'lectern' | 'atelie' | 'repos' | 'sobre' | 'house' | 'mail' | 'end' | 'desk';
 
 interface WorldLayout {
   width: number;
@@ -31,7 +31,25 @@ interface WorldLayout {
 /** Shan shui distances: high peaks barely move, the ridge with its pines a little more, hills more, the ground with
  * the scroll, and the foreground grass and branches faster than the eye. */
 const PARALLAX = { peaks: 0.1, ridge: 0.28, hills: 0.62, ground: 1, front: 1.45 };
-const NAV_STATIONS: StationName[] = ['hero', 'line', 'lectern', 'repos', 'house', 'mail'];
+
+interface Mood {
+  /** Sun position as a share of the viewport width and of the ground height, its scale and its opacity. */
+  sun: [number, number, number, number];
+  peaks: number;
+  ridge: number;
+  hills: number;
+  mist: number;
+  veil: number;
+  dusk: number;
+}
+/** Morning: clear and pale, the sun high. Fog: the far planes nearly gone, the sun a faint disc. Dusk: the sun low
+ * and large behind the peaks, the sky deepening, the hills standing out dark. */
+const MOODS: Mood[] = [
+  { sun: [0.76, 0.16, 0.8, 0.42], peaks: 0.6, ridge: 0.9, hills: 1, mist: 0.65, veil: 0, dusk: 0 },
+  { sun: [0.58, 0.22, 1, 0.12], peaks: 0.22, ridge: 0.45, hills: 0.75, mist: 1, veil: 0.8, dusk: 0.15 },
+  { sun: [0.3, 0.5, 1.4, 0.62], peaks: 0.8, ridge: 1, hills: 1, mist: 0.4, veil: 0.12, dusk: 1 },
+];
+const NAV_STATIONS: StationName[] = ['hero', 'line', 'house', 'lectern', 'repos', 'mail'];
 
 function place(element: HTMLElement, x: number, styles: Partial<CSSStyleDeclaration> = {}) {
   element.style.left = `${x}px`;
@@ -51,6 +69,10 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     front: $(root, '.mundo-front'),
   };
   const sky = $(root, '.mundo-sky');
+  const sun = $(root, '.mundo-sun');
+  const veil = $(root, '.mundo-veil');
+  const planes = { peaks: $(layers.peaks, '.mundo-plane'), ridge: $(layers.ridge, '.mundo-plane'), hills: $(layers.hills, '.mundo-plane') };
+  const mists = [...root.querySelectorAll<HTMLElement>('.mundo-mist')];
   const groundArt = $<SVGSVGElement>(root, '.mundo-ground-art');
   const heroSheet = $(root, '.station-hero-sheet');
   const heroText = $(root, '.station-hero-text');
@@ -88,8 +110,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   const process = $(root, '.station-process');
   const repos = $(root, '.station-repos');
   const reposBoard = $(root, '.station-repos-board');
-  const year = $(root, '.station-year');
-  const yearPaper = $(root, '.station-year-paper');
   const mail = $(root, '.station-mail');
   const github: GithubData = JSON.parse(document.getElementById('github-data')?.textContent ?? '{"repos":[],"days":[],"total":0,"live":false}');
   const line = $(root, '.station-line');
@@ -187,42 +207,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     );
   }
 
-  const yearSvg = $<SVGSVGElement>(year, '.station-year-grid');
-  function renderYear() {
-    const cell = 13;
-    const days = github.days;
-    const firstDay = days.length ? new Date(`${days[0].date}T12:00:00`).getDay() : 0;
-    const weeks = Math.max(1, Math.ceil((days.length + firstDay) / 7));
-    yearSvg.setAttribute('viewBox', `0 0 ${weeks * cell} ${7 * cell}`);
-    yearSvg.replaceChildren();
-    // One filtered group for the whole year: a filter on each of the ~365 marks was 365 offscreen passes per paint
-    const marks = svgElement('g', { filter: 'url(#bleed)' }, yearSvg);
-    const tones = ['mist', 'wash', 'soft', 'ink', 'ink'];
-    days.forEach((day, index) => {
-      const slot = index + firstDay;
-      const column = Math.floor(slot / 7);
-      const cx = column * cell + cell / 2;
-      const cy = (slot % 7) * cell + cell / 2;
-      const tilt = ((index * 13) % 7) - 3;
-      const path = svgElement('path', {
-        d: brushPath([[cx - 4.2, cy + tilt / 3], [cx + 4.2, cy - tilt / 3]], day.level === 0 ? 2.4 : 8.6, { seed: index + 1, start: 0.25, end: 0.4 }),
-        class: `ink-${tones[day.level] ?? 'ink'}`,
-        'data-column': column,
-      }, marks);
-      if (day.level === 0) path.style.opacity = '0.55';
-      svgElement('title', {}, path).textContent = `${day.date} · ${day.count}`;
-    });
-    $(year, '.station-year-total').textContent = days.length ? t('year.total').replace('{n}', String(github.total)) : t('year.offline');
-  }
-
-  function animateYear() {
-    if (reduced) return;
-    yearSvg.querySelectorAll<SVGPathElement>('path').forEach((path) => {
-      const column = Number(path.dataset.column);
-      path.animate([{ opacity: 0, transform: 'scale(0.2)' }, { opacity: path.style.opacity || '1', transform: 'scale(1)' }], { duration: 420, delay: column * 22, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' });
-    });
-  }
-
   // Layout
   function buildWorld(): WorldLayout {
     const viewport = pin.clientWidth;
@@ -237,13 +221,17 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     const sheetWidth = sheetHeight * 0.66;
     const textWidth = Math.min(460, viewport * (mobile ? 0.84 : 0.4));
     stations.hero = 0;
+    // Mel's invisible wall: the portrait's right edge, wherever the layout puts it
+    let portraitRight: number;
     if (mobile) {
       place(heroText, x, { width: `${textWidth}px`, top: `${topbar + 24}px` });
       x += textWidth + 40;
       place(heroSheet, x, { width: `${sheetWidth}px`, height: `${sheetHeight}px`, top: `${ground - sheetHeight}px` });
+      portraitRight = x + sheetWidth;
       x += sheetWidth + viewport * 0.3;
     } else {
       place(heroSheet, x, { width: `${sheetWidth}px`, height: `${sheetHeight}px`, top: `${ground - sheetHeight}px` });
+      portraitRight = x + sheetWidth;
       x += sheetWidth + 56;
       place(heroText, x, { width: `${textWidth}px`, top: `${topbar + 36}px` });
       x += textWidth + viewport * 0.22;
@@ -274,6 +262,18 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     line.style.setProperty('--paper-gap', `${gap}px`);
     x += lineWidth + 180;
 
+    stations.sobre = x;
+    place(signs.sobre, x, { top: `${ground - 190}px` });
+    x += 300;
+
+    const boardWidth = Math.min(560, viewport * 0.88);
+    const boardHeight = Math.min(ground - topbar - 30, 560);
+    stations.house = x;
+    place(house, x, { top: `${ground - boardHeight}px`, height: `${boardHeight}px`, width: `${(mobile ? 0 : 300) + boardWidth}px` });
+    board.style.width = `${boardWidth}px`;
+    board.style.height = `${boardHeight}px`;
+    x += (mobile ? 0 : 300) + boardWidth + viewport * 0.25;
+
     stations.estante = x;
     place(signs.estante, x, { top: `${ground - 190}px` });
     x += 250;
@@ -294,23 +294,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     place(repos, x, { top: `${ground - reposHeight - 74}px`, width: `${reposWidth}px`, height: `${reposHeight}px` });
     repos.style.setProperty('--repo-columns', String(reposColumns));
     x += reposWidth + viewport * 0.18;
-
-    const yearWidth = Math.min(860, Math.max(viewport * 0.9, 760));
-    stations.year = x;
-    place(year, x, { top: `${topbar + (mobile ? 40 : 80)}px`, width: `${yearWidth}px` });
-    x += yearWidth + viewport * 0.25;
-
-    stations.sobre = x;
-    place(signs.sobre, x, { top: `${ground - 190}px` });
-    x += 300;
-
-    const boardWidth = Math.min(560, viewport * 0.88);
-    const boardHeight = Math.min(ground - topbar - 30, 560);
-    stations.house = x;
-    place(house, x, { top: `${ground - boardHeight}px`, height: `${boardHeight}px`, width: `${(mobile ? 0 : 300) + boardWidth}px` });
-    board.style.width = `${boardWidth}px`;
-    board.style.height = `${boardHeight}px`;
-    x += (mobile ? 0 : 300) + boardWidth + viewport * 0.25;
 
     const noteWidth = Math.min(340, viewport * 0.62);
     stations.mail = x;
@@ -340,60 +323,51 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
       stations.desk - 160,
     ].map((value) => value + random() * 40);
 
-    return { width, viewport, height, ground, rocks, stations };
+    return { width, viewport, height, ground, rocks, stations, portraitRight };
   }
 
-  /** The distant planes, baked into canvas once per layout: peaks dissolving in wash, a ridge with far pines, hills
-   * with ink trees and rocks, and paper mist between them (farther = lighter and wetter, no outlines). */
+  /** The distant planes, painted into canvas once per layout (see landscape.ts): one long scene that goes from
+   * mountains and pines to the coast, the city, the fields and back to the mountains as the visitor walks. */
   function drawLandscape() {
-    const { width, viewport, height, ground } = world;
+    const { width, viewport, height, ground, stations } = world;
     const layerWidth = (factor: number) => viewport + (width - viewport) * factor;
     const phone = viewport < 700;
-
-    const peaksWidth = layerWidth(PARALLAX.peaks);
-    layers.peaks.style.width = `${peaksWidth}px`;
-    const peaks = [...farPeaks(peaksWidth, ground, 3), ...mistBand(peaksWidth, ground * 0.66, 90, 301), ...mistBand(peaksWidth, ground * 0.72, 50, 311)];
-
-    const ridgeWidth = layerWidth(PARALLAX.ridge);
-    layers.ridge.style.width = `${ridgeWidth}px`;
-    const ridgeLine = ridge(ridgeWidth, ground, { peaks: Math.ceil(ridgeWidth / 420), amplitude: 0.26, base: 0.78, seed: 3 });
-    const ridgeArt = [
-      stroke(ridgeLine.map(([x, y]) => [x, y + 40] as Point), 90, { tone: 'mist', filter: 'wash', seed: 31, start: 0.01, end: 0.01 }),
-      stroke(ridgeLine, 1.6, { tone: 'mist', seed: 32, start: 0.01, end: 0.02 }),
-      ...pinesOnRidge(ridgeLine, phone ? 70 : 54, 41),
-      ...mistBand(ridgeWidth, ground * 0.9, 70, 351),
+    // A point of the world lines up with a point of a plane when both sit mid-screen
+    const onPlane = (x: number, factor: number) => (x - viewport / 2) * factor + viewport / 2;
+    const scene: { biome: Biome; from: number; to: number }[] = [
+      { biome: 'mountains', from: 0, to: stations.varal },
+      { biome: 'coast', from: stations.varal, to: stations.estante },
+      { biome: 'city', from: stations.estante, to: stations.mail - viewport * 0.6 },
+      { biome: 'field', from: stations.mail - viewport * 0.6, to: stations.end },
+      { biome: 'mountains', from: stations.end, to: width },
     ];
+    const spec = (factor: number, planeHeight: number, planeGround: number): PlaneSpec => ({
+      width: layerWidth(factor),
+      height: planeHeight,
+      ground: planeGround,
+      stretches: scene.map(({ biome, from, to }) => ({ biome, from: onPlane(from, factor), to: onPlane(to, factor) })),
+      avoid: Object.values(stations).map((x) => onPlane(x, factor)),
+      phone,
+    });
 
-    const hillsWidth = layerWidth(PARALLAX.hills);
-    layers.hills.style.width = `${hillsWidth}px`;
-    const hillLine = ridge(hillsWidth, height, { peaks: Math.ceil(hillsWidth / 300), amplitude: 0.12, base: 0.86, seed: 9 });
-    const hills = [
-      stroke(hillLine.map(([x, y]) => [x, y + 30] as Point), 64, { tone: 'wash', filter: 'wash', seed: 91, start: 0.01, end: 0.01 }),
-      stroke(hillLine, 2, { tone: 'soft', dry: true, seed: 92, start: 0.01, end: 0.02 }),
-    ];
-    const random = seededRandom(Math.round(hillsWidth));
-    const heightAt = (x: number) => hillLine.reduce((best, point) => (Math.abs(point[0] - x) < Math.abs(best[0] - x) ? point : best))[1];
-    for (let x = 300 + random() * 300; x < hillsWidth - 100; x += 600 + random() * 300) {
-      // Trees never stand right behind a station sign
-      const clash = x < viewport * 1.1 || Object.values(world.stations).some((stationX) => Math.abs(x - stationX * PARALLAX.hills) < 120);
-      if (clash) continue;
-      const base = heightAt(x) + 6;
-      const scale = phone ? 0.7 : 0.9;
-      inkTree(900 + Math.round(x), 160).forEach((item) => hills.push({ ...item, width: item.width * scale, points: item.points.map(([px, py]) => [x + px * scale, base + py * scale] as Point) }));
-    }
-
-    // Washed planes keep half their pixels: they are soft anyway, and it quarters their memory
-    void bakePlane($(layers.peaks, '.mundo-plane'), peaksWidth, ground, peaks, 0.5);
-    void bakePlane($(layers.ridge, '.mundo-plane'), ridgeWidth, ground, ridgeArt, 0.5);
-    void bakePlane($(layers.hills, '.mundo-plane'), hillsWidth, height, hills, phone ? 0.75 : 1);
+    const peaks = spec(PARALLAX.peaks, ground, ground);
+    const ridge = spec(PARALLAX.ridge, ground, ground);
+    const hills = spec(PARALLAX.hills, height, ground);
+    layers.peaks.style.width = `${peaks.width}px`;
+    layers.ridge.style.width = `${ridge.width}px`;
+    layers.hills.style.width = `${hills.width}px`;
+    // Far planes are soft anyway: half their pixels quarters their memory
+    void paintPeaks($(layers.peaks, '.mundo-plane'), peaks, 0.5)
+      .then(() => paintRidge($(layers.ridge, '.mundo-plane'), ridge, phone ? 0.5 : 0.75))
+      .then(() => paintHills($(layers.hills, '.mundo-plane'), hills, phone ? 0.75 : 1));
 
     // Mist that drifts on its own, even while the page is still: a seamless baked strip slid by CSS
     const drift = async (host: HTMLElement, y: number, thickness: number, seed: number) => {
-      const strip = await bakeRepeatingTile(mistBand(viewport, y, thickness, seed), viewport, ground);
+      const strip = mistStrip(viewport, ground, y, thickness, seed);
       Object.assign(host.style, { backgroundImage: `url(${strip})`, backgroundSize: `${viewport}px ${ground}px`, width: `${layerWidth(1) + viewport}px`, height: `${ground}px`, '--drift-by': `-${viewport}px` });
     };
-    void drift($(layers.peaks, '.mundo-mist'), ground * 0.56, 46, 361);
-    void drift($(layers.ridge, '.mundo-mist'), ground * 0.84, 38, 371);
+    void drift($(layers.peaks, '.mundo-mist'), ground * 0.6, 120, 361);
+    void drift($(layers.ridge, '.mundo-mist'), ground * 0.88, 90, 371);
   }
 
   function drawLayers() {
@@ -480,10 +454,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     const reposArt = $<SVGSVGElement>(repos, '.station-repos-art');
     reposArt.setAttribute('viewBox', `0 0 ${boardBox.width} ${boardBox.height + 80}`);
     renderScene(reposArt, [...roughRect(4, 4, boardBox.width - 8, boardBox.height - 8, 2.6, 2501), ...worldProps.boardLegs(2510, boardBox.width, boardBox.height)]);
-    const paperBox = { width: yearPaper.offsetWidth, height: yearPaper.offsetHeight };
-    const rods = $<SVGSVGElement>(year, '.station-year-rods');
-    rods.setAttribute('viewBox', `0 -10 ${paperBox.width} ${paperBox.height + 20}`);
-    renderScene(rods, worldProps.scrollRods(2601, paperBox.width, paperBox.height));
     renderScene($<SVGSVGElement>(mail, '.station-mail-art'), worldProps.mailbox(2700));
     renderScene($<SVGSVGElement>(mail, '.station-mail-flag'), worldProps.mailFlag(2710));
     const note = $(mail, '.station-mail-note');
@@ -528,7 +498,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
       if (reduced) return;
       gsap.fromTo(repos.querySelectorAll('.repo-card'), { y: -30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.7, stagger: 0.06, ease: 'back.out(2)', clearProps: 'transform,opacity,visibility' });
     },
-    year: () => animateYear(),
     mail: () => {
       mel.say(pick({ pt: 'deixa um recado!', en: 'leave a note!' }));
       if (!reduced) gsap.fromTo($(mail, '.station-mail-flag'), { rotation: 0 }, { rotation: -80, transformOrigin: '15% 95%', duration: 0.5, yoyo: true, repeat: 3, ease: 'power2.inOut' });
@@ -562,6 +531,35 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     return Math.max(0, Math.min(distance, world.stations[name] - world.viewport * 0.12));
   }
 
+  /** The light of the day: the visit starts in the mood of the visitor's own hour, and the walk carries it on through
+   * morning, fog and dusk (and round to a new morning). Only opacities and one transform change, so it costs nothing
+   * while scrolling. */
+  const startMood = (() => {
+    const hour = new Date().getHours();
+    return hour >= 5 && hour < 11 ? 0 : hour >= 11 && hour < 16 ? 1 : 2;
+  })();
+  let moodKey = '';
+  function setMood(progress: number) {
+    const phase = (startMood + progress * MOODS.length) % MOODS.length;
+    const index = Math.floor(phase);
+    const t = phase - index;
+    const blend = t * t * (3 - 2 * t);
+    const a = MOODS[index];
+    const b = MOODS[(index + 1) % MOODS.length];
+    const at = (key: Exclude<keyof Mood, 'sun'>) => a[key] + (b[key] - a[key]) * blend;
+    const sunAt = (i: number) => a.sun[i] + (b.sun[i] - a.sun[i]) * blend;
+    const key = phase.toFixed(3);
+    if (key === moodKey) return;
+    moodKey = key;
+    const { viewport, ground } = world;
+    sun.style.transform = `translate3d(${(sunAt(0) * viewport).toFixed(1)}px, ${(sunAt(1) * ground).toFixed(1)}px, 0) scale(${sunAt(2).toFixed(3)})`;
+    sun.style.opacity = sunAt(3).toFixed(3);
+    pin.style.setProperty('--dusk', at('dusk').toFixed(3));
+    veil.style.opacity = at('veil').toFixed(3);
+    (['peaks', 'ridge', 'hills'] as const).forEach((name) => (planes[name].style.opacity = at(name).toFixed(3)));
+    mists.forEach((mist) => (mist.style.opacity = at('mist').toFixed(3)));
+  }
+
   function setup() {
     trigger?.kill();
     world = buildWorld();
@@ -569,6 +567,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     drawStations();
     mascotX = world.viewport * (world.viewport < 700 ? 0.22 : 0.28);
     previousRockX = [...world.rocks];
+    mel.setWall(world.portraitRight);
     mel.walk(mascotX, melFacing, 0);
     mascot.place(world.stations.desk + 150);
     painter.resize();
@@ -576,6 +575,8 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     fitSignLabels();
 
     const distance = world.width - world.viewport;
+    moodKey = '';
+    setMood(0);
     const setters = {
       peaks: gsap.quickSetter(layers.peaks, 'x', 'px'),
       ridge: gsap.quickSetter(layers.ridge, 'x', 'px'),
@@ -618,6 +619,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
         setters.ground(-offset);
         setters.front(-offset * PARALLAX.front);
         progressFill.style.clipPath = `inset(0 ${(100 - self.progress * 100).toFixed(2)}% 0 0)`;
+        setMood(self.progress);
 
         const velocity = self.getVelocity();
         wind += (Math.max(-14, Math.min(14, velocity / 260)) - wind) * 0.2;
@@ -625,6 +627,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
         // The foreground drags behind the scroll like grass in the wind, and springs back when it stops
         if (!reduced) frontSkew(gsap.utils.clamp(-6, 6, -velocity / 400));
         if (Math.abs(velocity) > 12) melFacing = Math.sign(velocity);
+        mel.setWall(world.portraitRight - offset);
         mel.walk(mascotX, melFacing, velocity / 3);
 
         world.rocks.forEach((rockX, index) => {
@@ -741,7 +744,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
 
   renderPapers();
   renderRepos();
-  renderYear();
   boardBars = renderBoard();
   setup();
 
@@ -752,7 +754,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   onLangChange(() => {
     renderPapers();
     renderRepos();
-    renderYear();
     boardBars = renderBoard();
     if (revealed.has('house')) boardBars.animate();
     frameAll(root);

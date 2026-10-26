@@ -16,10 +16,25 @@ let lenis: Lenis | null = null;
 
 function setupSmoothScroll() {
   if (prefersReducedMotion()) return;
-  lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.9 });
+  // Inside a dialog the wheel scrolls the dialog itself, natively
+  lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.9, prevent: (node) => node instanceof HTMLDialogElement });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => lenis?.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
+}
+
+/** While the notebook, the character sheet or the book is open, the world stays where it is: they have their own
+ * scrolling, and the wheel reaching the page underneath would walk the world on behind them. */
+function lockWorldUnderDialogs() {
+  const dialogs = [...document.querySelectorAll('dialog')];
+  const sync = () => {
+    const open = dialogs.some((dialog) => dialog.open);
+    document.documentElement.classList.toggle('is-locked', open);
+    if (open) lenis?.stop();
+    else lenis?.start();
+  };
+  const observer = new MutationObserver(sync);
+  dialogs.forEach((dialog) => observer.observe(dialog, { attributes: true, attributeFilter: ['open'] }));
 }
 
 function scrollTo(y: number, immediate = false) {
@@ -128,7 +143,6 @@ const HASH_TO_STATION: Record<string, StationName> = {
   destaques: 'line',
   estante: 'lectern',
   github: 'repos',
-  ano: 'year',
   sobre: 'house',
   contato: 'mail',
   mesinha: 'desk',
@@ -202,6 +216,7 @@ export async function boot() {
   startBoiling();
   watchGlobalSecrets();
   setupSmoothScroll();
+  lockWorldUnderDialogs();
   setupTopbar();
   setupDialog();
   await runIntro();

@@ -226,56 +226,6 @@
   font-size: 0.9rem;
 }
 
-/* A year in brushstrokes */
-.station-year-rods {
-  position: absolute;
-  left: 0;
-  top: -10px;
-  width: 100%;
-  height: calc(100% + 20px);
-  pointer-events: none;
-}
-
-.station-year-paper {
-  position: relative;
-  display: grid;
-  gap: 10px;
-  padding: 18px 34px 16px;
-  background: #f4f4f2;
-  box-shadow: 0 18px 26px -22px var(--shadow);
-}
-
-.station-year-title {
-  font-size: 1.6rem;
-  color: var(--ink);
-}
-
-.station-year-grid {
-  width: 100%;
-  height: auto;
-}
-
-.station-year-grid path {
-  transition: transform 0.2s;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-.station-year-grid path:hover {
-  transform: scale(1.6);
-}
-
-.station-year-caption {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-}
-
-.station-year-total {
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--ink);
-}
-
 /* Mailbox */
 .station-mail-box {
   position: absolute;

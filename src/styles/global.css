@@ -51,6 +51,13 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* The scrollbar's room is kept even when a dialog hides it, so the world never jumps sideways */
+  scrollbar-gutter: stable;
+}
+
+/* A dialog is open: the page under it holds still, whatever the wheel, keys or touch do */
+html.is-locked {
+  overflow: hidden;
 }
 
 html.lenis,
@@ -187,10 +194,6 @@ svg.ink {
   overflow: visible;
 }
 
-.ink-button.solid > svg.ink-frame {
-  opacity: 0;
-}
-
 /* The ink layer is a mask strip of blot frames (see blotSprite); --frame picks one, so the flood is stepped like
    hand-drawn animation and never runs an SVG filter */
 @property --frame {
@@ -213,40 +216,32 @@ svg.ink {
   pointer-events: none;
 }
 
-/* Primary: a full blot. On hover the paper drinks it back, then it soaks out again (one breath) */
-.ink-button.solid {
-  color: var(--paper);
-}
-
-.ink-button.solid .ink-layer {
-  background: var(--ink);
-}
-
-.ink-button.solid:hover .ink-layer,
-.ink-button.solid:focus-visible .ink-layer {
-  animation: ink-breathe 0.42s linear;
-}
-
-@keyframes ink-breathe {
-  35% { --frame: 4; }
-}
-
-/* Secondary: a wash sweeps in under the text from the left; the text keeps its ink */
-.ink-button:not(.solid) .ink-layer {
+/* Every button is a hand-drawn frame; on hover a wash sweeps in under the text from the left. Secondary buttons take
+   a grey wash and keep their ink; primary ones take black ink, and their text turns to paper as it passes */
+.ink-button .ink-layer {
   /* A touch deeper than --mist, so the wash still reads on bright screens */
   background: #b9bbb7;
   clip-path: inset(0 100% 0 0);
   transition: clip-path 0.42s cubic-bezier(0.45, 0.05, 0.3, 1);
 }
 
-.ink-button:not(.solid):hover .ink-layer,
-.ink-button:not(.solid):focus-visible .ink-layer {
+.ink-button.solid .ink-layer {
+  background: var(--ink);
+}
+
+.ink-button:hover .ink-layer,
+.ink-button:focus-visible .ink-layer {
   clip-path: inset(0 0 0 0);
 }
 
 /* Press: a stamp. It sinks fast and springs back */
 .ink-button {
-  transition: transform 0.38s cubic-bezier(0.3, 1.8, 0.5, 1);
+  transition: transform 0.38s cubic-bezier(0.3, 1.8, 0.5, 1), color 0.3s ease 0.08s;
+}
+
+.ink-button.solid:hover,
+.ink-button.solid:focus-visible {
+  color: var(--paper);
 }
 
 .ink-button:active {

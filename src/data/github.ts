@@ -8,16 +8,8 @@ export interface Repo {
   pushedAt: string;
 }
 
-export interface ContributionDay {
-  date: string;
-  level: number;
-  count: number;
-}
-
 export interface GithubData {
   repos: Repo[];
-  days: ContributionDay[];
-  total: number;
   live: boolean;
 }
 
@@ -63,29 +55,7 @@ async function loadRepos(): Promise<Repo[]> {
     }));
 }
 
-/** Reads the public contribution calendar: each cell has a date and level, and a tooltip with the count. */
-async function loadContributions() {
-  const html = await fetchText(`https://github.com/users/${GITHUB_USER}/contributions`);
-  const counts = new Map<string, number>();
-  for (const match of html.matchAll(/for="(contribution-day-component-[\d-]+)"[^>]*>([^<]*)<\/tool-tip>/g)) {
-    const amount = match[2].match(/^(\d+)/);
-    counts.set(match[1], amount ? Number(amount[1]) : 0);
-  }
-  const days: ContributionDay[] = [];
-  for (const match of html.matchAll(/data-date="([\d-]+)"\s+id="(contribution-day-component-[\d-]+)"\s+data-level="(\d)"/g)) {
-    days.push({ date: match[1], level: Number(match[3]), count: counts.get(match[2]) ?? 0 });
-  }
-  days.sort((a, b) => a.date.localeCompare(b.date));
-  return days;
-}
-
 export async function loadGithub(): Promise<GithubData> {
-  const [repos, days] = await Promise.allSettled([loadRepos(), loadContributions()]);
-  const contributionDays = days.status === 'fulfilled' ? days.value : [];
-  return {
-    repos: repos.status === 'fulfilled' && repos.value.length ? repos.value : FALLBACK_REPOS,
-    days: contributionDays,
-    total: contributionDays.reduce((sum, day) => sum + day.count, 0),
-    live: repos.status === 'fulfilled' && days.status === 'fulfilled',
-  };
+  const repos = await loadRepos().catch(() => []);
+  return { repos: repos.length ? repos : FALLBACK_REPOS, live: repos.length > 0 };
 }

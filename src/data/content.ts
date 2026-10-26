@@ -233,11 +233,6 @@ export const strings = {
     en: 'I build websites, identities and systems people remember. Everything starts as a sketch on paper and ends as clean, fast, detail-rich code.',
   },
 
-  'work.eyebrow': { pt: 'folhas soltas', en: 'loose pages' },
-  'work.title': { pt: 'Projetos', en: 'Projects' },
-
-  'about.eyebrow': { pt: 'ficha do personagem', en: 'character sheet' },
-  'about.title': { pt: 'Sobre mim', en: 'About me' },
   'about.player': { pt: 'Jogador 1', en: 'Player 1' },
   'about.level': { pt: 'nível: em evolução', en: 'level: leveling up' },
   'about.class': { pt: 'classe: artesão do front-end', en: 'class: front-end craftsman' },
@@ -281,10 +276,6 @@ export const strings = {
   'repos.lede': { pt: 'tudo que está na bancada, do estudo ao projeto de cliente', en: 'everything on the workbench, from study to client work' },
   'repos.updated': { pt: 'mexido em', en: 'touched on' },
   'repos.all': { pt: 'ver tudo no GitHub ↗', en: 'see everything on GitHub ↗' },
-  'year.title': { pt: 'Um ano em pinceladas', en: 'A year in brushstrokes' },
-  'year.lede': { pt: 'cada dia com código é uma mancha de tinta, mais escura quanto mais saiu do caderno', en: 'each day with code is an ink mark, darker the more left the sketchbook' },
-  'year.total': { pt: '{n} contribuições no último ano', en: '{n} contributions in the last year' },
-  'year.offline': { pt: 'o GitHub não respondeu no último build', en: 'GitHub didn’t answer during the last build' },
   'mail.title': { pt: 'Correio', en: 'Mailbox' },
   'mail.lede': { pt: 'tem um projeto em mente? deixa um recado', en: 'got a project in mind? leave a note' },
   'mail.open': { pt: 'abrir o caderno de recados', en: 'open the guestbook' },

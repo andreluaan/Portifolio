@@ -210,7 +210,7 @@ export class Mel {
     this.targetX = leaderX - leaderFacing * gap;
     if (pace > 8) this.wake();
     if (this.reduced) {
-      this.x = this.targetX;
+      this.x = Math.max(this.minX, this.targetX);
       this.facing = Math.sign(leaderX - this.x) || 1;
       this.render();
     }
@@ -294,6 +294,15 @@ export class Mel {
     if (action === 'scratch') this.posture = 'sit';
     this.start(action, seconds);
   }
+
+  /** An invisible wall, in screen pixels: she never goes left of it (the world keeps it at the portrait's right edge,
+   * so she never walks over the first picture). */
+  setWall(screenX: number) {
+    // Her drawing fills about three quarters of her box, centred; the rest is a small gap before the wall
+    this.minX = screenX + DOG_VIEW.width * this.scale * 0.43;
+  }
+
+  private minX = -Infinity;
 
   /** Lab only: draw the skeleton's joints over the drawing. */
   showSkeleton = false;
@@ -442,9 +451,15 @@ export class Mel {
     let target = this.targetX;
     if (action === 'zoom') target = this.leaderX + Math.sin((now - this.action!.start) * 3.2) * 70;
     if (action === 'sniff' || action === 'lick') target = this.leaderX - Math.sign(this.leaderX - this.x || 1) * 30;
+    target = Math.max(this.minX, target);
     const stiffness = action === 'zoom' ? 90 : 40;
     this.vx += (stiffness * (target - this.x) - 2 * Math.sqrt(stiffness) * this.vx) * dt;
     this.x += this.vx * dt;
+    if (this.x < this.minX) {
+      // The wall moves with the world: it pushes her along instead of letting her slip behind the portrait
+      this.x = this.minX;
+      this.vx = Math.max(0, this.vx);
+    }
     const travel = this.groundSpeed + this.vx;
     // The world only reports speed while it scrolls, so it fades out between updates
     this.groundSpeed *= Math.exp(-dt * 8);

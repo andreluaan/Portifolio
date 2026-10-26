@@ -12,9 +12,9 @@ const github = await loadGithub();
 const navItems = [
   { station: 'hero', key: 'nav.inicio' },
   { station: 'line', key: 'nav.varal' },
+  { station: 'house', key: 'nav.sobre' },
   { station: 'lectern', key: 'nav.estante' },
   { station: 'repos', key: 'nav.atelie' },
-  { station: 'house', key: 'nav.sobre' },
   { station: 'mail', key: 'nav.contato' },
 ] as const;
 const signItems = [
@@ -76,9 +76,11 @@ const processSteps = [1, 2, 3, 4] as const;
     <section class="mundo" aria-label="Mundo de papel">
       <div class="mundo-pin">
         <div class="mundo-sky"></div>
+        <div class="mundo-sun" aria-hidden="true"></div>
         <canvas class="mundo-paint" aria-hidden="true"></canvas>
         <div class="mundo-layer mundo-peaks" aria-hidden="true"><div class="mundo-plane"></div><div class="mundo-mist is-high"></div></div>
         <div class="mundo-layer mundo-ridge" aria-hidden="true"><div class="mundo-plane"></div><div class="mundo-mist is-low"></div></div>
+        <div class="mundo-veil" aria-hidden="true"></div>
         <div class="mundo-layer mundo-hills" aria-hidden="true"><div class="mundo-plane"></div></div>
         <div class="mundo-layer mundo-ground">
           <svg class="ink mundo-ground-art" aria-hidden="true"></svg>
@@ -135,15 +137,6 @@ const processSteps = [1, 2, 3, 4] as const;
               </div>
               <ul class="station-repos-list"></ul>
               <a class="brush-link station-repos-all" href="https://github.com/andreluaan" target="_blank" rel="noopener" data-i18n="repos.all">{pt('repos.all')}</a>
-            </div>
-          </div>
-
-          <div class="mundo-station station-year">
-            <svg class="ink station-year-rods" aria-hidden="true"></svg>
-            <div class="station-year-paper">
-              <p class="hand station-year-title" data-i18n="year.title">{pt('year.title')}</p>
-              <svg class="ink station-year-grid" role="img" aria-label={pt('year.title')}></svg>
-              <p class="station-year-caption"><span class="station-year-total"></span> · <span data-i18n="year.lede">{pt('year.lede')}</span></p>
             </div>
           </div>
 

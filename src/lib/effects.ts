@@ -68,48 +68,6 @@ function getOverlay() {
   return overlay;
 }
 
-/** Floods the screen with an ink blot from `origin`, runs `swap` while covered, then lets paper bleed back in. */
-export function inkTransition(origin: { x: number; y: number }, swap: () => void | Promise<void>) {
-  if (prefersReducedMotion()) {
-    return Promise.resolve(swap());
-  }
-  const svg = getOverlay();
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-  svg.replaceChildren();
-  const cover = Math.hypot(Math.max(origin.x, width - origin.x), Math.max(origin.y, height - origin.y)) * 1.35;
-  const inkBlot = svgElement('circle', { cx: origin.x, cy: origin.y, r: 0, class: 'ink-ink', filter: 'url(#blot-edge)' }, svg);
-  const droplets = Array.from({ length: 9 }, () => {
-    const angle = Math.random() * Math.PI * 2;
-    return svgElement('circle', { cx: origin.x, cy: origin.y, r: 4 + Math.random() * 10, class: 'ink-ink', 'data-angle': angle }, svg);
-  });
-  const paperBlot = svgElement('circle', { cx: width / 2, cy: height / 2, r: 0, class: 'ink-paper', filter: 'url(#blot-edge)' }, svg);
-  svg.classList.add('is-active');
-
-  return new Promise<void>((resolve) => {
-    const timeline = gsap.timeline({
-      onComplete: () => {
-        svg.classList.remove('is-active');
-        svg.replaceChildren();
-        resolve();
-      },
-    });
-    timeline.to(inkBlot, { attr: { r: cover }, duration: 0.6, ease: 'power3.in' }, 0);
-    droplets.forEach((drop) => {
-      const angle = Number(drop.getAttribute('data-angle'));
-      const reach = 80 + Math.random() * 180;
-      timeline.to(drop, { attr: { cx: origin.x + Math.cos(angle) * reach, cy: origin.y + Math.sin(angle) * reach }, duration: 0.45, ease: 'power2.out' }, 0);
-    });
-    timeline.add(async () => {
-      timeline.pause();
-      await swap();
-      timeline.resume();
-    }, 0.62);
-    timeline.to(paperBlot, { attr: { r: Math.hypot(width, height) * 0.75 }, duration: 0.7, ease: 'power2.inOut' }, 0.66);
-  });
-}
-
 let boilTimer = 0;
 
 /** Steps every boiling drawing through its three baked frames (see `scheduleBake`), so linework trembles like
