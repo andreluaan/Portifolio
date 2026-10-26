@@ -1,4 +1,4 @@
-import { Application, Assets, Container, Graphics, Matrix, MeshPlane, MeshRope, Point as PixiPoint, Rectangle, Sprite, Texture } from 'pixi.js';
+import { Application, Assets, Container, Graphics, Matrix, Mesh, MeshGeometry, MeshPlane, MeshRope, Point as PixiPoint, Rectangle, Sprite, Texture } from 'pixi.js';
 import atlas from '../data/mel-atlas.json';
 import type { Point } from './brush';
 import { EAR_REST, EYES, PIVOTS, type Bone, type LegName } from './dog-rig';
@@ -28,7 +28,6 @@ const DUST = 0x8d8f8b;
 /** The far legs are a shade darker, as they are in the drawing's shadow side. */
 const FAR_TINT = 0x8c8d8a;
 const TAIL_POINTS = 10;
-const LEG_POINTS = 24; // must match CHAIN_POINTS in prototipo/mel-recorte/cut.py
 /** Where the body mesh hands over from the hips to the chest, in rig x. */
 const SPINE_BLEND = [60, 100];
 
@@ -87,13 +86,104 @@ function curve(points: Point[], count: number): Point[] {
   return out;
 }
 
+/** How far the fur may sit from a leg's axis on the inside of a bend, as a share of the bend's radius. */
+const FOLD_LIMIT = 0.7;
+const LEG_ROWS = 7;
+const LEG_SAMPLES = 48;
+
+/** A leg strip bent along its joints. Unlike a plain rope, it never folds over itself at a sharp hock: on the inside
+ * of a tight bend the fur is drawn in towards the axis (as a real leg's fur bunches) instead of crossing over. */
+class LegMesh {
+  readonly mesh: Mesh<MeshGeometry>;
+  private readonly positions: Float32Array;
+  private readonly angles = new Float32Array(LEG_SAMPLES);
+  private readonly bends = new Float32Array(LEG_SAMPLES);
+
+  constructor(
+    texture: Texture,
+    private readonly thickness: number
+  ) {
+    const uvs = new Float32Array(LEG_SAMPLES * LEG_ROWS * 2);
+    for (let i = 0; i < LEG_SAMPLES; i++) {
+      for (let row = 0; row < LEG_ROWS; row++) {
+        const k = (i * LEG_ROWS + row) * 2;
+        uvs[k] = i / (LEG_SAMPLES - 1);
+        uvs[k + 1] = row / (LEG_ROWS - 1);
+      }
+    }
+    const indices: number[] = [];
+    for (let i = 0; i < LEG_SAMPLES - 1; i++) {
+      for (let row = 0; row < LEG_ROWS - 1; row++) {
+        const a = i * LEG_ROWS + row;
+        const b = a + LEG_ROWS;
+        indices.push(a, b, a + 1, a + 1, b, b + 1);
+      }
+    }
+    this.positions = new Float32Array(uvs.length);
+    const geometry = new MeshGeometry({ positions: this.positions, uvs, indices: new Uint32Array(indices) });
+    this.mesh = new Mesh({ geometry, texture });
+  }
+
+  /** `path` holds LEG_SAMPLES points evenly spaced along the leg, in strip pixels. */
+  follow(path: Point[]) {
+    const n = LEG_SAMPLES;
+    // Tangent angles, unwrapped and lightly smoothed so a joint reads as a curve rather than a kink
+    let previous = 0;
+    for (let i = 0; i < n; i++) {
+      const [ax, ay] = path[Math.max(0, i - 1)];
+      const [bx, by] = path[Math.min(n - 1, i + 1)];
+      let angle = Math.atan2(by - ay, bx - ax);
+      if (i) angle += Math.round((previous - angle) / (2 * Math.PI)) * 2 * Math.PI;
+      this.angles[i] = previous = angle;
+    }
+    const smooth = (values: Float32Array) => {
+      const copy = values.slice();
+      for (let i = 0; i < n; i++) {
+        let sum = 0;
+        let weight = 0;
+        for (let j = -2; j <= 2; j++) {
+          const w = 3 - Math.abs(j);
+          sum += copy[Math.min(n - 1, Math.max(0, i + j))] * w;
+          weight += w;
+        }
+        values[i] = sum / weight;
+      }
+    };
+    smooth(this.angles);
+    // Signed curvature: how fast the axis turns per pixel of length
+    for (let i = 0; i < n; i++) {
+      const a = Math.max(0, i - 1);
+      const b = Math.min(n - 1, i + 1);
+      const length = Math.hypot(path[b][0] - path[a][0], path[b][1] - path[a][1]) || 1;
+      this.bends[i] = (this.angles[b] - this.angles[a]) / length;
+    }
+    smooth(this.bends);
+
+    for (let i = 0; i < n; i++) {
+      // The strip's first row lies against the normal, as cut.py unrolled it
+      const nx = -Math.sin(this.angles[i]);
+      const ny = Math.cos(this.angles[i]);
+      const bend = this.bends[i];
+      for (let row = 0; row < LEG_ROWS; row++) {
+        let offset = (row / (LEG_ROWS - 1) - 0.5) * this.thickness;
+        // An offset d along the normal travels at (1 - d·bend) of the axis' speed: at 1 it folds back on itself
+        if (offset * bend > FOLD_LIMIT) offset = FOLD_LIMIT / bend;
+        const k = (i * LEG_ROWS + row) * 2;
+        this.positions[k] = path[i][0] + nx * offset;
+        this.positions[k + 1] = path[i][1] + ny * offset;
+      }
+    }
+    this.mesh.geometry.getBuffer('aPosition').update();
+  }
+}
+
 /** Mel drawn from André's cut-out pencil drawing with WebGL. The body is a mesh that bends at the spine, each leg and
  * the tail are rope meshes along their joints (so they curve instead of hinging), and head and ears ride on bones. */
 export class MelCutout {
   private readonly holders = new Map<'head' | 'earNear' | 'earFar', Container>();
   private readonly body: MeshPlane;
   private readonly bodyRest: Float32Array;
-  private readonly legRopes = {} as Record<LegName, PixiPoint[]>;
+  private readonly legs = {} as Record<LegName, LegMesh>;
   private readonly tailPoints: PixiPoint[];
   private readonly lids = new Graphics();
   private readonly tongue = new Graphics();
@@ -130,7 +220,16 @@ export class MelCutout {
       root.addChild(holder);
       return points;
     };
-    const bone = (name: 'head' | 'earNear' | 'earFar', extras: Container[] = []) => {
+    const leg = (name: PartName, tint?: number) => {
+      const strip = new LegMesh(slice(name), atlas.parts[name].frame[3]);
+      if (tint) strip.mesh.tint = tint;
+      const holder = new Container();
+      holder.scale.set(unit);
+      holder.addChild(strip.mesh);
+      root.addChild(holder);
+      return strip;
+    };
+    const bone =(name: 'head' | 'earNear' | 'earFar', extras: Container[] = []) => {
       const holder = new Container();
       const sprite = new Sprite(slice(name));
       const [rx, ry] = (atlas.parts[name] as { rest: number[] }).rest;
@@ -142,8 +241,8 @@ export class MelCutout {
     };
 
     // Back to front: far legs, tail, body, near hind leg, ears, head, near front leg
-    this.legRopes.farRear = rope('leg.farRear', LEG_POINTS, FAR_TINT);
-    this.legRopes.farFront = rope('leg.nearFront', LEG_POINTS, FAR_TINT);
+    this.legs.farRear = leg('leg.farRear', FAR_TINT);
+    this.legs.farFront = leg('leg.nearFront', FAR_TINT);
     this.tailPoints = rope('tail', TAIL_POINTS);
 
     this.body = new MeshPlane({ texture: slice('body'), verticesX: 12, verticesY: 8 });
@@ -158,11 +257,11 @@ export class MelCutout {
     }
     root.addChild(this.body);
 
-    this.legRopes.nearRear = rope('leg.nearRear', LEG_POINTS);
+    this.legs.nearRear = leg('leg.nearRear');
     bone('earFar');
     bone('earNear');
     bone('head', [this.tongue, this.lids]);
-    this.legRopes.nearFront = rope('leg.nearFront', LEG_POINTS);
+    this.legs.nearFront = leg('leg.nearFront');
     root.addChild(this.skeleton);
 
     this.tongue.visible = false;
@@ -194,7 +293,7 @@ export class MelCutout {
       this.holders.get(name)!.setFromMatrix(toPixi(matrix));
     }
     this.bendBody(frame.bones.hips, frame.bones.chest);
-    (Object.keys(this.legRopes) as LegName[]).forEach((leg) => this.follow(this.legRopes[leg], curve(frame.legs[leg], LEG_POINTS)));
+    (Object.keys(this.legs) as LegName[]).forEach((leg) => this.legs[leg].follow(curve(frame.legs[leg], LEG_SAMPLES).map(([x, y]) => [x / atlas.unit, y / atlas.unit])));
     this.follow(this.tailPoints, this.tailPath(frame.tail));
     this.drawLids(frame);
     this.tongue.visible = frame.tongue;
