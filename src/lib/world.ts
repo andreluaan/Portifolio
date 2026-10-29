@@ -554,7 +554,8 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     const { viewport, ground } = world;
     sun.style.transform = `translate3d(${(sunAt(0) * viewport).toFixed(1)}px, ${(sunAt(1) * ground).toFixed(1)}px, 0) scale(${sunAt(2).toFixed(3)})`;
     sun.style.opacity = sunAt(3).toFixed(3);
-    pin.style.setProperty('--dusk', at('dusk').toFixed(3));
+    // Written on the empty sky, its only reader: on the pin it restyled the whole world every scroll frame
+    sky.style.setProperty('--dusk', at('dusk').toFixed(3));
     veil.style.opacity = at('veil').toFixed(3);
     (['peaks', 'ridge', 'hills'] as const).forEach((name) => (planes[name].style.opacity = at(name).toFixed(3)));
     mists.forEach((mist) => (mist.style.opacity = at('mist').toFixed(3)));
