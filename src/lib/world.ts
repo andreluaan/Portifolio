@@ -11,7 +11,8 @@ import { getLang, onLangChange, pick, t } from './i18n';
 import { Mascot } from './mascot';
 import { Mel } from './mel';
 import { InkPainter } from './painting';
-import { mistStrip, paintHills, paintPeaks, paintRidge, type Biome, type PlaneSpec } from './landscape';
+import { mistStrip, type Biome, type PlaneSpec } from './landscape';
+import { paintPlanes } from './planes';
 import { deskObjects, foregroundBranch, grassTufts, sketchFor, worldProps } from './scenes';
 import { unlock } from './secrets';
 import { attributeList, characterIdentity, portraits } from './sections';
@@ -357,9 +358,11 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     layers.ridge.style.width = `${ridge.width}px`;
     layers.hills.style.width = `${hills.width}px`;
     // Far planes are soft anyway: half their pixels quarters their memory
-    void paintPeaks($(layers.peaks, '.mundo-plane'), peaks, 0.5)
-      .then(() => paintRidge($(layers.ridge, '.mundo-plane'), ridge, phone ? 0.5 : 0.75))
-      .then(() => paintHills($(layers.hills, '.mundo-plane'), hills, phone ? 0.75 : 1));
+    paintPlanes([
+      { host: $(layers.peaks, '.mundo-plane'), name: 'peaks', spec: peaks, scale: 0.5 },
+      { host: $(layers.ridge, '.mundo-plane'), name: 'ridge', spec: ridge, scale: phone ? 0.5 : 0.75 },
+      { host: $(layers.hills, '.mundo-plane'), name: 'hills', spec: hills, scale: phone ? 0.75 : 1 },
+    ]);
 
     // Mist that drifts on its own, even while the page is still: a seamless baked strip slid by CSS
     const drift = async (host: HTMLElement, y: number, thickness: number, seed: number) => {

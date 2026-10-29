@@ -1,4 +1,5 @@
 import { scheduleBake } from './bake';
+import { seededRandom } from './random';
 
 export type Point = [number, number];
 export type Tone = 'ink' | 'soft' | 'wash' | 'mist' | 'paper';
@@ -27,10 +28,7 @@ export const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-mo
 
 let maskCounter = 0;
 
-export function seededRandom(seed: number) {
-  let state = (Math.abs(Math.floor(seed)) * 9973 + 12345) % 2147483647 || 1;
-  return () => (state = (state * 16807) % 2147483647) / 2147483647;
-}
+export { seededRandom };
 
 export function smoothPoints(points: Point[]): Point[] {
   if (points.length < 3) return points;

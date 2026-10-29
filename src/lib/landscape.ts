@@ -1,4 +1,5 @@
-import { seededRandom, type Point } from './brush';
+import type { Point } from './brush';
+import { seededRandom } from './random';
 
 /** The far planes painted straight into canvas, in the manner of an ink-wash landscape: washes that thin out into
  * mist at their feet, paper grain broken into every fill, dry-brush facets on the rock, and silhouettes that grow
@@ -91,14 +92,25 @@ const smooth = (t: number) => {
   return c * c * (3 - 2 * c);
 };
 
+// Canvases ------------------------------------------------------------------------------------------------------------
+
+/** The painter runs in a worker when it can (see paintPlanes), where only OffscreenCanvas exists. */
+type Canvas = OffscreenCanvas | HTMLCanvasElement;
+type Ctx = OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D;
+
+function makeCanvas(width: number, height: number): Canvas {
+  if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(width, height);
+  return Object.assign(document.createElement('canvas'), { width, height });
+}
+const context2d = (canvas: Canvas) => canvas.getContext('2d') as Ctx;
+
 /** Paper grain: speckles and short dry streaks, erased out of every wash so it reads as pigment on rough paper. */
-let grainTile: HTMLCanvasElement | null = null;
+let grainTile: Canvas | null = null;
 function grain() {
   if (grainTile) return grainTile;
   const size = 256;
-  grainTile = document.createElement('canvas');
-  grainTile.width = grainTile.height = size;
-  const g = grainTile.getContext('2d')!;
+  grainTile = makeCanvas(size, size);
+  const g = context2d(grainTile);
   const random = seededRandom(4242);
   for (let i = 0; i < 3200; i++) {
     g.fillStyle = `rgba(0,0,0,${(0.15 + random() * 0.85).toFixed(2)})`;
@@ -117,20 +129,17 @@ function grain() {
 /** Paints one tile. Every element is drawn in plane coordinates; the tile only shifts and clips, so elements that
  * straddle two tiles come out identical on both sides (each draws with its own seeded randomness). */
 class Painter {
-  readonly scratch: CanvasRenderingContext2D;
+  readonly scratch: Ctx;
   private readonly grainPattern: CanvasPattern;
 
   constructor(
-    readonly ctx: CanvasRenderingContext2D,
+    readonly ctx: Ctx,
     readonly from: number,
     readonly to: number,
     readonly scale: number,
-    private readonly setup: (target: CanvasRenderingContext2D) => void
+    setup: (target: Ctx) => void
   ) {
-    const canvas = document.createElement('canvas');
-    canvas.width = ctx.canvas.width;
-    canvas.height = ctx.canvas.height;
-    this.scratch = canvas.getContext('2d')!;
+    this.scratch = context2d(makeCanvas(ctx.canvas.width, ctx.canvas.height));
     this.grainPattern = this.scratch.createPattern(grain(), 'repeat')!;
     setup(this.scratch);
   }
@@ -140,7 +149,7 @@ class Painter {
   }
 
   /** Draws into a clean scratch layer, roughens it with paper grain, dissolves its ends into mist, then lays it down. */
-  pass(draw: (g: CanvasRenderingContext2D) => void, options: { grain?: number; fade?: [number, number, number]; opacity?: number } = {}) {
+  pass(draw: (g: Ctx) => void, options: { grain?: number; fade?: [number, number, number]; opacity?: number } = {}) {
     const g = this.scratch;
     g.save();
     g.setTransform(1, 0, 0, 1, 0, 0);
@@ -179,24 +188,23 @@ class Painter {
   }
 }
 
-async function paintTiles(host: HTMLElement, width: number, height: number, scale: number, paint: (painter: Painter) => void) {
-  const tiles: HTMLCanvasElement[] = [];
+export interface Tile {
+  x0: number;
+  width: number;
+  height: number;
+  canvas: Canvas;
+}
+
+function* paintTiles(width: number, height: number, scale: number, paint: (painter: Painter) => void): Generator<Tile> {
   for (let x0 = 0; x0 < width; x0 += TILE) {
     const w = Math.min(TILE, width - x0);
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.ceil(w * scale);
-    canvas.height = Math.ceil(height * scale);
-    const setup = (target: CanvasRenderingContext2D) => target.setTransform(scale, 0, 0, scale, -x0 * scale, 0);
-    const ctx = canvas.getContext('2d')!;
+    const canvas = makeCanvas(Math.ceil(w * scale), Math.ceil(height * scale));
+    const setup = (target: Ctx) => target.setTransform(scale, 0, 0, scale, -x0 * scale, 0);
+    const ctx = context2d(canvas);
     setup(ctx);
     paint(new Painter(ctx, x0, x0 + w, scale, setup));
-    canvas.className = 'mundo-baked';
-    Object.assign(canvas.style, { left: `${x0}px`, width: `${w}px`, height: `${height}px` });
-    tiles.push(canvas);
-    // Let the page breathe between tiles: painting a whole plane at once would stall the first scroll
-    await new Promise((resolve) => requestAnimationFrame(resolve));
+    yield { x0, width: w, height, canvas };
   }
-  host.replaceChildren(...tiles);
 }
 
 // Motifs -------------------------------------------------------------------------------------------------------------
@@ -239,7 +247,7 @@ interface Wash {
 /** Paints a range pixel by pixel, like a wash laid wet and worked into: densest under the crest, broken into patches,
  * scored by gullies that run down the slope, lighter on faces turned to the light (from the right), and thinning into
  * mist at the foot. */
-function washRange(g: CanvasRenderingContext2D, p: Painter, ridgeAt: (x: number) => number, wash: Wash) {
+function washRange(g: Ctx, p: Painter, ridgeAt: (x: number) => number, wash: Wash) {
   const { width, height } = g.canvas;
   // Only the band of rows the wash can reach is allocated and written
   const tops = new Float32Array(width);
@@ -328,7 +336,7 @@ function spruce(path: Path2D, x: number, base: number, height: number, seed: num
 }
 
 /** A broad-leafed tree: a leaning trunk forking into branches, each ending in clusters of small dark leaves. */
-function leafyTree(g: CanvasRenderingContext2D, x: number, base: number, height: number, tone: Tone, seed: number) {
+function leafyTree(g: Ctx, x: number, base: number, height: number, tone: Tone, seed: number) {
   const random = seededRandom(seed);
   const tips: Point[] = [];
   g.strokeStyle = rgba(tone, 0.95);
@@ -360,7 +368,7 @@ function leafyTree(g: CanvasRenderingContext2D, x: number, base: number, height:
 }
 
 /** A wire hanging between two points. */
-function sag(g: CanvasRenderingContext2D, a: Point, b: Point, depth: number) {
+function sag(g: Ctx, a: Point, b: Point, depth: number) {
   g.beginPath();
   g.moveTo(...a);
   g.quadraticCurveTo((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + depth * 2, ...b);
@@ -374,18 +382,18 @@ const near = (x: number, avoid: number[], gap: number) => avoid.some((stationX) 
 const BLEND = 520;
 
 /** The farthest plane: high peaks half lost in the wash, the same behind the whole walk. */
-export function paintPeaks(host: HTMLElement, spec: PlaneSpec, scale: number) {
+function paintPeaks(spec: PlaneSpec, scale: number) {
   const { width, ground } = spec;
-  return paintTiles(host, width, ground, scale, (p) => {
+  return paintTiles(width, ground, scale, (p) => {
     p.pass((g) => washRange(g, p, crest(ground * 0.6, ground * 0.36, 560, 7), { tone: TONE.wash, alpha: 0.75, depth: ground * 0.32, seed: 71, rock: 0.45 }), { grain: 0.3 });
     p.pass((g) => washRange(g, p, crest(ground * 0.74, ground * 0.24, 320, 13), { tone: TONE.soft, alpha: 0.55, depth: ground * 0.2, seed: 72, rock: 0.6 }), { grain: 0.28 });
   });
 }
 
 /** The middle distance changes with the walk: forested mountains, the sea and its headland, the city, the fields. */
-export function paintRidge(host: HTMLElement, spec: PlaneSpec, scale: number) {
+function paintRidge(spec: PlaneSpec, scale: number) {
   const { width, ground, stretches, phone } = spec;
-  return paintTiles(host, width, ground, scale, (p) => {
+  return paintTiles(width, ground, scale, (p) => {
     for (const [index, stretch] of stretches.entries()) {
       const { biome, from, to } = stretch;
       if (!p.visible(from - BLEND, to + BLEND)) continue;
@@ -560,10 +568,10 @@ export function paintRidge(host: HTMLElement, spec: PlaneSpec, scale: number) {
 }
 
 /** The near plane: a low wash of hills along the whole walk, and what stands closest in each stretch. */
-export function paintHills(host: HTMLElement, spec: PlaneSpec, scale: number) {
+function paintHills(spec: PlaneSpec, scale: number) {
   const { width, height, ground, stretches, avoid, phone } = spec;
   const size = phone ? 0.7 : 1;
-  return paintTiles(host, width, height, scale, (p) => {
+  return paintTiles(width, height, scale, (p) => {
     const hillAt = crest(ground - 2, ground * 0.08, 380, 9);
     p.pass((g) => washRange(g, p, hillAt, { tone: TONE.wash, alpha: 0.7, depth: ground * 0.12, seed: 91, rock: 0.35 }), { grain: 0.28 });
     // Things stand a little into the hill, never on its very crest
@@ -741,6 +749,19 @@ export function paintHills(host: HTMLElement, spec: PlaneSpec, scale: number) {
       }
     }
   });
+}
+
+export type PlaneName = 'peaks' | 'ridge' | 'hills';
+export interface PlaneJob {
+  name: PlaneName;
+  spec: PlaneSpec;
+  scale: number;
+}
+const PLANES = { peaks: paintPeaks, ridge: paintRidge, hills: paintHills } satisfies Record<PlaneName, (spec: PlaneSpec, scale: number) => Generator<Tile>>;
+
+/** Paints a plane tile by tile; each tile is finished before the next is started, so a caller can stop in between. */
+export function* paintPlane(job: PlaneJob): Generator<Tile> {
+  yield* PLANES[job.name](job.spec, job.scale);
 }
 
 /** A strip of drifting mist, `period` wide and seamless, as an image URL: soft paper-coloured clouds that thin out
