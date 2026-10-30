@@ -11,8 +11,7 @@ import { getLang, onLangChange, pick, t } from './i18n';
 import { Mascot } from './mascot';
 import { Mel } from './mel';
 import { InkPainter } from './painting';
-import { mistStrip, type Biome, type PlaneSpec } from './landscape';
-import { paintPlanes } from './planes';
+import roll from '../data/rolo.json';
 import { deskObjects, foregroundBranch, grassTufts, sketchFor, worldProps } from './scenes';
 import { unlock } from './secrets';
 import { attributeList, characterIdentity, portraits } from './sections';
@@ -29,28 +28,25 @@ interface WorldLayout {
   stations: Record<StationName, number>;
 }
 
-/** Shan shui distances: high peaks barely move, the ridge with its pines a little more, hills more, the ground with
- * the scroll, and the foreground grass and branches faster than the eye. */
-const PARALLAX = { peaks: 0.1, ridge: 0.28, hills: 0.62, ground: 1, front: 1.45 };
+/** The painting moves as far as its own length asks; around it, mist drifts between it and the ground, and the
+ * foreground grass and branches pass faster than the eye. */
+const PARALLAX = { mist: 0.3, ground: 1, front: 1.45 };
 
 interface Mood {
-  /** Sun position as a share of the viewport width and of the ground height, its scale and its opacity. */
-  sun: [number, number, number, number];
-  peaks: number;
-  ridge: number;
-  hills: number;
   mist: number;
   veil: number;
   dusk: number;
 }
-/** Morning: clear and pale, the sun high. Fog: the far planes nearly gone, the sun a faint disc. Dusk: the sun low
- * and large behind the peaks, the sky deepening, the hills standing out dark. */
+/** Morning: clear and pale. Fog: the painting half gone behind the paper. Dusk: the whole sheet deepening from the top. */
 const MOODS: Mood[] = [
-  { sun: [0.76, 0.16, 0.8, 0.42], peaks: 0.6, ridge: 0.9, hills: 1, mist: 0.65, veil: 0, dusk: 0 },
-  { sun: [0.58, 0.22, 1, 0.12], peaks: 0.22, ridge: 0.45, hills: 0.75, mist: 1, veil: 0.8, dusk: 0.15 },
-  { sun: [0.3, 0.5, 1.4, 0.62], peaks: 0.8, ridge: 1, hills: 1, mist: 0.4, veil: 0.12, dusk: 1 },
+  { mist: 0, veil: 0, dusk: 0 },
+  { mist: 0, veil: 0, dusk: 0 },
+  { mist: 0, veil: 0, dusk: 0 },
 ];
 const NAV_STATIONS: StationName[] = ['hero', 'line', 'house', 'lectern', 'repos', 'mail'];
+
+/** How far a hanging sign rises above the ground; the pole's foot is at the bottom of its box. */
+const SIGN_HEIGHT = 296;
 
 function place(element: HTMLElement, x: number, styles: Partial<CSSStyleDeclaration> = {}) {
   element.style.left = `${x}px`;
@@ -63,16 +59,14 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   const root = document.querySelector<HTMLElement>('.mundo')!;
   const pin = $(root, '.mundo-pin');
   const layers = {
-    peaks: $(root, '.mundo-peaks'),
-    ridge: $(root, '.mundo-ridge'),
-    hills: $(root, '.mundo-hills'),
+    roll: $(root, '.mundo-roll'),
+    mist: $(root, '.mundo-mists'),
     ground: $(root, '.mundo-ground'),
     front: $(root, '.mundo-front'),
   };
   const sky = $(root, '.mundo-sky');
-  const sun = $(root, '.mundo-sun');
   const veil = $(root, '.mundo-veil');
-  const planes = { peaks: $(layers.peaks, '.mundo-plane'), ridge: $(layers.ridge, '.mundo-plane'), hills: $(layers.hills, '.mundo-plane') };
+  const rollPainting = $(layers.roll, '.mundo-plane');
   const mists = [...root.querySelectorAll<HTMLElement>('.mundo-mist')];
   const groundArt = $<SVGSVGElement>(root, '.mundo-ground-art');
   const heroSheet = $(root, '.station-hero-sheet');
@@ -89,7 +83,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   /** Shrinks a sign's label until it fits the plank, since translations and late fonts change its width. */
   function fitSignLabels() {
     Object.values(signs).forEach((sign) => {
-      const label = $(sign, '.hand');
+      const label = $(sign, '.station-sign-label');
       label.style.fontSize = '';
       const range = document.createRange();
       range.selectNodeContents(label);
@@ -135,6 +129,9 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   let progressFill: SVGGElement;
   let trigger: ScrollTrigger | undefined;
   let previousRockX: number[] = [];
+  let rollTiles: HTMLImageElement[] = [];
+  let rollSource = 0;
+  let rollTravel = 0;
   let mascotX = 0;
   let activeSection: StationName = 'hero';
   let inkSpilled = false;
@@ -239,7 +236,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     }
 
     stations.processo = x;
-    place(signs.processo, x, { top: `${ground - 190}px` });
+    place(signs.processo, x, { top: `${ground - SIGN_HEIGHT}px` });
     x += 300;
 
     const flagWidth = mobile ? 190 : 210;
@@ -249,7 +246,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     x += flagWidth * 4 + 60 + viewport * 0.2;
 
     stations.varal = x;
-    place(signs.varal, x, { top: `${ground - 190}px` });
+    place(signs.varal, x, { top: `${ground - SIGN_HEIGHT}px` });
     x += 300;
 
     const featuredCount = projects.filter((project) => project.featured).length;
@@ -264,7 +261,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     x += lineWidth + 180;
 
     stations.sobre = x;
-    place(signs.sobre, x, { top: `${ground - 190}px` });
+    place(signs.sobre, x, { top: `${ground - SIGN_HEIGHT}px` });
     x += 300;
 
     const boardWidth = Math.min(560, viewport * 0.88);
@@ -276,7 +273,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     x += (mobile ? 0 : 300) + boardWidth + viewport * 0.25;
 
     stations.estante = x;
-    place(signs.estante, x, { top: `${ground - 190}px` });
+    place(signs.estante, x, { top: `${ground - SIGN_HEIGHT}px` });
     x += 250;
 
     const lecternScale = Math.min(1.45, (ground - topbar - 90) / 270);
@@ -285,7 +282,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     x += 160 * lecternScale + viewport * 0.25;
 
     stations.atelie = x;
-    place(signs.atelie, x, { top: `${ground - 190}px` });
+    place(signs.atelie, x, { top: `${ground - SIGN_HEIGHT}px` });
     x += 300;
 
     const reposColumns = mobile ? 2 : 4;
@@ -327,57 +324,44 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     return { width, viewport, height, ground, rocks, stations, portraitRight };
   }
 
-  /** The distant planes, painted into canvas once per layout (see landscape.ts): one long scene that goes from
-   * mountains and pines to the coast, the city, the fields and back to the mountains as the visitor walks. */
-  function drawLandscape() {
-    const { width, viewport, height, ground, stations } = world;
-    const layerWidth = (factor: number) => viewport + (width - viewport) * factor;
-    const phone = viewport < 700;
-    // A point of the world lines up with a point of a plane when both sit mid-screen
-    const onPlane = (x: number, factor: number) => (x - viewport / 2) * factor + viewport / 2;
-    const scene: { biome: Biome; from: number; to: number }[] = [
-      { biome: 'mountains', from: 0, to: stations.varal },
-      { biome: 'coast', from: stations.varal, to: stations.estante },
-      { biome: 'city', from: stations.estante, to: stations.mail - viewport * 0.6 },
-      { biome: 'field', from: stations.mail - viewport * 0.6, to: stations.end },
-      { biome: 'mountains', from: stations.end, to: width },
-    ];
-    const spec = (factor: number, planeHeight: number, planeGround: number): PlaneSpec => ({
-      width: layerWidth(factor),
-      height: planeHeight,
-      ground: planeGround,
-      stretches: scene.map(({ biome, from, to }) => ({ biome, from: onPlane(from, factor), to: onPlane(to, factor) })),
-      avoid: Object.values(stations).map((x) => onPlane(x, factor)),
-      phone,
+  /** The background is one painting (see prototipo/rolo/paint.py). Its ground band lines up with the world's ground,
+   * and it always travels its whole length during the walk, whatever the size of the window. */
+  function drawRoll() {
+    const { viewport, ground } = world;
+    const scale = Math.max(ground / (roll.height * 0.8), (viewport * 1.4) / roll.width);
+    const shownHeight = roll.height * scale;
+    const shownTile = roll.tileWidth * scale;
+    rollTravel = roll.width * scale - viewport;
+    const wanted = shownHeight * Math.min(window.devicePixelRatio || 1, 2);
+    const source = roll.sizes.find((size) => size >= wanted) ?? roll.sizes[roll.sizes.length - 1];
+    if (rollSource !== source) {
+      rollSource = source;
+      rollTiles = Array.from({ length: roll.tiles }, (_, index) => {
+        const tile = new Image();
+        tile.alt = '';
+        tile.decoding = 'async';
+        // Only the opening is on screen at first; the rest of the scroll loads as the walk nears it
+        tile.loading = index < 2 ? 'eager' : 'lazy';
+        tile.src = `/images/rolo/scroll-${source}-${index}.webp`;
+        return tile;
+      });
+      rollPainting.replaceChildren(...rollTiles);
+    }
+    rollTiles.forEach((tile, index) => Object.assign(tile.style, { left: `${index * shownTile}px`, width: `${shownTile + 1}px`, height: `${shownHeight}px` }));
+    rollPainting.style.top = `${ground - shownHeight * 0.8}px`;
+    layers.roll.style.width = `${roll.width * scale}px`;
+    mists.forEach((mist, index) => {
+      const period = index ? 1000 : 1400;
+      Object.assign(mist.style, { top: `${ground * (index ? 0.6 : 0.42)}px`, height: `${period * 0.15}px`, backgroundSize: `${period}px 100%` });
+      mist.style.setProperty('--drift-by', `-${period}px`);
     });
-
-    const peaks = spec(PARALLAX.peaks, ground, ground);
-    const ridge = spec(PARALLAX.ridge, ground, ground);
-    const hills = spec(PARALLAX.hills, height, ground);
-    layers.peaks.style.width = `${peaks.width}px`;
-    layers.ridge.style.width = `${ridge.width}px`;
-    layers.hills.style.width = `${hills.width}px`;
-    // Far planes are soft anyway: half their pixels quarters their memory
-    paintPlanes([
-      { host: $(layers.peaks, '.mundo-plane'), name: 'peaks', spec: peaks, scale: 0.5 },
-      { host: $(layers.ridge, '.mundo-plane'), name: 'ridge', spec: ridge, scale: phone ? 0.5 : 0.75 },
-      { host: $(layers.hills, '.mundo-plane'), name: 'hills', spec: hills, scale: phone ? 0.75 : 1 },
-    ]);
-
-    // Mist that drifts on its own, even while the page is still: a seamless baked strip slid by CSS
-    const drift = async (host: HTMLElement, y: number, thickness: number, seed: number) => {
-      const strip = mistStrip(viewport, ground, y, thickness, seed);
-      Object.assign(host.style, { backgroundImage: `url(${strip})`, backgroundSize: `${viewport}px ${ground}px`, width: `${layerWidth(1) + viewport}px`, height: `${ground}px`, '--drift-by': `-${viewport}px` });
-    };
-    void drift($(layers.peaks, '.mundo-mist'), ground * 0.6, 120, 361);
-    void drift($(layers.ridge, '.mundo-mist'), ground * 0.88, 90, 371);
   }
 
   function drawLayers() {
     const { width, viewport, height, ground, rocks } = world;
     const layerWidth = (factor: number) => viewport + (width - viewport) * factor;
 
-    drawLandscape();
+    drawRoll();
 
     layers.ground.style.width = `${width}px`;
     groundArt.setAttribute('viewBox', `0 0 ${width} ${height}`);
@@ -549,18 +533,13 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     const blend = t * t * (3 - 2 * t);
     const a = MOODS[index];
     const b = MOODS[(index + 1) % MOODS.length];
-    const at = (key: Exclude<keyof Mood, 'sun'>) => a[key] + (b[key] - a[key]) * blend;
-    const sunAt = (i: number) => a.sun[i] + (b.sun[i] - a.sun[i]) * blend;
+    const at = (key: keyof Mood) => a[key] + (b[key] - a[key]) * blend;
     const key = phase.toFixed(3);
     if (key === moodKey) return;
     moodKey = key;
-    const { viewport, ground } = world;
-    sun.style.transform = `translate3d(${(sunAt(0) * viewport).toFixed(1)}px, ${(sunAt(1) * ground).toFixed(1)}px, 0) scale(${sunAt(2).toFixed(3)})`;
-    sun.style.opacity = sunAt(3).toFixed(3);
     // Written on the empty sky, its only reader: on the pin it restyled the whole world every scroll frame
     sky.style.setProperty('--dusk', at('dusk').toFixed(3));
     veil.style.opacity = at('veil').toFixed(3);
-    (['peaks', 'ridge', 'hills'] as const).forEach((name) => (planes[name].style.opacity = at(name).toFixed(3)));
     mists.forEach((mist) => (mist.style.opacity = at('mist').toFixed(3)));
   }
 
@@ -582,9 +561,8 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     moodKey = '';
     setMood(0);
     const setters = {
-      peaks: gsap.quickSetter(layers.peaks, 'x', 'px'),
-      ridge: gsap.quickSetter(layers.ridge, 'x', 'px'),
-      hills: gsap.quickSetter(layers.hills, 'x', 'px'),
+      roll: gsap.quickSetter(layers.roll, 'x', 'px'),
+      mist: gsap.quickSetter(layers.mist, 'x', 'px'),
       ground: gsap.quickSetter(layers.ground, 'x', 'px'),
       front: gsap.quickSetter(layers.front, 'x', 'px'),
     };
@@ -617,9 +595,8 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
       scrub: reduced ? true : 0.7,
       onUpdate: (self) => {
         const offset = self.progress * distance;
-        setters.peaks(-offset * PARALLAX.peaks);
-        setters.ridge(-offset * PARALLAX.ridge);
-        setters.hills(-offset * PARALLAX.hills);
+        setters.roll(-self.progress * rollTravel);
+        setters.mist(-offset * PARALLAX.mist);
         setters.ground(-offset);
         setters.front(-offset * PARALLAX.front);
         progressFill.style.clipPath = `inset(0 ${(100 - self.progress * 100).toFixed(2)}% 0 0)`;

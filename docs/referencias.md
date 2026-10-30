@@ -35,6 +35,8 @@ Legenda: **[V]** verificado · **[I]** inferido, conferir no navegador.
 | messenger.abeto.co [V] | Mundinho coeso e encantador |
 
 ## Backlog (ideias em nanquim)
+> Registro original de 2026-10-23. O status atualizado fica em [ideias.md](ideias.md).
+
 | # | Ideia | Esforço | Impacto | Técnica |
 |---|---|---|---|---|
 | 1 | Intro "a página se desenha"; Esc = blot de tinta | M | alto | SVG dashoffset + GSAP timeline + feTurbulence |

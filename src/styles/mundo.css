@@ -2,7 +2,7 @@
   position: relative;
   height: 100svh;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--paper) 0%, #e9e9e6 70%, var(--paper-deep) 100%);
+  background: var(--paper);
 }
 
 .mundo-sky {
@@ -11,30 +11,16 @@
   pointer-events: none;
 }
 
-/* Dusk deepens the sky from the top, leaving a pale band where the sun goes down */
+/* Dusk deepens the sheet from the top; translucent, since the painting is underneath */
 .mundo-sky::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #b2b3af 0%, #cbccc8 38%, #e4e4e1 66%, rgba(238, 238, 236, 0) 100%);
+  background: linear-gradient(180deg, rgb(40 41 39 / 0.3) 0%, rgb(40 41 39 / 0.14) 45%, rgb(40 41 39 / 0) 80%);
   opacity: var(--dusk, 0);
 }
 
-/* A wash disc: denser in the middle, its rim bleeding into the paper */
-.mundo-sun {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 130px;
-  height: 130px;
-  margin: -65px 0 0 -65px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(141, 143, 139, 0.6) 0 52%, rgba(141, 143, 139, 0.32) 62%, rgba(141, 143, 139, 0) 71%);
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-
-/* Fog between the far planes and the near hills */
+/* Fog over the painting */
 .mundo-veil {
   position: absolute;
   inset: 0;
@@ -44,6 +30,7 @@
 }
 
 .mundo-cloud {
+  display: none;
   position: absolute;
   width: 220px;
   height: 44px;
@@ -81,26 +68,18 @@
   inset: 0;
 }
 
-.mundo-baked {
+.mundo-plane img {
   position: absolute;
   top: 0;
-  animation: plane-in 0.8s ease-out;
+  max-width: none;
 }
-
-@keyframes plane-in {
-  from { opacity: 0; }
-}
-
-/* Atmospheric perspective: the farther the plane, the more it dissolves into the paper, so the sky stays mostly
-   paper and the text above it stays easy to read */
-.mundo-peaks .mundo-plane { opacity: 0.6; }
-.mundo-ridge .mundo-plane { opacity: 0.9; }
 
 /* Paper mist that drifts by itself between the distances */
 .mundo-mist {
   position: absolute;
   left: 0;
-  top: 0;
+  width: calc(100% + 2000px);
+  background-image: url('/images/rolo/mist.webp');
   background-repeat: repeat-x;
   pointer-events: none;
   animation: mist-drift 90s linear infinite;

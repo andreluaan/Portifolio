@@ -22,9 +22,10 @@ Astro + GSAP (ScrollTrigger) + Lenis. Canvas/WebGL quando o efeito pedir. Servid
 - `src/lib/brush.ts` — motor de pincel (traços em SVG, máscaras de desenho, molduras à mão). `scenes.ts` guarda os desenhos.
 - `src/lib/mascot.ts` — Borrão, a criaturinha de tinta (estados, física de mola, arrastar e soltar). O André prefere esta versão.
 - `src/lib/mascot-dog.ts` + `src/styles/mascot-dog.css` — versão cachorrinho guardada para uso futuro (não importada). Ele não gostou dela como personagem principal.
-- `src/lib/world.ts` — o mundo de papel (estações, camadas, rolagem lateral, clima manhã/névoa/entardecer). `landscape.ts` pinta o fundo em aguada (montanhas, litoral, cidade, campo).
+- `src/lib/world.ts` — o mundo de papel (estações, camadas, rolagem lateral, clima manhã/névoa/entardecer). O fundo é um rolo emaki único e pré-pintado: a pintura do André em `prototipo/rolo/original.webp`, só redimensionada por `adapt.py` para `public/images/rolo/`; nunca repintar.
 - `prototipo/mel-recorte/` — recorte da Mel: `cut.py` gera o atlas a partir do desenho; `fur.py` aplica pelagem, esconde cortes e limpa as patas sobre `mel-atlas-base.*`. `book.ts` (estante), `character.ts` (ficha), `notebook.ts` (recados), `painting.ts` (mesinha).
 - `src/data/github.ts` — repositórios e contribuições do GitHub lidos no build, com fallback.
 - `src/lib/secrets.ts`, `sound.ts` (sons sintetizados, mudos por padrão), `i18n.ts` + `src/data/content.ts` (textos PT/EN).
+- `docs/ideias.md` — banco de ideias vivo: registrar ideias novas e atualizar o status ao entregar uma peça.
 - `prototipo/` — protótipos em HTML único (v2 = motor de pincel em SVG) e o retrato original.
 - `public/images/andre-perfil.webp` e `andre-frente.webp` — retratos tratados (fundo branco puro, para mesclar com `multiply`).

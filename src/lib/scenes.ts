@@ -163,16 +163,19 @@ export const deskObjects = {
 
 export const worldProps = {
   signpost: (seed: number): Stroke[] => [
-    stroke([[40, 182], [104, 184]], 10, { tone: 'mist', filter: 'wash', seed: seed + 3 }),
-    stroke([[70, 80], [72, 184]], 5.5, { seed, start: 0.02, end: 0.05 }),
-    stroke([[8, 34], [186, 28], [212, 52], [188, 76], [12, 80], [8, 34]], 2.8, { seed: seed + 1, start: 0.01, end: 0.03 }),
-    stroke([[60, 184], [56, 170], [62, 160]], 1.6, { seed: seed + 2 }),
-    stroke([[82, 184], [88, 168], [84, 156]], 1.6, { seed: seed + 7 }),
+    stroke([[0, 292], [34, 294]], 10, { tone: 'mist', filter: 'wash', seed: seed + 3 }),
+    stroke([[14, 6], [16, 294]], 4.5, { seed, start: 0.02, end: 0.05 }),
+    stroke([[6, 12], [100, 9], [198, 13]], 2.4, { seed: seed + 1, start: 0.02, end: 0.05 }),
+    stroke([[46, 11], [46, 30]], 1.2, { seed: seed + 2, start: 0.01, end: 0.01 }),
+    stroke([[164, 12], [164, 30]], 1.2, { seed: seed + 4, start: 0.01, end: 0.01 }),
+    stroke([[192, 14], [192, 74]], 1.1, { seed: seed + 5, start: 0.01, end: 0.01 }),
+    stroke([[192, 74], [192, 112]], 4.5, { seed: seed + 6, start: 0.05, end: 0.05 }),
+    stroke([[30, 30], [180, 30], [179, 248], [170, 256], [34, 254], [30, 240], [30, 30]], 1.3, { seed: seed + 7, start: 0.01, end: 0.03 }),
   ],
-  /** Flat shapes painted under the signpost strokes so the board reads as a solid plank over the hills. */
+  /** Flat shapes painted under the sign strokes so the paper reads as solid over the painting. */
   signBoard: {
-    shadow: 'M14 42 L192 36 L216 60 L194 84 L18 88 Z',
-    plank: 'M9 35 L186 29 L211 52 L188 75 L13 79 Z',
+    shadow: 'M34 38 L186 38 L185 256 L174 264 L38 262 Z',
+    plank: 'M30 30 L180 30 L179 248 L170 256 L34 254 L30 240 Z',
   },
   pole: (seed: number, height: number): Stroke[] => [
     stroke([[10, 0], [12, height]], 4.5, { seed, start: 0.02, end: 0.05 }),
