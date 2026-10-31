@@ -46,7 +46,9 @@ const MOODS: Mood[] = [
 const NAV_STATIONS: StationName[] = ['hero', 'line', 'house', 'lectern', 'repos', 'mail'];
 
 /** How far a hanging sign rises above the ground; the pole's foot is at the bottom of its box. */
-const SIGN_HEIGHT = 296;
+const SIGN_HEIGHT = 396;
+/** Where the blank paper sits inside the board picture, as shares of its width and height. */
+const BOARD_PAPER = { left: 0.163, right: 0.839, top: 0.214, bottom: 0.73 };
 
 function place(element: HTMLElement, x: number, styles: Partial<CSSStyleDeclaration> = {}) {
   element.style.left = `${x}px`;
@@ -94,13 +96,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   }
 
   function drawSign(name: keyof typeof signs, animate = false) {
-    const svg = $<SVGSVGElement>(signs[name], 'svg');
-    renderScene(svg, worldProps.signpost(signSeeds[name]), { animate });
-    const defs = svg.querySelector('defs')!;
-    defs.after(
-      svgElement('path', { d: worldProps.signBoard.shadow, class: 'station-sign-shadow' }),
-      svgElement('path', { d: worldProps.signBoard.plank, class: 'station-sign-plank' })
-    );
+    renderScene($<SVGSVGElement>(signs[name], 'svg'), worldProps.signpost(signSeeds[name]), { animate });
   }
   const process = $(root, '.station-process');
   const repos = $(root, '.station-repos');
@@ -276,10 +272,11 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     place(signs.estante, x, { top: `${ground - SIGN_HEIGHT}px` });
     x += 250;
 
-    const lecternScale = Math.min(1.45, (ground - topbar - 90) / 270);
+    const lecternWidth = Math.min(340, viewport * 0.7);
+    const lecternHeight = lecternWidth * (498 / 620);
     stations.lectern = x;
-    place(lectern, x, { top: `${ground - 256 * lecternScale}px`, width: `${160 * lecternScale}px`, height: `${260 * lecternScale}px` });
-    x += 160 * lecternScale + viewport * 0.25;
+    place(lectern, x, { top: `${ground - lecternHeight + 8}px`, width: `${lecternWidth}px`, height: `${lecternHeight}px` });
+    x += lecternWidth + viewport * 0.25;
 
     stations.atelie = x;
     place(signs.atelie, x, { top: `${ground - SIGN_HEIGHT}px` });
@@ -287,11 +284,16 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
 
     const reposColumns = mobile ? 2 : 4;
     const reposWidth = Math.min(reposColumns * 220 + 60, viewport * 0.92);
-    const reposHeight = Math.min(ground - topbar - 110, 470);
+    // The stone feet stand in front of the ground line, which gives the walk its depth
+    const paperShare = BOARD_PAPER.bottom - BOARD_PAPER.top;
+    const boardFeet = ground + 60;
+    const reposHeight = (boardFeet - topbar - 10) * paperShare;
+    const reposMargin = (reposWidth * BOARD_PAPER.left) / (BOARD_PAPER.right - BOARD_PAPER.left);
+    x += reposMargin;
     stations.repos = x;
-    place(repos, x, { top: `${ground - reposHeight - 74}px`, width: `${reposWidth}px`, height: `${reposHeight}px` });
+    place(repos, x, { top: `${boardFeet - (reposHeight * (1 - BOARD_PAPER.top)) / paperShare}px`, width: `${reposWidth}px`, height: `${reposHeight}px` });
     repos.style.setProperty('--repo-columns', String(reposColumns));
-    x += reposWidth + viewport * 0.18;
+    x += reposWidth + reposMargin + viewport * 0.18;
 
     const noteWidth = Math.min(340, viewport * 0.62);
     stations.mail = x;
@@ -306,6 +308,9 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     stations.desk = x;
     place(desk, x, { top: `${ground - 200}px` });
     x += 260 + viewport * 0.35;
+
+    const signScale = Math.min(1, (ground - topbar - 16) / SIGN_HEIGHT);
+    Object.values(signs).forEach((sign) => (sign.style.scale = String(signScale)));
 
     const width = Math.max(x, viewport * 2);
     const random = seededRandom(Math.round(width));
@@ -433,14 +438,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
       stroke(sag, 1.6, { seed: 1405, start: 0.01, end: 0.01 }),
     ]);
 
-    renderScene($<SVGSVGElement>(lectern, '.station-lectern-art'), worldProps.lectern(1450));
-    renderScene($<SVGSVGElement>(lectern, '.station-lectern-page'), worldProps.lecternPage(1470));
-
     process.querySelectorAll<SVGSVGElement>('.process-flag svg').forEach((svg, index) => renderScene(svg, worldProps.flag(2400 + index * 10)));
-    const boardBox = { width: repos.clientWidth, height: repos.clientHeight };
-    const reposArt = $<SVGSVGElement>(repos, '.station-repos-art');
-    reposArt.setAttribute('viewBox', `0 0 ${boardBox.width} ${boardBox.height + 80}`);
-    renderScene(reposArt, [...roughRect(4, 4, boardBox.width - 8, boardBox.height - 8, 2.6, 2501), ...worldProps.boardLegs(2510, boardBox.width, boardBox.height)]);
     renderScene($<SVGSVGElement>(mail, '.station-mail-art'), worldProps.mailbox(2700));
     renderScene($<SVGSVGElement>(mail, '.station-mail-flag'), worldProps.mailFlag(2710));
     const note = $(mail, '.station-mail-note');
@@ -448,7 +446,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     noteFrame.setAttribute('viewBox', `0 0 ${note.offsetWidth} ${note.offsetHeight}`);
     renderScene(noteFrame, roughRect(3, 3, note.offsetWidth - 6, note.offsetHeight - 6, 1.8, 2720));
 
-    renderScene($<SVGSVGElement>(house, '.station-house-art'), worldProps.house(1500));
     const boardRect = { width: board.offsetWidth, height: board.offsetHeight };
     const boardFrame = $<SVGSVGElement>(board, '.station-board-frame');
     boardFrame.setAttribute('viewBox', `0 0 ${boardRect.width} ${boardRect.height}`);
@@ -495,14 +492,10 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     },
     estante: () => drawSign('estante', true),
     lectern: () => {
-      renderScene($<SVGSVGElement>(lectern, '.station-lectern-art'), worldProps.lectern(1450), { animate: true, pace: 1.2 });
       mel.say(pick({ pt: 'tem um livro ali!', en: 'there’s a book there!' }));
     },
     sobre: () => drawSign('sobre', true),
-    house: () => {
-      renderScene($<SVGSVGElement>(house, '.station-house-art'), worldProps.house(1500), { animate: true });
-      boardBars?.animate(0.4);
-    },
+    house: () => boardBars?.animate(0.4),
     end: () => renderScene($<SVGSVGElement>(end, 'svg'), worldProps.enso(1700), { animate: true, pace: 0.6 }),
     desk: () => {
       renderScene($<SVGSVGElement>(desk, '.station-desk-art'), worldProps.desk(1750), { animate: true });
@@ -574,7 +567,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
       const next = value.toFixed(1);
       if (next === windValue) return;
       windValue = next;
-      root.querySelectorAll<HTMLElement>('.line-paper, .station-lectern-page, .station-sign').forEach((element) => element.style.setProperty('--wind', next));
+      root.querySelectorAll<HTMLElement>('.line-paper, .station-sign').forEach((element) => element.style.setProperty('--wind', next));
     };
     const frontSkew = gsap.quickTo(layers.front, 'skewX', { duration: 0.9, ease: 'elastic.out(1, 0.35)' });
     gsap.set(layers.front, { transformOrigin: '50% 100%' });

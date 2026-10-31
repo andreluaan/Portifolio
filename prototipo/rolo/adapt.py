@@ -1,4 +1,4 @@
-"""Prepares André's painting as the world's background. It is used as it is: only resized, never repainted.
+"""Prepares André's painting as the world's background. It is never repainted: only lightened and resized.
 
 Run: python prototipo/rolo/adapt.py
 Output: public/images/rolo/ (scroll-<height>-0.webp) and src/data/rolo.json
@@ -14,7 +14,10 @@ OUTPUT = ROOT / "public" / "images" / "rolo"
 MANIFEST = ROOT / "src" / "data" / "rolo.json"
 SIZES = {1400: 82, 800: 78}
 
-source = Image.open(Path(__file__).with_name("original.webp")).convert("RGB")
+# Only the tones move: the paper goes close to white and the blacks ease, so what stands on top keeps its contrast
+LIGHTEN = [min(255, round(255 * (min(value, 232) / 232) ** 0.62 * 0.74 + 66)) for value in range(256)]
+
+source = Image.open(Path(__file__).with_name("original.webp")).convert("RGB").point(LIGHTEN * 3)
 for height, quality in SIZES.items():
     size = (round(source.width * height / source.height), height)
     source.resize(size, Image.LANCZOS).save(OUTPUT / f"scroll-{height}-0.webp", quality=quality, method=6)

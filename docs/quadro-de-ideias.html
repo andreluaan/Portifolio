@@ -1,0 +1,386 @@
+<title>Quadro de Ideias do Portfólio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Hanken+Grotesk:wght@400;500;600&family=Nanum+Pen+Script&display=swap">
+<style>
+  /* Layout: a handscroll of five hanging columns, read from what is moving now to what was set aside. */
+  :root {
+    color-scheme: light;
+    --paper: #f3f3f0;
+    --sheet: #fbfbf9;
+    --mist: #dcdcd8;
+    --wash: #8d8f8b;
+    --soft: #4b4c4a;
+    --ink: #151515;
+    --display: 'Shippori Mincho B1', 'Hiragino Mincho ProN', Georgia, serif;
+    --body: 'Hanken Grotesk', 'Segoe UI', system-ui, sans-serif;
+    --hand: 'Nanum Pen Script', 'Segoe Print', cursive;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.45; }
+  .page { display: grid; gap: 20px; padding-block: 28px 44px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 28px; }
+  h1 { margin: 0; font-family: var(--display); font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1; letter-spacing: -0.02em; text-wrap: balance; }
+  .lede { margin: 6px 0 0; font-family: var(--hand); font-size: 1.45rem; line-height: 1.1; color: var(--soft); }
+  .tally { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0; font-variant-numeric: tabular-nums; color: var(--soft); }
+  .tally strong { font-family: var(--display); font-size: 1.25rem; color: var(--ink); }
+  .tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  input, select, textarea, button { font: inherit; color: var(--ink); }
+  input, select, textarea { min-width: 0; background: var(--sheet); border: 1px solid var(--wash); padding: 8px 10px; }
+  #busca { flex: 1 1 220px; }
+  button { background: var(--sheet); border: 1.5px solid var(--ink); padding: 8px 14px; cursor: pointer; }
+  button:hover:not(:disabled) { background: var(--ink); color: var(--sheet); }
+  button:disabled { border-color: var(--wash); color: var(--wash); cursor: default; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+  .chip { border-color: var(--wash); padding: 5px 11px; font-size: 0.86rem; }
+  .board { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  .column { position: relative; display: grid; gap: 10px; min-width: 0; min-height: 180px; padding: 22px 10px 14px; background: var(--mist); }
+  .column::before { content: ''; position: absolute; left: -5px; right: -5px; top: 0; height: 8px; background: var(--ink); }
+  .column { transition: background 0.15s; }
+  .column.is-over { background: var(--wash); outline: 2.5px solid var(--ink); outline-offset: 3px; }
+  body.is-dragging { cursor: grabbing; user-select: none; }
+  body.is-dragging .column:not(.is-over) { opacity: 0.72; }
+  .column h2 { margin: 0; font-family: var(--display); font-size: 1.15rem; display: flex; justify-content: space-between; gap: 8px; }
+  .column h2 span { font-variant-numeric: tabular-nums; color: var(--soft); }
+  .column > p { margin: 0; font-size: 0.82rem; color: var(--soft); }
+  .cards { display: grid; gap: 10px; }
+  .card { position: relative; display: grid; gap: 7px; min-width: 0; padding: 11px 12px 10px; background: var(--sheet); cursor: grab; transition: transform 0.15s, box-shadow 0.15s; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 14px -10px var(--ink); }
+  .grip { position: absolute; right: 2px; top: 2px; width: 34px; height: 34px; display: grid; place-items: center; color: var(--wash); font-size: 1.1rem; touch-action: none; }
+  .number + h3, .card > h3:first-of-type { padding-right: 24px; }
+  /* While dragged, the card itself stays in the flow as the slot showing where it will land */
+  .card.is-slot { background: transparent; outline: 2px dashed var(--ink); outline-offset: -2px; box-shadow: none; transform: none; }
+  .card.is-slot > * { visibility: hidden; }
+  .card.is-ghost { position: fixed; left: 0; top: 0; z-index: 30; margin: 0; pointer-events: none; cursor: grabbing; box-shadow: 0 22px 28px -12px rgb(21 21 21 / 0.55); transition: none; }
+  .card.is-landing { transition: transform 0.18s ease-out; }
+  .card.is-landed { animation: landed 0.7s ease-out; }
+  @keyframes landed { from { outline: 2.5px solid var(--ink); outline-offset: 3px; } to { outline: 2.5px solid transparent; outline-offset: 8px; } }
+  .cards:has(.card) .empty { display: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .card, .column, .card.is-landing { transition: none; }
+    .card:hover { transform: none; }
+    .card.is-landed { animation: none; }
+  }
+  .card header { display: block; }
+  .number { font-family: var(--hand); font-size: 1.2rem; line-height: 1; color: var(--wash); }
+  .card h3 { margin: 0; font-family: var(--display); font-size: 0.98rem; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px; }
+  .pill { padding: 1px 7px; border: 1px solid var(--wash); font-size: 0.74rem; }
+  .pill.is-high { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
+  details { font-size: 0.84rem; color: var(--soft); }
+  summary { cursor: pointer; }
+  details p { margin: 5px 0 0; overflow-wrap: anywhere; }
+  .empty { margin: 0; padding: 14px 8px; font-family: var(--hand); font-size: 1.2rem; line-height: 1.1; color: var(--soft); text-align: center; }
+  dialog { width: min(460px, calc(100vw - 32px)); padding: 20px; background: var(--sheet); border: 1.5px solid var(--ink); }
+  dialog::backdrop { background: rgb(21 21 21 / 0.35); }
+  dialog form { display: grid; gap: 10px; }
+  dialog h2 { margin: 0; font-family: var(--display); }
+  dialog label { display: grid; gap: 3px; font-size: 0.86rem; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .actions { display: flex; justify-content: flex-end; gap: 8px; }
+  #aviso { margin: 0; color: var(--soft); }
+  @media (max-width: 1080px) { .board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .board { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<div class="page">
+  <header>
+    <div>
+      <h1>Quadro de Ideias</h1>
+      <p class="lede">o que está na bancada, o que vem depois e o que ficou guardado</p>
+    </div>
+    <p class="tally" id="tally"></p>
+  </header>
+  <div class="tools">
+    <input id="busca" type="search" placeholder="Buscar ideia" aria-label="Buscar ideia">
+    <button class="chip" type="button" data-filter="alto" aria-pressed="false">Impacto alto</button>
+    <button class="chip" type="button" data-filter="P" aria-pressed="false">Esforço pequeno</button>
+    <button id="desfazer" type="button" title="Ctrl+Z" disabled>Desfazer</button>
+    <button id="nova" type="button">+ Nova ideia</button>
+  </div>
+  <p id="aviso" role="status">Carregando as ideias…</p>
+  <main class="board" id="board"></main>
+</div>
+
+<dialog id="dialogo">
+  <form id="formulario" method="dialog">
+    <h2>Nova ideia</h2>
+    <label>Ideia <input id="campo-titulo" required maxlength="160"></label>
+    <div class="row">
+      <label>Esforço <select id="campo-esforco"><option>P</option><option selected>M</option><option>G</option></select></label>
+      <label>Impacto <select id="campo-impacto"><option>baixo</option><option selected>médio</option><option>alto</option></select></label>
+    </div>
+    <label>Coluna <select id="campo-coluna"></select></label>
+    <label>Observação <textarea id="campo-nota" rows="3" maxlength="500"></textarea></label>
+    <div class="actions">
+      <button id="cancelar" type="button">Cancelar</button>
+      <button type="submit" value="salvar">Adicionar</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  const COLUMNS = [
+    { id: 'andamento', title: 'Em andamento', hint: 'Na bancada agora' },
+    { id: 'proximas', title: 'Próximas', hint: 'Aprovadas, na fila' },
+    { id: 'propostas', title: 'Propostas', hint: 'Esperando sua decisão' },
+    { id: 'feitas', title: 'Feitas', hint: 'Já estão no site' },
+    { id: 'arquivadas', title: 'Arquivadas', hint: 'Testadas e deixadas de lado' },
+  ];
+  const IMPACT_ORDER = { alto: 0, 'médio': 1, baixo: 2 };
+  const board = document.getElementById('board');
+  const notice = document.getElementById('aviso');
+  const search = document.getElementById('busca');
+  const dialog = document.getElementById('dialogo');
+  const filters = new Set();
+  let ideas = [];
+  let store = null;
+  let readOnly = false;
+  let dragging = false;
+  let landedId = null;
+
+  const element = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+
+  const undoButton = document.getElementById('desfazer');
+  const undoSteps = [];
+
+  function remember(step) {
+    undoSteps.push(step);
+    undoButton.disabled = false;
+  }
+
+  function refuseWrites() {
+    readOnly = true;
+    notice.textContent = 'Você pode ver este quadro, mas não alterar.';
+    notice.hidden = false;
+    render();
+  }
+
+  function move(id, column) {
+    const idea = ideas.find((item) => item.id === id);
+    if (!store || readOnly || !idea || idea.coluna === column) return;
+    const from = idea.coluna;
+    idea.coluna = column;
+    landedId = id;
+    store.doc(id).update({ coluna: column }).then(() => remember(() => {
+      landedId = id;
+      return store.doc(id).update({ coluna: from });
+    }), refuseWrites);
+  }
+
+  const stepColumn = (idea, direction) => COLUMNS[COLUMNS.findIndex(({ id }) => id === idea.coluna) + direction]?.id;
+
+  function startDrag(event, node, idea) {
+    const rect = node.getBoundingClientRect();
+    const grab = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    const start = { x: event.clientX, y: event.clientY };
+    let ghost = null;
+    let target = null;
+
+    const place = (x, y) => {
+      ghost.style.transform = `translate(${x - grab.x}px, ${y - grab.y}px) rotate(2.5deg) scale(1.04)`;
+      const column = document.elementFromPoint(x, y)?.closest('.column') ?? null;
+      if (column === target) return;
+      target?.classList.remove('is-over');
+      target = column;
+      if (!target) return;
+      target.classList.add('is-over');
+      target.querySelector('.cards').append(node);
+    };
+    const onMove = (moved) => {
+      if (!ghost) {
+        if (Math.hypot(moved.clientX - start.x, moved.clientY - start.y) < 6) return;
+        ghost = node.cloneNode(true);
+        ghost.classList.add('is-ghost');
+        ghost.style.width = `${rect.width}px`;
+        document.body.append(ghost);
+        node.classList.add('is-slot');
+        document.body.classList.add('is-dragging');
+        dragging = true;
+      }
+      place(moved.clientX, moved.clientY);
+      const edge = 70;
+      if (moved.clientY > innerHeight - edge) scrollBy(0, 14);
+      else if (moved.clientY < edge) scrollBy(0, -14);
+    };
+    const stop = (drop) => {
+      removeEventListener('pointermove', onMove);
+      removeEventListener('pointerup', onUp);
+      removeEventListener('pointercancel', onCancel);
+      removeEventListener('keydown', onEscape);
+      if (!ghost) return;
+      target?.classList.remove('is-over');
+      document.body.classList.remove('is-dragging');
+      if (drop && target) move(idea.id, target.dataset.column);
+      const slot = node.getBoundingClientRect();
+      const finish = () => {
+        ghost.remove();
+        dragging = false;
+        render();
+      };
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !drop || !target) return finish();
+      ghost.classList.add('is-landing');
+      ghost.style.transform = `translate(${slot.left}px, ${slot.top}px)`;
+      setTimeout(finish, 180);
+    };
+    const onUp = () => stop(true);
+    const onCancel = () => stop(false);
+    const onEscape = (key) => key.key === 'Escape' && stop(false);
+    addEventListener('pointermove', onMove);
+    addEventListener('pointerup', onUp);
+    addEventListener('pointercancel', onCancel);
+    addEventListener('keydown', onEscape);
+  }
+
+  function undo() {
+    const step = undoSteps.pop();
+    undoButton.disabled = !undoSteps.length;
+    step?.().catch(refuseWrites);
+  }
+
+  undoButton.addEventListener('click', undo);
+  window.addEventListener('keydown', (event) => {
+    const typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName ?? '');
+    if (!(event.ctrlKey || event.metaKey) || event.shiftKey || event.key.toLowerCase() !== 'z' || typing || dialog.open) return;
+    event.preventDefault();
+    undo();
+  });
+
+  function card(idea) {
+    const node = element('article', 'card');
+    node.dataset.id = idea.id;
+    if (idea.id === landedId) node.classList.add('is-landed');
+    if (!readOnly) {
+      node.tabIndex = 0;
+      node.setAttribute('aria-keyshortcuts', 'ArrowLeft ArrowRight');
+      node.title = 'Arraste para mover, ou use as setas ← → do teclado';
+      node.append(element('span', 'grip', '⠿'));
+      node.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0 || event.target.closest('details')) return;
+        // On a touch screen the grip starts the drag, so the rest of the card still scrolls the page
+        if (event.pointerType === 'touch' && !event.target.closest('.grip')) return;
+        startDrag(event, node, idea);
+      });
+      node.addEventListener('keydown', (event) => {
+        const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+        const column = direction && stepColumn(idea, direction);
+        if (!column || event.target !== node) return;
+        event.preventDefault();
+        move(idea.id, column);
+        render();
+        board.querySelector(`[data-id="${idea.id}"]`)?.focus();
+      });
+    }
+    if (idea.numero) node.append(element('span', 'number', `#${idea.numero}`));
+    node.append(element('h3', '', idea.titulo));
+    const meta = element('div', 'meta');
+    if (idea.esforco) meta.append(element('span', 'pill', `esforço ${idea.esforco}`));
+    if (idea.impacto) meta.append(element('span', `pill${idea.impacto === 'alto' ? ' is-high' : ''}`, `impacto ${idea.impacto}`));
+    if (meta.children.length) node.append(meta);
+    if (idea.nota) {
+      const details = element('details');
+      details.append(element('summary', '', 'Detalhes'), element('p', '', idea.nota));
+      node.append(details);
+    }
+    return node;
+  }
+
+  function visible(idea) {
+    const query = search.value.trim().toLowerCase();
+    if (query && !`${idea.numero ?? ''} ${idea.titulo} ${idea.nota ?? ''}`.toLowerCase().includes(query)) return false;
+    if (filters.has('alto') && idea.impacto !== 'alto') return false;
+    if (filters.has('P') && idea.esforco !== 'P') return false;
+    return true;
+  }
+
+  function render() {
+    // A snapshot arriving mid-drag must not pull the board out from under the pointer; dropping renders it
+    if (dragging) return;
+    board.replaceChildren(...COLUMNS.map(({ id, title, hint }) => {
+      const column = element('section', 'column');
+      column.dataset.column = id;
+      const items = ideas.filter((idea) => idea.coluna === id && visible(idea))
+        .sort((a, b) => (IMPACT_ORDER[a.impacto] ?? 3) - (IMPACT_ORDER[b.impacto] ?? 3) || (a.numero ?? 999) - (b.numero ?? 999));
+      const heading = element('h2', '', title);
+      heading.append(element('span', '', String(items.length)));
+      const cards = element('div', 'cards');
+      cards.append(...(items.length ? items.map(card) : [element('p', 'empty', 'nada por aqui')]));
+      column.append(heading, element('p', '', hint), cards);
+      return column;
+    }));
+    landedId = null;
+    const count = (id) => ideas.filter((idea) => idea.coluna === id).length;
+    const tally = document.getElementById('tally');
+    tally.replaceChildren(...[['em andamento', 'andamento'], ['na fila', 'proximas'], ['feitas', 'feitas']].map(([label, id]) => {
+      const item = element('span');
+      item.append(element('strong', '', String(count(id))), ` ${label}`);
+      return item;
+    }));
+    document.getElementById('nova').hidden = readOnly;
+    undoButton.hidden = readOnly;
+  }
+
+  search.addEventListener('input', render);
+  document.querySelectorAll('.chip').forEach((chip) => chip.addEventListener('click', () => {
+    const key = chip.dataset.filter;
+    filters.has(key) ? filters.delete(key) : filters.add(key);
+    chip.setAttribute('aria-pressed', String(filters.has(key)));
+    render();
+  }));
+
+  const columnField = document.getElementById('campo-coluna');
+  COLUMNS.forEach(({ id, title }) => columnField.append(new Option(title, id, false, id === 'propostas')));
+  document.getElementById('nova').addEventListener('click', () => dialog.showModal());
+  document.getElementById('cancelar').addEventListener('click', () => dialog.close());
+  document.getElementById('formulario').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const title = document.getElementById('campo-titulo');
+    const note = document.getElementById('campo-nota');
+    if (!store) return;
+    const next = Math.max(0, ...ideas.map((idea) => idea.numero ?? 0)) + 1;
+    const id = `ideia-${next}`;
+    store.doc(id).set({
+      numero: next,
+      titulo: title.value.trim(),
+      esforco: document.getElementById('campo-esforco').value,
+      impacto: document.getElementById('campo-impacto').value,
+      coluna: columnField.value,
+      nota: note.value.trim(),
+    }).then(() => {
+      remember(() => store.doc(id).delete());
+      title.value = '';
+      note.value = '';
+      dialog.close();
+    })
+      .catch(() => { notice.textContent = 'Não foi possível salvar esta ideia.'; });
+  });
+
+  render();
+  (async () => {
+    const timeout = setTimeout(() => { notice.textContent = 'O quadro está demorando para responder. Abra de novo em instantes.'; }, 10000);
+    const db = await claude.use('db');
+    if (!db) {
+      clearTimeout(timeout);
+      notice.textContent = 'Entre na sua conta para ver as ideias.';
+      return;
+    }
+    const user = await claude.use('user');
+    readOnly = (await user?.can('data.write')) === false;
+    store = db.collection('ideias');
+    store.onSnapshot((snapshot) => {
+      clearTimeout(timeout);
+      ideas = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      notice.textContent = ideas.length ? '' : 'Ainda não há ideias. Use “Nova ideia” para adicionar a primeira.';
+      notice.hidden = !notice.textContent;
+      render();
+    }, () => {
+      clearTimeout(timeout);
+      notice.textContent = 'Não foi possível carregar as ideias.';
+    });
+  })();
+</script>

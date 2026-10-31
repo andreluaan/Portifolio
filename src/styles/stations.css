@@ -1,8 +1,8 @@
 /* Signs */
 .station-sign {
   width: 200px;
-  height: 300px;
-  transform-origin: 8% 100%;
+  height: 400px;
+  transform-origin: 95% 100%;
   transition: transform 0.5s var(--ease-ink);
   rotate: calc(var(--wind, 0) * 0.25deg);
 }
@@ -18,29 +18,29 @@
   height: 100%;
 }
 
-.station-sign-plank {
-  fill: #fbfbf9;
-}
-
-.station-sign-shadow {
-  fill: var(--wash);
-  opacity: 0.35;
-}
-
-.station-sign img {
+.station-sign-banner {
   position: absolute;
-  left: 18%;
-  top: 13%;
-  width: 67%;
+  left: 0;
+  top: 2%;
+  width: 88%;
   height: auto;
-  pointer-events: none;
+  filter: drop-shadow(0 10px 10px rgb(21 21 21 / 0.12));
+}
+
+.station-sign-art {
+  position: absolute;
+  left: 13%;
+  top: 22%;
+  width: 56%;
+  height: auto;
+  mix-blend-mode: multiply;
 }
 
 .station-sign-label {
   position: absolute;
-  left: 15%;
-  top: 62%;
-  width: 75%;
+  left: 8%;
+  top: 56%;
+  width: 66%;
   font-family: var(--font-display);
   font-size: 0.8rem;
   line-height: 1.3;
@@ -53,9 +53,9 @@
 
 .station-sign-rule {
   position: absolute;
-  left: 34%;
-  top: 77%;
-  width: 37%;
+  left: 26%;
+  top: 68%;
+  width: 30%;
   height: 1px;
   background: var(--ink-soft);
 }
@@ -143,13 +143,14 @@
 }
 
 /* GitHub workshop board */
+/* The board's paper is the content box: the picture reaches past it by the paper's share of the whole image */
 .station-repos-art {
   position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 2;
-  width: 100%;
-  height: calc(100% + 80px);
+  left: -24.1%;
+  top: -41.5%;
+  max-width: none;
+  width: 147.9%;
+  height: 193.8%;
   pointer-events: none;
 }
 
@@ -159,8 +160,7 @@
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 14px;
   height: 100%;
-  padding: 22px 26px 18px;
-  background: #f3f3f1;
+  padding: 12px 18px 8px;
 }
 
 .station-repos-head h2 {
@@ -251,6 +251,10 @@
 .station-repos-all {
   justify-self: end;
   font-size: 0.9rem;
+}
+
+.repo-card:nth-child(n + 9) {
+  display: none;
 }
 
 /* Mailbox */
@@ -437,9 +441,11 @@
 @media (max-width: 700px) {
   .station-repos-list {
     grid-auto-rows: auto;
+    gap: 8px;
   }
 
-  .repo-card:nth-child(n + 7) {
+  /* The board's paper is short on a phone: two whole cards, and the link to the rest, read better than cut ones */
+  .repo-card:nth-child(n + 3) {
     display: none;
   }
 

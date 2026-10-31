@@ -20,12 +20,16 @@ PANELS = {
     "atelie": (1390, 200, 1660, 466),
 }
 
+# The branch is the faintest drawing in the reference; this brings it level with the others
+INK_GAIN = {"processo": 2.4}
+
 OUTPUT.mkdir(parents=True, exist_ok=True)
 source = Image.open(Path(__file__).with_name("placas-original.webp")).convert("L")
 for name, box in PANELS.items():
     crop = source.crop(box)
     crop = crop.resize((416, 410), Image.LANCZOS)
     ink = np.clip(1 - np.asarray(crop, dtype=np.float32) / 226, 0, 1) ** 1.15
+    ink = np.clip(ink * INK_GAIN.get(name, 1), 0, 1)
     height, width = ink.shape
     across = np.minimum(np.arange(width), np.arange(width)[::-1]) / (width * 0.1)
     down = np.minimum(np.arange(height), np.arange(height)[::-1]) / (height * 0.1)

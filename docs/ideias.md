@@ -2,6 +2,8 @@
 
 Lista viva do que o portfólio pode ganhar. Ideia nova entra aqui, e o status muda quando a peça muda.
 
+**Quadro visual:** https://claude.ai/artifact/XYsnoADderm8nbh6ZZ6f5o
+
 **Status:** ✅ feito · 🟡 parcial · ⬜ pendente · 💭 proposta nova, ainda não aprovada
 **Esforço:** P, M, G · **Impacto:** baixo, médio, alto
 **Última conferência no código:** 2026-10-30
@@ -33,6 +35,14 @@ As ideias #1 a #20 vêm do relatório em [referencias.md](referencias.md). Toda 
 | 22 | Segredo para quem abandonar ou vencer um minijogo | 💭 | P | baixo | `unlock()` no fim da partida; depende da #12 | Gatilho do samuelrizzon.dev |
 | 23 | Recado de volta do Borrão quando o visitante retorna | 💭 | P | médio | localStorage com a última visita | Proposta do Claude |
 | 24 | Fundo como rolo emaki único em sumi-e: pintura contínua, sem divisão por cenas, só neutros, com áreas calmas atrás do conteúdo | ⬜ | G | alto | WebP pré-pintado em blocos + overlay leve | Feito com a pintura enviada pelo André, usada sem alteração |
+
+## Pedidos do André
+
+| # | Ideia | Status | Esforço | Impacto | Técnica | Observação |
+|---|---|---|---|---|---|---|
+| 25 | Chão novo: mais grama e clima de cidadezinha japonesa, com ruas, cercas, lanternas e casinhas | ⬜ | G | alto | Faixa contínua pedida ao ChatGPT, em bloco repetível, no lugar da linha e da mancha atuais | Definir antes se é chão de terra, pedra ou madeira; precisa manter a faixa clara para os personagens |
+| 26 | Minigame com a Mel: ela pula e sobe nas coisas do mundo em busca de algo | ⬜ | G | alto | Plataforma em canvas sobre `mel.ts`, com colisão nas peças e placar em segredo do passaporte | Definir o que ela procura e como o jogo começa; a Mel hoje só caminha com a rolagem |
+| 27 | Mel com movimento em profundidade, como nos beat 'em ups antigos das Tartarugas Ninja: frente, trás, cima e baixo no chão | ⬜ | G | alto | Faixa de chão com eixo Y próprio, Mel maior quando está mais perto e ordem de camadas pela posição | Combina com #26. O quadro do Ateliê com os pés à frente da linha do chão é a referência dessa profundidade: manter assim |
 
 ## Feitas
 

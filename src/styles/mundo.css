@@ -292,9 +292,9 @@
 .station-house-art {
   position: absolute;
   left: 0;
-  bottom: 0;
-  width: 260px;
-  height: 240px;
+  bottom: -4px;
+  width: 290px;
+  height: auto;
 }
 
 .station-board {
@@ -425,30 +425,8 @@
   transition: transform 0.4s var(--ease-ink);
 }
 
-.station-lectern-page {
-  position: absolute;
-  left: 50%;
-  top: 15%;
-  width: 30%;
-  height: auto;
-  aspect-ratio: 60 / 44;
-  transform-origin: 0 90%;
-  animation: page-flutter 2.8s ease-in-out infinite;
-  rotate: calc(var(--wind, 0) * -3deg);
-}
-
-@keyframes page-flutter {
-  0%, 100% { transform: rotate(0deg) scaleX(1); }
-  40% { transform: rotate(-16deg) scaleX(0.82); }
-  60% { transform: rotate(-10deg) scaleX(0.9); }
-}
-
 .station-lectern-button:hover .station-lectern-art {
   transform: translateY(-6px) rotate(-1.5deg);
-}
-
-.station-lectern-button:hover .station-lectern-page {
-  animation-duration: 0.9s;
 }
 
 .station-lectern-label {

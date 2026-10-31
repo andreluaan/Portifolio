@@ -163,20 +163,10 @@ export const deskObjects = {
 
 export const worldProps = {
   signpost: (seed: number): Stroke[] => [
-    stroke([[0, 292], [34, 294]], 10, { tone: 'mist', filter: 'wash', seed: seed + 3 }),
-    stroke([[14, 6], [16, 294]], 4.5, { seed, start: 0.02, end: 0.05 }),
-    stroke([[6, 12], [100, 9], [198, 13]], 2.4, { seed: seed + 1, start: 0.02, end: 0.05 }),
-    stroke([[46, 11], [46, 30]], 1.2, { seed: seed + 2, start: 0.01, end: 0.01 }),
-    stroke([[164, 12], [164, 30]], 1.2, { seed: seed + 4, start: 0.01, end: 0.01 }),
-    stroke([[192, 14], [192, 74]], 1.1, { seed: seed + 5, start: 0.01, end: 0.01 }),
-    stroke([[192, 74], [192, 112]], 4.5, { seed: seed + 6, start: 0.05, end: 0.05 }),
-    stroke([[30, 30], [180, 30], [179, 248], [170, 256], [34, 254], [30, 240], [30, 30]], 1.3, { seed: seed + 7, start: 0.01, end: 0.03 }),
+    stroke([[172, 396], [200, 398]], 10, { tone: 'mist', filter: 'wash', seed: seed + 1 }),
+    stroke([[188, 4], [190, 398]], 4.5, { seed, start: 0.02, end: 0.05 }),
+    stroke([[196, 9], [140, 7], [80, 8]], 2.6, { seed: seed + 2, start: 0.05, end: 0.02 }),
   ],
-  /** Flat shapes painted under the sign strokes so the paper reads as solid over the painting. */
-  signBoard: {
-    shadow: 'M34 38 L186 38 L185 256 L174 264 L38 262 Z',
-    plank: 'M30 30 L180 30 L179 248 L170 256 L34 254 L30 240 Z',
-  },
   pole: (seed: number, height: number): Stroke[] => [
     stroke([[10, 0], [12, height]], 4.5, { seed, start: 0.02, end: 0.05 }),
     stroke([[0, 8], [24, 6]], 3, { seed: seed + 1 }),
@@ -185,46 +175,11 @@ export const worldProps = {
     stroke([[0, 30], [8, 12], [26, 4], [44, 10], [52, 30]], 3, { seed, start: 0.02, end: 0.05 }),
     stroke([[8, 24], [40, 22]], 9, { tone: 'wash', filter: 'wash', seed: seed + 1 }),
   ],
-  house: (seed: number): Stroke[] => [
-    stroke([[10, 110], [130, 20], [250, 110]], 4.4, { seed, start: 0.02 }),
-    stroke([[34, 94], [34, 230]], 3, { seed: seed + 1 }),
-    stroke([[226, 94], [226, 230]], 3, { seed: seed + 2 }),
-    stroke([[110, 230], [110, 160], [150, 160], [150, 230]], 2.6, { seed: seed + 3 }),
-    stroke([[180, 60], [180, 30], [200, 30], [200, 76]], 2.6, { seed: seed + 4 }),
-    stroke([[60, 120], [200, 116]], 20, { tone: 'mist', filter: 'wash', seed: seed + 5 }),
-    stroke([[0, 232], [260, 230]], 3, { seed: seed + 6, dry: true }),
-  ],
   enso: (seed: number): Stroke[] => [
     stroke(ellipsePoints(60, 60, 50, 48, { from: -0.6, sweep: 5.9, count: 22, seed }), 9, { seed, dry: true, start: 0.05, end: 0.5 }),
   ],
   cloud: (seed: number): Stroke[] => [stroke([[0, 20], [60, 12], [130, 18], [200, 14]], 16, { tone: 'mist', filter: 'wash', seed })],
   bird: (seed: number): Stroke[] => [stroke([[0, 8], [8, 2], [14, 8], [20, 2], [28, 8]], 1.4, { seed })],
-  lectern: (seed: number): Stroke[] => [
-    stroke([[10, 254], [150, 256]], 14, { tone: 'mist', filter: 'wash', seed: seed + 1 }),
-    stroke([[18, 250], [142, 250]], 4, { seed: seed + 2, start: 0.01, end: 0.02 }),
-    stroke([[18, 250], [22, 240], [138, 240], [142, 250]], 2.6, { seed: seed + 3, start: 0.02, end: 0.04 }),
-    stroke([[30, 240], [36, 230], [124, 230], [130, 240]], 2.4, { seed: seed + 4, start: 0.02, end: 0.04 }),
-    stroke([[80, 100], [80, 230]], 30, { tone: 'mist', filter: 'wash', seed: seed + 5, start: 0.01, end: 0.01 }),
-    stroke([[64, 230], [65, 96]], 3.4, { seed: seed + 6, start: 0.02, end: 0.05 }),
-    stroke([[96, 230], [95, 96]], 3.4, { seed: seed + 7, start: 0.02, end: 0.05 }),
-    stroke([[88, 228], [87, 104]], 6, { tone: 'wash', seed: seed + 8, dry: true }),
-    stroke(ellipsePoints(80, 150, 9, 10, { seed: seed + 9, count: 12 }), 2.2, { seed: seed + 9 }),
-    stroke([[76, 145], [76, 156], [80, 152], [84, 156], [84, 145]], 1.4, { seed: seed + 10 }),
-    stroke([[26, 92], [134, 88]], 3, { seed: seed + 11, start: 0.02, end: 0.04 }),
-    stroke([[20, 86], [40, 80], [60, 85], [80, 79], [100, 84], [120, 78], [140, 82]], 4, { seed: seed + 12, start: 0.01, end: 0.02 }),
-    stroke([[20, 86], [34, 58]], 2.6, { seed: seed + 13 }),
-    stroke([[140, 82], [126, 50]], 2.6, { seed: seed + 14 }),
-    stroke([[34, 58], [126, 50]], 2.6, { seed: seed + 15, start: 0.02, end: 0.04 }),
-    stroke([[38, 74], [58, 62], [80, 66]], 14, { tone: 'paper', filter: 'none', seed: seed + 16, start: 0.02, end: 0.05 }),
-    stroke([[80, 66], [102, 56], [124, 58]], 14, { tone: 'paper', filter: 'none', seed: seed + 17, start: 0.02, end: 0.05 }),
-    stroke([[34, 78], [58, 62], [80, 64]], 2.2, { seed: seed + 18, start: 0.02, end: 0.05 }),
-    stroke([[80, 64], [104, 52], [128, 56]], 2.2, { seed: seed + 19, start: 0.02, end: 0.05 }),
-    stroke([[34, 78], [80, 72], [128, 62]], 1.8, { seed: seed + 20, tone: 'soft' }),
-    stroke([[80, 62], [80, 72]], 2, { seed: seed + 21 }),
-    stroke([[46, 70], [70, 66]], 1.1, { seed: seed + 22, tone: 'wash' }),
-    stroke([[92, 64], [116, 60]], 1.1, { seed: seed + 23, tone: 'wash' }),
-    stroke([[108, 70], [110, 98], [104, 106]], 4, { seed: seed + 24, start: 0.1, end: 0.6 }),
-  ],
   flag: (seed: number): Stroke[] => [
     stroke([[14, 6], [16, 230]], 3.4, { seed, start: 0.02, end: 0.05 }),
     stroke([[16, 10], [190, 18], [176, 70], [192, 120], [18, 112]], 2, { seed: seed + 1, start: 0.01, end: 0.03 }),
@@ -241,15 +196,6 @@ export const worldProps = {
   mailFlag: (seed: number): Stroke[] => [
     stroke([[4, 60], [4, 4]], 3, { seed }),
     stroke([[4, 6], [26, 10], [24, 22], [4, 20]], 6, { seed: seed + 1, start: 0.02, end: 0.05 }),
-  ],
-  boardLegs: (seed: number, width: number, height: number): Stroke[] => [
-    stroke([[24, height - 20], [16, height + 70]], 5, { seed, start: 0.02, end: 0.05 }),
-    stroke([[width - 24, height - 20], [width - 16, height + 70]], 5, { seed: seed + 1, start: 0.02, end: 0.05 }),
-    stroke([[0, height + 72], [width, height + 74]], 12, { tone: 'mist', filter: 'wash', seed: seed + 2 }),
-  ],
-  lecternPage: (seed: number): Stroke[] => [
-    stroke([[4, 40], [26, 14], [56, 18]], 10, { tone: 'paper', seed: seed + 1, start: 0.02, end: 0.05, filter: 'none' }),
-    stroke([[2, 40], [24, 12], [56, 16]], 1.8, { seed, start: 0.02, end: 0.05 }),
   ],
   desk: (seed: number): Stroke[] => [
     stroke([[0, 196], [260, 198]], 12, { tone: 'mist', filter: 'wash', seed: seed + 1 }),

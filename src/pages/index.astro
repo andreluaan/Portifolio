@@ -104,8 +104,9 @@ const processSteps = [1, 2, 3, 4] as const;
           {
             signItems.map((item) => (
               <div class="mundo-station station-sign" data-sign={item.sign}>
-                <svg class="ink" viewBox="0 0 200 300" aria-hidden="true" />
-                <img src={`/images/placas/${item.sign}.webp`} alt="" width="416" height="410" loading="lazy" decoding="async" />
+                <svg class="ink" viewBox="0 0 200 400" aria-hidden="true" />
+                <img class="station-sign-banner" src="/images/pecas/placa.webp" alt="" width="420" height="909" loading="lazy" decoding="async" />
+                <img class="station-sign-art" src={`/images/placas/${item.sign}.webp`} alt="" width="416" height="410" loading="lazy" decoding="async" />
                 <span class="station-sign-label" data-i18n={item.key}>{pt(item.key)}</span>
                 <span class="station-sign-rule" aria-hidden="true"></span>
               </div>
@@ -129,7 +130,7 @@ const processSteps = [1, 2, 3, 4] as const;
           </div>
 
           <div class="mundo-station station-repos">
-            <svg class="ink station-repos-art" aria-hidden="true"></svg>
+            <img class="station-repos-art" src="/images/pecas/quadro.webp" alt="" width="1400" height="802" loading="lazy" decoding="async" />
             <div class="station-repos-board">
               <div class="station-repos-head">
                 <h2 data-i18n="repos.title">{pt('repos.title')}</h2>
@@ -165,14 +166,13 @@ const processSteps = [1, 2, 3, 4] as const;
 
           <div class="mundo-station station-lectern">
             <button class="station-lectern-button" type="button" data-i18n-label="mundo.lectern" aria-label={pt('mundo.lectern')}>
-              <svg class="ink station-lectern-art" viewBox="0 0 160 260" aria-hidden="true"></svg>
-              <svg class="ink station-lectern-page" viewBox="0 0 60 44" aria-hidden="true"></svg>
+              <img class="station-lectern-art" src="/images/pecas/estante.webp" alt="" width="620" height="498" loading="lazy" decoding="async" />
             </button>
             <p class="hand station-lectern-label" data-i18n="mundo.lectern">{pt('mundo.lectern')}</p>
           </div>
 
           <div class="mundo-station station-house">
-            <svg class="ink station-house-art" viewBox="0 0 260 240" aria-hidden="true"></svg>
+            <img class="station-house-art" src="/images/pecas/casa.webp" alt="" width="620" height="570" loading="lazy" decoding="async" />
             <div class="station-board">
               <svg class="ink station-board-frame" aria-hidden="true"></svg>
               <div class="station-board-body"></div>
