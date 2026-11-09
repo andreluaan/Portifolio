@@ -47,6 +47,10 @@ const NAV_STATIONS: StationName[] = ['hero', 'line', 'house', 'lectern', 'repos'
 
 /** How far a hanging sign rises above the ground; the pole's foot is at the bottom of its box. */
 const SIGN_HEIGHT = 396;
+/** The portrait's hanging scroll: drawn 1.35 times wider than painted, so its paper matches the portrait's shape. */
+const SCROLL_ASPECT = (700 / 1701) * 1.35;
+/** How far the scroll's lower rod hangs above the ground. */
+const SCROLL_LIFT = 26;
 /** Where the blank paper sits inside the board picture, as shares of its width and height. */
 const BOARD_PAPER = { left: 0.163, right: 0.839, top: 0.214, bottom: 0.73 };
 
@@ -211,8 +215,8 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     const stations = {} as Record<StationName, number>;
     let x = viewport * (mobile ? 0.06 : 0.07);
 
-    const sheetHeight = Math.min(ground - topbar - 30, mobile ? 360 : 560);
-    const sheetWidth = sheetHeight * 0.66;
+    const sheetHeight = Math.min(ground - topbar - 20 - SCROLL_LIFT, mobile ? 380 : 620);
+    const sheetWidth = sheetHeight * SCROLL_ASPECT;
     const textWidth = Math.min(460, viewport * (mobile ? 0.84 : 0.4));
     stations.hero = 0;
     // Mel's invisible wall: the portrait's right edge, wherever the layout puts it
@@ -220,13 +224,13 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     if (mobile) {
       place(heroText, x, { width: `${textWidth}px`, top: `${topbar + 24}px` });
       x += textWidth + 40;
-      place(heroSheet, x, { width: `${sheetWidth}px`, height: `${sheetHeight}px`, top: `${ground - sheetHeight}px` });
-      portraitRight = x + sheetWidth;
+      place(heroSheet, x, { width: `${sheetWidth}px`, height: `${sheetHeight}px`, top: `${ground - sheetHeight - SCROLL_LIFT}px` });
+      portraitRight = x + sheetWidth + 30;
       x += sheetWidth + viewport * 0.3;
     } else {
-      place(heroSheet, x, { width: `${sheetWidth}px`, height: `${sheetHeight}px`, top: `${ground - sheetHeight}px` });
-      portraitRight = x + sheetWidth;
-      x += sheetWidth + 56;
+      place(heroSheet, x, { width: `${sheetWidth}px`, height: `${sheetHeight}px`, top: `${ground - sheetHeight - SCROLL_LIFT}px` });
+      portraitRight = x + sheetWidth + 30;
+      x += sheetWidth + 86;
       place(heroText, x, { width: `${textWidth}px`, top: `${topbar + 36}px` });
       x += textWidth + viewport * 0.22;
     }
@@ -417,14 +421,21 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     }
   }
 
+  /** The mailbox rocks on its post, to say a note went in (or that one could). */
+  function nudgeMailbox() {
+    if (reduced) return;
+    gsap.fromTo($(mail, '.station-mail-art'), { rotation: -5 }, { rotation: 0, duration: 1.1, ease: 'elastic.out(1.2, 0.25)', transformOrigin: '50% 100%' });
+  }
+
   function drawStations() {
     const sheet = { width: heroSheet.offsetWidth, height: heroSheet.offsetHeight };
     const frame = $<SVGSVGElement>(heroSheet, '.station-hero-frame');
-    frame.setAttribute('viewBox', `0 0 ${sheet.width} ${sheet.height + 40}`);
+    // The scroll hangs from the arm of a slim post that stands on the ground beside it
+    frame.setAttribute('viewBox', `0 0 ${sheet.width + 40} ${sheet.height + SCROLL_LIFT}`);
     renderScene(frame, [
-      ...roughRect(4, 4, sheet.width - 8, sheet.height - 8, 2.2, 1201),
-      stroke([[sheet.width * 0.18, sheet.height - 4], [sheet.width * 0.16, sheet.height + 36]], 4.5, { seed: 1206 }),
-      stroke([[sheet.width * 0.82, sheet.height - 4], [sheet.width * 0.85, sheet.height + 36]], 4.5, { seed: 1207 }),
+      stroke([[sheet.width + 22, 0], [sheet.width + 24, sheet.height + SCROLL_LIFT]], 5, { seed: 1206, start: 0.02, end: 0.05 }),
+      stroke([[sheet.width / 2 - 10, 3], [sheet.width * 0.8, 1], [sheet.width + 30, 4]], 3, { seed: 1207, start: 0.05, end: 0.02 }),
+      stroke([[sheet.width + 4, sheet.height + SCROLL_LIFT - 2], [sheet.width + 40, sheet.height + SCROLL_LIFT]], 9, { tone: 'mist', filter: 'wash', seed: 1208 }),
     ]);
     (Object.keys(signs) as (keyof typeof signs)[]).forEach((name) => drawSign(name));
 
@@ -439,8 +450,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     ]);
 
     process.querySelectorAll<SVGSVGElement>('.process-flag svg').forEach((svg, index) => renderScene(svg, worldProps.flag(2400 + index * 10)));
-    renderScene($<SVGSVGElement>(mail, '.station-mail-art'), worldProps.mailbox(2700));
-    renderScene($<SVGSVGElement>(mail, '.station-mail-flag'), worldProps.mailFlag(2710));
     const note = $(mail, '.station-mail-note');
     const noteFrame = $<SVGSVGElement>(mail, '.station-mail-note-frame');
     noteFrame.setAttribute('viewBox', `0 0 ${note.offsetWidth} ${note.offsetHeight}`);
@@ -452,7 +461,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     renderScene(boardFrame, roughRect(4, 4, boardRect.width - 8, boardRect.height - 8, 2.4, 1601));
     renderScene($<SVGSVGElement>(end, 'svg'), worldProps.enso(1700));
 
-    renderScene($<SVGSVGElement>(desk, '.station-desk-art'), worldProps.desk(1750));
     renderScene($<SVGSVGElement>(desk, '.desk-ink svg'), deskObjects.inkBottle);
     renderScene($<SVGSVGElement>(desk, '.desk-brush svg'), deskObjects.brush);
 
@@ -484,7 +492,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     },
     mail: () => {
       mel.say(pick({ pt: 'deixa um recado!', en: 'leave a note!' }));
-      if (!reduced) gsap.fromTo($(mail, '.station-mail-flag'), { rotation: 0 }, { rotation: -80, transformOrigin: '15% 95%', duration: 0.5, yoyo: true, repeat: 3, ease: 'power2.inOut' });
+      nudgeMailbox();
     },
     line: () => {
       if (reduced) return;
@@ -498,7 +506,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     house: () => boardBars?.animate(0.4),
     end: () => renderScene($<SVGSVGElement>(end, 'svg'), worldProps.enso(1700), { animate: true, pace: 0.6 }),
     desk: () => {
-      renderScene($<SVGSVGElement>(desk, '.station-desk-art'), worldProps.desk(1750), { animate: true });
       mascot.say(t('mundo.desk'), 2600);
       // Mel spots her old friend in his corner
       mel.bark(2);
@@ -668,8 +675,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
 
   $(lectern, '.station-lectern-button').addEventListener('click', () => openBook());
 
-  const raiseFlag = () => gsap.to($(mail, '.station-mail-flag'), { rotation: -80, transformOrigin: '15% 95%', duration: 0.5, ease: 'back.out(2)' });
-  const openMail = () => openNotebook(raiseFlag);
+  const openMail = () => openNotebook(nudgeMailbox);
   $(mail, '.station-mail-box').addEventListener('click', openMail);
   $(mail, '[data-open-notebook]').addEventListener('click', openMail);
   const copyButton = $(mail, '[data-copy-email]');

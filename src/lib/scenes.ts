@@ -185,29 +185,6 @@ export const worldProps = {
     stroke([[16, 10], [190, 18], [176, 70], [192, 120], [18, 112]], 2, { seed: seed + 1, start: 0.01, end: 0.03 }),
     stroke([[0, 230], [34, 232]], 8, { tone: 'mist', filter: 'wash', seed: seed + 2 }),
   ],
-  mailbox: (seed: number): Stroke[] => [
-    stroke([[0, 214], [120, 216]], 12, { tone: 'mist', filter: 'wash', seed: seed + 1 }),
-    stroke([[58, 96], [60, 214]], 6, { seed: seed + 2, start: 0.02, end: 0.05 }),
-    stroke([[10, 96], [10, 52], [30, 30], [76, 30], [100, 50], [102, 96], [10, 96]], 3.2, { seed: seed + 3, start: 0.01, end: 0.03 }),
-    stroke([[30, 30], [52, 52], [54, 96]], 2.2, { seed: seed + 4 }),
-    stroke([[60, 62], [92, 60]], 12, { tone: 'wash', filter: 'wash', seed: seed + 5 }),
-    stroke([[18, 76], [44, 76]], 2.4, { seed: seed + 6 }),
-  ],
-  mailFlag: (seed: number): Stroke[] => [
-    stroke([[4, 60], [4, 4]], 3, { seed }),
-    stroke([[4, 6], [26, 10], [24, 22], [4, 20]], 6, { seed: seed + 1, start: 0.02, end: 0.05 }),
-  ],
-  desk: (seed: number): Stroke[] => [
-    stroke([[0, 196], [260, 198]], 12, { tone: 'mist', filter: 'wash', seed: seed + 1 }),
-    stroke([[8, 96], [252, 92]], 6, { seed: seed + 2, start: 0.01, end: 0.02 }),
-    stroke([[16, 104], [244, 100]], 2, { seed: seed + 3, tone: 'soft' }),
-    stroke([[28, 100], [24, 196]], 4, { seed: seed + 4, start: 0.02, end: 0.05 }),
-    stroke([[232, 98], [238, 196]], 4, { seed: seed + 5, start: 0.02, end: 0.05 }),
-    stroke([[60, 112], [200, 110]], 1.4, { seed: seed + 6 }),
-    stroke([[60, 112], [62, 136], [198, 134], [200, 110]], 1.6, { seed: seed + 7, start: 0.02, end: 0.05 }),
-    stroke([[122, 122], [138, 122]], 3, { seed: seed + 8 }),
-    stroke([[30, 90], [36, 70], [110, 66], [112, 88]], 1.6, { seed: seed + 9, tone: 'wash' }),
-  ],
 };
 
 // Landscape planes (shan shui): farther = lighter, wetter, no outline; mist is painted in paper between distances.

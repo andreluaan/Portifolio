@@ -6,7 +6,7 @@ Peça **uma imagem por vez**, na ordem abaixo, porque ela vai do que muda mais o
 
 **Entrega:** coloque o resultado na conversa com o Claude. Ele tira o fundo branco, encaixa a peça no site e escreve os textos por cima. O varal de projetos fica como está.
 
-**Já feitas:** 1 Estante, 2 Placa de seção, 3 Quadro do Ateliê, 4 Casa do Sobre. O 5 Quadro da ficha foi testado e descartado: a ficha fica no cartão branco. Próxima: 6 Correio.
+**Já feitas:** 1 Estante, 2 Placa de seção, 3 Quadro do Ateliê, 4 Casa do Sobre, 6 Correio, 7 Moldura do retrato e 8 Mesinha escondida. O 5 Quadro da ficha foi testado e descartado: a ficha fica no cartão branco. Faltam: 9 Bandeira do processo e 10 Ensō final.
 
 ## Estilo (colar sempre)
 

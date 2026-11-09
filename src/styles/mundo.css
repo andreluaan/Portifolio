@@ -142,28 +142,36 @@
 /* Hero */
 .station-hero-sheet {
   position: absolute;
-  background: #f5f5f3;
   /* Keeps the portrait's multiply blend inside the sheet instead of against every parallax layer, which janked scrolling. */
   isolation: isolate;
-  transform: rotate(-1.5deg);
-  transform-origin: 50% 100%;
-  box-shadow: 0 20px 30px -24px var(--shadow);
+}
+
+.station-hero-scroll {
+  position: absolute;
+  inset: 0;
+  max-width: none;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 14px 14px rgb(21 21 21 / 0.14));
 }
 
 .station-hero-frame {
   position: absolute;
   left: 0;
   top: 0;
-  width: 100%;
-  height: calc(100% + 40px);
+  z-index: -1;
+  width: calc(100% + 40px);
+  height: calc(100% + 26px);
   overflow: visible;
 }
 
 .station-hero-painting {
   position: absolute;
-  inset: 14px;
-  width: calc(100% - 28px);
-  height: calc(100% - 28px);
+  /* The scroll's blank paper, as shares of the picture */
+  left: 13.9%;
+  top: 19.4%;
+  width: 72.2%;
+  height: 72.6%;
   mix-blend-mode: multiply;
 }
 
@@ -447,15 +455,16 @@
 
 /* Hidden desk */
 .station-desk {
-  width: 260px;
+  width: 340px;
   height: 200px;
 }
 
 .station-desk-art {
   position: absolute;
-  inset: 0;
+  left: 0;
+  bottom: 0;
   width: 100%;
-  height: 100%;
+  height: auto;
 }
 
 .desk-ink,
@@ -469,22 +478,25 @@
 }
 
 .desk-ink {
-  left: 150px;
-  top: 16px;
-  width: 78px;
-  height: 70px;
+  left: 160px;
+  top: 78px;
+  width: 52px;
+  height: 47px;
 }
 
+/* The brush is the one painted on the table: the button is only its hit area */
 .desk-brush {
-  left: 24px;
-  top: 14px;
-  width: 110px;
-  height: 100px;
-  transform: rotate(-60deg);
+  left: 44px;
+  top: 96px;
+  width: 124px;
+  height: 34px;
 }
+
+.desk-brush svg { opacity: 0; }
 
 .desk-ink:hover { transform: translateY(-4px) rotate(-6deg); }
-.desk-brush:hover { transform: rotate(-54deg) translateY(-4px); }
+.desk-brush:hover,
+.desk-brush:focus-visible { outline: 1.5px dashed var(--ink); outline-offset: 2px; }
 
 .desk-ink svg,
 .desk-brush svg {

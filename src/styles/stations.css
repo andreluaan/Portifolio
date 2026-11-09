@@ -263,7 +263,7 @@
   left: 0;
   bottom: 0;
   width: 120px;
-  height: 220px;
+  height: 233px;
   padding: 0;
   background: none;
   border: 0;
@@ -280,14 +280,6 @@
   inset: 0;
   width: 100%;
   height: 100%;
-}
-
-.station-mail-flag {
-  position: absolute;
-  left: 92px;
-  top: 30px;
-  width: 30px;
-  height: 64px;
 }
 
 .station-mail-note {

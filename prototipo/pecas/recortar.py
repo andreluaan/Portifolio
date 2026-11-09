@@ -11,9 +11,9 @@ from PIL import Image, ImageDraw, ImageFilter
 
 HERE = Path(__file__).parent
 OUTPUT = HERE.parents[1] / "public" / "images" / "pecas"
-WIDTHS = {"estante": 620, "placa": 420, "quadro": 1400, "casa": 620}
+WIDTHS = {"estante": 620, "placa": 420, "quadro": 1400, "casa": 620, "correio": 360, "moldura": 700, "mesinha": 640}
 # Background closed inside a piece, which a flood from the edges cannot reach
-HOLES = {"estante": [(499, 1009)], "placa": [(507, 110)], "quadro": [], "casa": []}
+HOLES = {"estante": [(499, 1009)], "placa": [(507, 110)], "quadro": [], "casa": [], "correio": [], "moldura": [], "mesinha": []}
 OUTSIDE = 120
 # How far the blacks rise towards white, so the heaviest wood sits with the pale painting
 LIFT = {"estante": 0.14, "quadro": 0.22}
