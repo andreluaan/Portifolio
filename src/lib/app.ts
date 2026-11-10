@@ -3,7 +3,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { brushPath, frameAll, prefersReducedMotion, renderScene, roughRect, stroke, svgElement } from './brush';
 import { startBoiling } from './effects';
-import { applyStrings, getLang, initLang, onLangChange, pick, setLang, t } from './i18n';
+import { getLang, pick, t } from './i18n';
 import { runIntro } from './intro';
 import { foundSecrets, onSecretsChange, secrets, watchGlobalSecrets } from './secrets';
 import { isSoundOn, onSoundChange, setSound, sounds } from './sound';
@@ -48,30 +48,25 @@ function scrollTo(y: number, immediate = false) {
 }
 
 function setupTopbar() {
-  const langButtons = document.querySelectorAll<HTMLButtonElement>('[data-lang]');
+  // Each language is its own page. The drop of ink sits under the current one and, on the way out, hops to the other
+  const langLinks = [...document.querySelectorAll<HTMLAnchorElement>('.lang-switch [data-lang]')];
   const langDrop = document.querySelector<HTMLElement>('.lang-drop')!;
-  const syncLang = () => {
-    langButtons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.lang === getLang())));
-    // A drop of ink hops over to the chosen language
-    const active = [...langButtons].find((button) => button.dataset.lang === getLang())!;
-    const x = active.offsetLeft + active.offsetWidth / 2 - 3;
-    if (prefersReducedMotion() || !langDrop.dataset.ready) gsap.set(langDrop, { x });
-    else gsap.timeline().to(langDrop, { x, duration: 0.35, ease: 'power1.inOut' }).to(langDrop, { y: -9, duration: 0.17, ease: 'power1.out', yoyo: true, repeat: 1 }, 0);
-    langDrop.dataset.ready = 'true';
-  };
-  langButtons.forEach((button) => button.addEventListener('click', () => setLang(button.dataset.lang as 'pt' | 'en')));
-  onLangChange(() => {
-    syncLang();
-    renderPassport();
-    requestAnimationFrame(() => frameAll());
-  });
-  syncLang();
+  const dropOver = (link: HTMLElement) => link.offsetLeft + link.offsetWidth / 2 - 3;
+  gsap.set(langDrop, { x: dropOver(langLinks.find((link) => link.dataset.lang === getLang())!) });
+  langLinks.forEach((link) =>
+    link.addEventListener('click', (event) => {
+      if (link.dataset.lang === getLang() || prefersReducedMotion() || event.metaKey || event.ctrlKey) return;
+      event.preventDefault();
+      gsap.timeline({ onComplete: () => location.assign(link.href + location.hash) })
+        .to(langDrop, { x: dropOver(link), duration: 0.3, ease: 'power1.inOut' })
+        .to(langDrop, { y: -9, duration: 0.15, ease: 'power1.out', yoyo: true, repeat: 1 }, 0);
+    })
+  );
 
   const soundButton = document.querySelector<HTMLButtonElement>('.sound-toggle')!;
   const soundIcon = soundButton.querySelector('svg')!;
   const drawSound = (on: boolean) => {
     soundButton.setAttribute('aria-pressed', String(on));
-    soundButton.dataset.i18nLabel = on ? 'topbar.sound.on' : 'topbar.sound.off';
     soundButton.setAttribute('aria-label', t(on ? 'topbar.sound.on' : 'topbar.sound.off'));
     renderScene(soundIcon, [
       stroke([[4, 10], [10, 10], [17, 4], [17, 24], [10, 18], [4, 18], [4, 10]], 2, { seed: 41, start: 0.02, end: 0.04 }),
@@ -198,10 +193,9 @@ function setupNavBrush() {
     button.addEventListener('pointerenter', () => place(button));
     button.addEventListener('pointerleave', () => place(current));
   });
-  // Item widths change when the fonts arrive and with the language
+  // Item widths change when the fonts arrive
   window.addEventListener('resize', () => place(current));
   document.fonts?.ready.then(() => place(current));
-  onLangChange(() => requestAnimationFrame(() => place(current)));
   return {
     moveTo(target: HTMLElement | null) {
       current = target;
@@ -211,7 +205,6 @@ function setupNavBrush() {
 }
 
 export async function boot() {
-  initLang();
   startBoiling();
   watchGlobalSecrets();
   setupSmoothScroll();
@@ -222,7 +215,6 @@ export async function boot() {
   window.scrollTo(0, 0);
   const world = mountWorld(scrollTo);
   setupNavigation(world);
-  applyStrings();
   // No refresh here: ScrollTrigger.create already measured the world, and the one after fonts.ready (resolved at
   // once on a warm cache) catches what the strings and fonts change. Each refresh forces layout twice on boot.
   const linked = HASH_TO_STATION[location.hash.slice(1)] ?? location.hash.slice(1);

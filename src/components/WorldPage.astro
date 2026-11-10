@@ -1,0 +1,299 @@
+---
+import Base from '../layouts/Base.astro';
+import { attributes, projects, type Lang } from '../data/content';
+import { loadGithub } from '../data/github';
+import { pathFor, translator } from '../lib/i18n';
+import { portraits } from '../lib/portraits';
+import '../styles/pieces.css';
+import '../styles/mundo.css';
+import '../styles/book.css';
+import '../styles/stations.css';
+import '../styles/reading.css';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const { t, pick, locale } = translator(lang);
+const github = await loadGithub();
+const featured = projects.filter((project) => project.featured);
+const repos = github.repos.slice(0, 12);
+// The anchors double as the reading-mode table of contents; in the world, app.ts walks there instead
+const navItems = [
+  { station: 'hero', key: 'nav.inicio', anchor: 'inicio' },
+  { station: 'line', key: 'nav.varal', anchor: 'destaques' },
+  { station: 'house', key: 'nav.sobre', anchor: 'sobre' },
+  { station: 'lectern', key: 'nav.estante', anchor: 'estante' },
+  { station: 'repos', key: 'nav.atelie', anchor: 'github' },
+  { station: 'mail', key: 'nav.contato', anchor: 'contato' },
+] as const;
+const signItems = [
+  { sign: 'varal', key: 'mundo.sign.varal' },
+  { sign: 'estante', key: 'mundo.sign.estante' },
+  { sign: 'atelie', key: 'mundo.sign.atelie' },
+  { sign: 'sobre', key: 'mundo.sign.sobre' },
+] as const;
+const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocaleDateString(locale, { day: '2-digit', month: 'short' });
+---
+
+<Base lang={lang} title={pick({ pt: 'André Luan · mundo de papel', en: 'André Luan · paper world' })}>
+  <div class="intro" id="intro" hidden>
+    <div class="intro-stage">
+      <p class="hand intro-label"><span>{t('intro.label')}</span> <span class="intro-percent">0%</span></p>
+      <svg class="intro-line ink" viewBox="0 0 320 18" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </div>
+    <p class="hand intro-hint">{t('intro.hint')}</p>
+    <button class="intro-skip" type="button"><span>{t('intro.skip')}</span> <kbd>Esc</kbd></button>
+  </div>
+
+  <header class="topbar">
+    <a class="topbar-signature" href={pathFor(lang)} data-go="hero" aria-label="André Luan">André Luan</a>
+
+    <nav class="world-nav" aria-label={t('nav.label')}>
+      {
+        navItems.map((item) => (
+          <a href={`#${item.anchor}`} data-go={item.station} aria-current="false">
+            <span>{t(item.key)}</span>
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="topbar-tools">
+      <nav class="lang-switch" aria-label="Idioma / Language">
+        <a href={pathFor('pt')} hreflang="pt-BR" lang="pt-BR" data-lang="pt" aria-current={lang === 'pt' ? 'true' : undefined}>pt</a>
+        <a href={pathFor('en')} hreflang="en" lang="en" data-lang="en" aria-current={lang === 'en' ? 'true' : undefined}>en</a>
+        <span class="lang-drop" aria-hidden="true"></span>
+      </nav>
+      <button class="sound-toggle" type="button" data-frame="ring" aria-pressed="false" aria-label={t('topbar.sound.off')}>
+        <svg class="ink" viewBox="0 0 32 28" aria-hidden="true"></svg>
+      </button>
+      <button class="secrets-toggle" type="button" data-frame="plain" aria-expanded="false" aria-controls="passport">
+        <span class="secrets-seal" aria-hidden="true">秘</span>
+        <span class="secrets-count"></span>
+        <span class="visually-hidden">{t('topbar.secrets')}</span>
+      </button>
+    </div>
+
+    <div class="passport" id="passport" hidden>
+      <p class="label">{t('secrets.title')}</p>
+      <ul class="passport-grid"></ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="mundo" aria-label={pick({ pt: 'Mundo de papel', en: 'Paper world' })}>
+      <div class="mundo-pin">
+        <div class="mundo-layer mundo-roll" aria-hidden="true"><div class="mundo-plane"></div></div>
+        <div class="mundo-layer mundo-mists" aria-hidden="true"><div class="mundo-mist"></div><div class="mundo-mist is-low"></div></div>
+        <div class="mundo-veil" aria-hidden="true"></div>
+        <div class="mundo-sky"></div>
+        <canvas class="mundo-paint" aria-hidden="true"></canvas>
+        <div class="mundo-layer mundo-ground">
+          <svg class="ink mundo-ground-art" aria-hidden="true"></svg>
+
+          <div class="mundo-station station-hero" id="inicio">
+            <div class="station-hero-sheet">
+              <img class="station-hero-scroll" src="/images/pecas/moldura.webp" alt="" width="700" height="1701" decoding="async" />
+              <svg class="ink station-hero-frame" aria-hidden="true"></svg>
+              <svg class="station-hero-painting" viewBox="0 60 900 1340" preserveAspectRatio="xMidYMid slice" role="img" aria-label={pick({ pt: 'Retrato de André em nanquim, de perfil', en: 'Ink portrait of André, in profile' })}>
+                <image href={portraits.profile.href} x="0" y="0" width={portraits.profile.width} height={portraits.profile.height} preserveAspectRatio="xMidYMid slice"></image>
+              </svg>
+            </div>
+          </div>
+          <div class="mundo-station station-hero-text">
+            <p class="hand">{t('hero.eyebrow')}</p>
+            <h1 class="station-hero-name">André<br />Luan</h1>
+            <p class="station-hero-role">{t('hero.role')}</p>
+            <p class="station-hero-lede">{t('hero.lede')}</p>
+            <div class="station-hero-actions">
+              <button class="ink-button" type="button" data-frame data-go="line"><span>{t('nav.varal')}</span> →</button>
+              <button class="ink-button" type="button" data-frame data-go="mail"><span>{t('nav.contato')}</span></button>
+            </div>
+            <p class="hand station-hero-hint"><span>{t('mundo.hint')}</span> <span class="station-hero-arrow">→</span></p>
+          </div>
+
+          {
+            signItems.map((item) => (
+              <div class="mundo-station station-sign" data-sign={item.sign}>
+                <svg class="ink" viewBox="0 0 200 400" aria-hidden="true" />
+                <img class="station-sign-banner" src="/images/pecas/placa.webp" alt="" width="420" height="909" loading="lazy" decoding="async" />
+                <img class="station-sign-art" src={`/images/placas/${item.sign}.webp`} alt="" width="416" height="410" loading="lazy" decoding="async" />
+                <span class="station-sign-label" role="heading" aria-level="2">{t(item.key)}</span>
+                <span class="station-sign-rule" aria-hidden="true"></span>
+              </div>
+            ))
+          }
+
+          <div class="mundo-station station-repos" id="github">
+            <img class="station-repos-art" src="/images/pecas/quadro.webp" alt="" width="1400" height="802" loading="lazy" decoding="async" />
+            <div class="station-repos-board">
+              <div class="station-repos-head">
+                <h2>{t('repos.title')}</h2>
+                <p class="hand">{t('repos.lede')}</p>
+              </div>
+              <ul class="station-repos-list">
+                {
+                  repos.map((repo, index) => (
+                    <li class="repo-card" style={`--tilt: ${((index * 37) % 5) - 2}deg`}>
+                      <a href={repo.url} target="_blank" rel="noopener">
+                        <span class="repo-pin" aria-hidden="true" />
+                        <strong>{repo.name.replace(/[-_]/g, ' ')}</strong>
+                        <span class="repo-description">{repo.description ?? '—'}</span>
+                        <span class="repo-foot">
+                          <span class="hand repo-language">{repo.language ?? ''}</span>
+                          <span class="repo-date">{t('repos.updated')} {repoDate(repo.pushedAt)}</span>
+                        </span>
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+              <a class="brush-link station-repos-all" href="https://github.com/andreluaan" target="_blank" rel="noopener">{t('repos.all')}</a>
+            </div>
+          </div>
+
+          <div class="mundo-station station-mail" id="contato">
+            <button class="station-mail-box" type="button" aria-label={t('mail.open')}>
+              <img class="station-mail-art" src="/images/pecas/correio.webp" alt="" width="360" height="698" loading="lazy" decoding="async" />
+            </button>
+            <div class="station-mail-note">
+              <svg class="ink station-mail-note-frame" aria-hidden="true"></svg>
+              <h2 class="hand">{t('mail.title')}</h2>
+              <p class="station-mail-lede">{t('mail.lede')}</p>
+              <p class="station-mail-email">andre.luanbq@gmail.com</p>
+              <div class="station-mail-actions">
+                <button class="ink-button small" type="button" data-frame data-open-notebook><span>{t('mail.open')}</span></button>
+                <button class="ink-button small" type="button" data-frame data-copy-email><span>{t('mail.copy')}</span></button>
+              </div>
+              <p class="station-mail-links"><a class="brush-link" href="https://github.com/andreluaan" target="_blank" rel="noopener">github ↗</a> <a class="brush-link" href="mailto:andre.luanbq@gmail.com">e-mail ↗</a></p>
+            </div>
+          </div>
+
+          <div class="mundo-station station-line" id="destaques">
+            <svg class="ink station-line-art" aria-hidden="true"></svg>
+            <div class="station-line-papers">
+              {
+                featured.map((project, index) => (
+                  <button
+                    type="button"
+                    class="line-paper"
+                    data-project={project.id}
+                    aria-label={pick(project.title)}
+                    style={`--delay: ${-index * 0.7}s; --tilt: ${(index % 2 ? 1 : -1) * (2 + (index % 3))}deg`}
+                  >
+                    <span class="line-paper-pin" aria-hidden="true" />
+                    <span class="line-paper-sheet">
+                      <svg class="ink" viewBox="0 0 240 160" aria-hidden="true" />
+                      <span class="line-paper-title">{pick(project.title)}</span>
+                      <span class="line-paper-summary">{pick(project.stat)}</span>
+                      <span class="line-paper-foot">
+                        <span class="hand line-paper-status">{pick(project.status)}</span>
+                        <span class="hand line-paper-open">{pick({ pt: 'abrir →', en: 'open →' })}</span>
+                      </span>
+                    </span>
+                  </button>
+                ))
+              }
+            </div>
+          </div>
+
+          <div class="mundo-station station-lectern" id="estante">
+            <button class="station-lectern-button" type="button" aria-label={t('mundo.lectern')}>
+              <img class="station-lectern-art" src="/images/pecas/estante.webp" alt="" width="620" height="498" loading="lazy" decoding="async" />
+            </button>
+            <p class="hand station-lectern-label">{t('mundo.lectern')}</p>
+            <ol class="station-lectern-index">
+              {
+                projects.map((project) => (
+                  <li>
+                    <h3>{pick(project.title)} <span class="hand">{project.year} · {pick(project.status)}</span></h3>
+                    <p>{pick(project.summary)}</p>
+                    <p class="hand">{pick(project.tags).join(' · ')}</p>
+                    {project.repo && <a class="brush-link" href={project.repo} target="_blank" rel="noopener">github ↗</a>}
+                  </li>
+                ))
+              }
+            </ol>
+          </div>
+
+          <div class="mundo-station station-house" id="sobre">
+            <img class="station-house-art" src="/images/pecas/casa.webp" alt="" width="620" height="570" loading="lazy" decoding="async" />
+            <div class="station-board">
+              <svg class="ink station-board-frame" aria-hidden="true"></svg>
+              <div class="station-board-body">
+                <div class="character-identity">
+                  <img class="character-face" src={portraits.front.href} alt={pick({ pt: 'Retrato de André em nanquim, de frente', en: 'Ink portrait of André, facing forward' })} width="600" height="600" loading="lazy" />
+                  <div class="character-tag"><span class="label">{t('about.player')}</span><span class="hand">{t('about.level')}</span></div>
+                  <div><h3>André Luan</h3><p class="hand character-class">{t('about.class')}</p></div>
+                  <p class="character-bio">{t('about.bio')}</p>
+                </div>
+                <ul class="character-attributes">
+                  {
+                    attributes.map((attribute) => (
+                      <li data-value={attribute.value}>
+                        <span class="hand">{pick(attribute.label)}</span>
+                        <svg class="ink" viewBox="0 0 300 16" preserveAspectRatio="none" role="img" aria-label={`${Math.round(attribute.value * 100)}%`} />
+                      </li>
+                    ))
+                  }
+                </ul>
+                <button class="ink-button small" type="button" data-frame data-open-sheet><span>{t('about.readFull')}</span> →</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mundo-station station-end">
+            <svg class="ink" viewBox="0 0 120 120" aria-hidden="true"></svg>
+            <p class="hand">{t('mundo.end')}</p>
+          </div>
+
+          <div class="mundo-station station-desk">
+            <img class="station-desk-art" src="/images/pecas/mesinha.webp" alt="" width="640" height="204" loading="lazy" decoding="async" />
+            <button class="desk-ink" type="button" aria-label={t('mundo.ink')}>
+              <svg class="ink" viewBox="0 0 130 115" aria-hidden="true"></svg>
+            </button>
+            <button class="desk-brush" type="button" aria-label={t('mundo.brush')}>
+              <svg class="ink" viewBox="0 0 170 155" aria-hidden="true"></svg>
+            </button>
+          </div>
+        </div>
+        <div class="mundo-layer mundo-front"><svg class="ink" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+        <div class="mundo-mascot-layer"></div>
+        <div class="mundo-progress" aria-hidden="true">
+          <svg class="ink" viewBox="0 0 400 20" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+      <div class="mundo-painting-bar" hidden>
+        <span class="hand">{t('mundo.painting')}</span>
+        <button class="ink-button small" type="button" data-frame data-clear-sky><span>{t('mundo.clear')}</span></button>
+      </div>
+      <div class="mundo-brush-cursor" aria-hidden="true"><svg class="ink" viewBox="0 0 170 155"></svg></div>
+    </section>
+  </main>
+
+  <dialog class="sheet-dialog" id="sheet-dialog">
+    <svg class="ink sheet-frame" aria-hidden="true"></svg>
+    <button class="sheet-close hand" type="button" data-close-sheet><span>{t('dialog.close')}</span> ✕</button>
+    <div class="sheet-body"></div>
+  </dialog>
+
+  <dialog class="book-dialog" id="book-dialog" aria-label={t('book.title')}>
+    <div class="book-topline">
+      <span class="hand book-counter"></span>
+      <button class="book-close" type="button" data-close-book><span>{t('dialog.close')}</span> ✕</button>
+    </div>
+    <div class="book-stage">
+      <button class="book-nav prev" type="button" aria-label={t('book.prev')}>‹</button>
+      <div class="book"><div class="book-leaves"></div></div>
+      <button class="book-nav next" type="button" aria-label={t('book.next')}>›</button>
+    </div>
+    <p class="hand book-hint">{t('book.hint')}</p>
+  </dialog>
+
+  <script>
+    import { boot } from '../lib/app';
+    boot();
+  </script>
+</Base>

@@ -2,20 +2,17 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { projects } from '../data/content';
 import { frameAll, inkSplat, prefersReducedMotion, renderScene, roughRect, seededRandom, stroke, svgElement, type Point, type Stroke } from './brush';
-import { openBook } from './book';
-import { openCharacterSheet } from './character';
-import { openNotebook } from './notebook';
-import type { GithubData } from '../data/github';
+import { openBook, openCharacterSheet, openNotebook } from './dialogs';
 import { paintPortrait } from './effects';
-import { getLang, onLangChange, pick, t } from './i18n';
+import { pick, t } from './i18n';
 import { BACK_EDGE_DEPTH, depthAt, depthScale, drawFloor, FLOOR_PROPS, LANE_DEPTH, lanternFlame, lanternRays, laneY, ROW_DEPTHS, type FloorPropKind, type FloorPropName, type Lane } from './floor';
 import { Mascot } from './mascot';
 import { Mel } from './mel';
-import { InkPainter } from './painting';
+import type { InkPainter } from './painting';
 import roll from '../data/rolo.json';
 import { deskObjects, foregroundBranch, sketchFor, worldProps } from './scenes';
 import { unlock } from './secrets';
-import { attributeList, characterIdentity, portraits } from './sections';
+import { attributeBars, portraits } from './sections';
 import { sounds } from './sound';
 
 export type StationName = 'hero' | 'varal' | 'line' | 'estante' | 'lectern' | 'atelie' | 'repos' | 'sobre' | 'house' | 'mail' | 'end' | 'desk';
@@ -108,9 +105,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     renderScene($<SVGSVGElement>(signs[name], 'svg'), worldProps.signpost(signSeeds[name]), { animate });
   }
   const repos = $(root, '.station-repos');
-  const reposBoard = $(root, '.station-repos-board');
   const mail = $(root, '.station-mail');
-  const github: GithubData = JSON.parse(document.getElementById('github-data')?.textContent ?? '{"repos":[],"days":[],"total":0,"live":false}');
   const line = $(root, '.station-line');
   const lineArt = $<SVGSVGElement>(root, '.station-line-art');
   const papersHost = $(root, '.station-line-papers');
@@ -147,72 +142,23 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   let scrollVelocity = 0;
   const lane = (): Lane => ({ back: world.ground, front: world.height });
 
-  // Content that depends on the language
-  function renderBoard() {
-    const identity = characterIdentity();
-    const bars = attributeList();
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'ink-button small';
-    button.dataset.frame = '';
-    button.innerHTML = '<span></span> →';
-    button.querySelector('span')!.textContent = t('about.readFull');
-    button.addEventListener('click', openCharacterSheet);
-    boardBody.replaceChildren(identity, bars.list, button);
-    return bars;
+  // The content itself comes rendered in the page's language; the world adds the drawings and what clicks do
+  function hydrateBoard() {
+    $(boardBody, '[data-open-sheet]').addEventListener('click', () => void openCharacterSheet());
+    return attributeBars(boardBody);
   }
 
-  function renderPapers() {
-    const featured = projects.filter((project) => project.featured);
-    papersHost.replaceChildren(
-      ...featured.map((project, index) => {
-        const paper = document.createElement('button');
-        paper.type = 'button';
-        paper.className = 'line-paper';
-        paper.style.setProperty('--delay', `${-index * 0.7}s`);
-        paper.style.setProperty('--tilt', `${(index % 2 ? 1 : -1) * (2 + (index % 3))}deg`);
-        paper.innerHTML = `
-          <span class="line-paper-pin" aria-hidden="true"></span>
-          <span class="line-paper-sheet">
-            <svg class="ink" viewBox="0 0 240 160" aria-hidden="true"></svg>
-            <span class="line-paper-title"></span>
-            <span class="line-paper-summary"></span>
-            <span class="line-paper-foot"><span class="hand line-paper-status"></span><span class="hand line-paper-open"></span></span>
-          </span>`;
-        paper.querySelector('.line-paper-title')!.textContent = pick(project.title);
-        paper.querySelector('.line-paper-summary')!.textContent = pick(project.stat);
-        paper.querySelector('.line-paper-status')!.textContent = pick(project.status);
-        paper.querySelector('.line-paper-open')!.textContent = pick({ pt: 'abrir →', en: 'open →' });
-        paper.setAttribute('aria-label', pick(project.title));
-        const svg = paper.querySelector('svg')!;
-        renderScene(svg, sketchFor(project.id));
-        paper.addEventListener('mouseenter', () => {
-          renderScene(svg, sketchFor(project.id), { animate: true, pace: 1.8 });
-          sounds.paper();
-        });
-        paper.addEventListener('click', () => openBook(project.id));
-        return paper;
-      })
-    );
-  }
-
-  function renderRepos() {
-    const list = $(reposBoard, '.station-repos-list');
-    const locale = getLang() === 'pt' ? 'pt-BR' : 'en-US';
-    list.replaceChildren(
-      ...github.repos.slice(0, 12).map((repo, index) => {
-        const item = document.createElement('li');
-        item.className = 'repo-card';
-        item.style.setProperty('--tilt', `${((index * 37) % 5) - 2}deg`);
-        item.innerHTML = '<a target="_blank" rel="noopener"><span class="repo-pin" aria-hidden="true"></span><strong></strong><span class="repo-description"></span><span class="repo-foot"><span class="hand repo-language"></span><span class="repo-date"></span></span></a>';
-        item.querySelector('a')!.href = repo.url;
-        item.querySelector('strong')!.textContent = repo.name.replace(/[-_]/g, ' ');
-        item.querySelector('.repo-description')!.textContent = repo.description ?? '—';
-        item.querySelector('.repo-language')!.textContent = repo.language ?? '';
-        item.querySelector('.repo-date')!.textContent = `${t('repos.updated')} ${new Date(`${repo.pushedAt}T12:00:00`).toLocaleDateString(locale, { day: '2-digit', month: 'short' })}`;
-        return item;
-      })
-    );
+  function hydratePapers() {
+    papersHost.querySelectorAll<HTMLButtonElement>('.line-paper').forEach((paper) => {
+      const id = paper.dataset.project!;
+      const svg = paper.querySelector('svg')!;
+      renderScene(svg, sketchFor(id));
+      paper.addEventListener('mouseenter', () => {
+        renderScene(svg, sketchFor(id), { animate: true, pace: 1.8 });
+        sounds.paper();
+      });
+      paper.addEventListener('click', () => void openBook(id));
+    });
   }
 
   // Layout
@@ -489,7 +435,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     });
   }
 
-  let boardBars: ReturnType<typeof attributeList> | null = null;
+  let boardBars: ReturnType<typeof attributeBars> | null = null;
   const reveals: Partial<Record<StationName, () => void>> = {
     hero: () => paintPortrait($<SVGSVGElement>(heroSheet, '.station-hero-painting'), { ...portraits.profile, animate: true, delay: 0.2 }),
     varal: () => {
@@ -568,7 +514,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     mel.setDepthScale(depthScale(depth));
     placeFloorProps();
     mascot.place(world.stations.desk + 150);
-    painter.resize();
+    painter?.resize();
     frameAll(root);
     fitSignLabels();
 
@@ -657,9 +603,14 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     });
   }
 
-  // Hidden desk: paint the sky, spill the ink
-  const painter = new InkPainter(paintCanvas, pin);
-  function setPainting(value: boolean) {
+  // Hidden desk: paint the sky, spill the ink. The painter (and its full-screen canvas) is made on first use.
+  let painter: InkPainter | null = null;
+  async function setPainting(value: boolean) {
+    if (!painter) {
+      const { InkPainter } = await import('./painting');
+      painter = new InkPainter(paintCanvas, pin);
+      painter.resize();
+    }
     painter.enabled = value;
     root.classList.toggle('is-painting', value);
     paintingBar.hidden = !value;
@@ -671,16 +622,16 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     }
   }
   const onPointerMove = (event: PointerEvent) => {
-    if (painter.enabled) brushCursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
+    if (painter?.enabled) brushCursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
   };
   window.addEventListener('pointermove', onPointerMove, { passive: true });
   renderScene($<SVGSVGElement>(brushCursor, 'svg'), deskObjects.brush);
-  $(desk, '.desk-brush').addEventListener('click', () => setPainting(!painter.enabled));
+  $(desk, '.desk-brush').addEventListener('click', () => void setPainting(!painter?.enabled));
   $(paintingBar, '[data-clear-sky]').addEventListener('click', () => {
-    gsap.to(paintCanvas, { autoAlpha: 0, duration: 0.5, onComplete: () => (painter.clear(), gsap.set(paintCanvas, { autoAlpha: 1 })) });
+    gsap.to(paintCanvas, { autoAlpha: 0, duration: 0.5, onComplete: () => (painter?.clear(), gsap.set(paintCanvas, { autoAlpha: 1 })) });
     sounds.paper();
   });
-  window.addEventListener('keydown', (event) => event.key === 'Escape' && painter.enabled && setPainting(false));
+  window.addEventListener('keydown', (event) => event.key === 'Escape' && painter?.enabled && void setPainting(false));
 
   $(desk, '.desk-ink').addEventListener('click', () => {
     const bottle = $(desk, '.desk-ink');
@@ -696,9 +647,9 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     window.setTimeout(() => mascot.say(pick({ pt: 'opa! não fui eu', en: 'oops! wasn’t me' })), 700);
   });
 
-  $(lectern, '.station-lectern-button').addEventListener('click', () => openBook());
+  $(lectern, '.station-lectern-button').addEventListener('click', () => void openBook());
 
-  const openMail = () => openNotebook(nudgeMailbox);
+  const openMail = () => void openNotebook(nudgeMailbox);
   $(mail, '.station-mail-box').addEventListener('click', openMail);
   $(mail, '[data-open-notebook]').addEventListener('click', openMail);
   const copyButton = $(mail, '[data-copy-email]');
@@ -746,7 +697,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     return { x: event.clientX - box.left, y: event.clientY - box.top };
   };
   pin.addEventListener('click', (event) => {
-    if (!world || !trigger || painter.enabled) return;
+    if (!world || !trigger || painter?.enabled) return;
     if (event.target instanceof Element && event.target.closest('button, a, input, textarea, label, [role="button"]')) return;
     const { x, y } = pinPoint(event);
     if (y < world.ground - 4) return;
@@ -984,23 +935,13 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     [...station.children].forEach((piece) => farAway.observe(piece));
   });
 
-  renderPapers();
-  renderRepos();
-  boardBars = renderBoard();
+  hydratePapers();
+  boardBars = hydrateBoard();
   setup();
 
   if (!reduced) {
     gsap.fromTo(heroText.children, { autoAlpha: 0, y: 24, filter: 'blur(8px)' }, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.9, stagger: 0.1, delay: 0.3, ease: 'power3.out', clearProps: 'all' });
   }
-
-  onLangChange(() => {
-    renderPapers();
-    renderRepos();
-    boardBars = renderBoard();
-    if (revealed.has('house')) boardBars.animate();
-    frameAll(root);
-    fitSignLabels();
-  });
 
   document.fonts?.ready.then(fitSignLabels);
 

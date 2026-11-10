@@ -50,15 +50,13 @@
   pointer-events: none;
 }
 
-.lang-switch button {
+.lang-switch a {
   padding: 2px 6px;
-  background: none;
-  border: 0;
   color: var(--wash);
-  cursor: pointer;
+  text-decoration: none;
 }
 
-.lang-switch button[aria-pressed='true'] {
+.lang-switch a[aria-current='true'] {
   color: var(--ink);
 }
 
@@ -928,16 +926,14 @@
   min-width: 0;
 }
 
-.world-nav button {
+.world-nav a {
   position: relative;
   padding: 6px 12px;
-  background: none;
-  border: 0;
+  text-decoration: none;
   font-family: var(--font-hand);
   font-size: 1.4rem;
   line-height: 1;
   color: var(--ink-soft);
-  cursor: pointer;
   white-space: nowrap;
 }
 
@@ -969,14 +965,14 @@
   pointer-events: none;
 }
 
-.world-nav button:hover,
-.world-nav button[aria-current='true'] {
+.world-nav a:hover,
+.world-nav a[aria-current='true'] {
   color: var(--ink);
 }
 
 @media (max-width: 760px) {
   .world-nav { grid-column: 1 / -1; grid-row: 2; }
-  .world-nav button { padding: 6px 8px; font-size: 1.25rem; }
+  .world-nav a { padding: 6px 8px; font-size: 1.25rem; }
 }
 
 /* Mel, André's dog: a transform-only rig, so nothing here may add filters */

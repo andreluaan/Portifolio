@@ -1,0 +1,195 @@
+/* Reading mode: the same page as a plain document, for when scripts don't run (and, later, for whoever prefers it).
+   The world adds `has-world` to <html> before the first paint (Base.astro), so none of this applies to it. */
+
+/* Only the world shows the full project index: the book opens it there */
+.has-world .station-lectern-index {
+  display: none;
+}
+
+:root:not(.has-world) {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--topbar-height) + 16px);
+
+  /* Decoration and anything that needs a script to do something */
+  .intro,
+  .mundo-layer:not(.mundo-ground),
+  .mundo-veil,
+  .mundo-sky,
+  .mundo-paint,
+  .mundo-ground-art,
+  .mundo-mascot-layer,
+  .mundo-progress,
+  .mundo-painting-bar,
+  .mundo-brush-cursor,
+  .station-desk,
+  .station-hero-actions,
+  .station-hero-hint,
+  .station-hero-frame,
+  .station-line-art,
+  .line-paper-pin,
+  .line-paper-open,
+  .line-paper svg,
+  .station-sign svg,
+  .station-sign-banner,
+  .station-sign-rule,
+  .station-lectern-button,
+  .station-lectern-label,
+  .station-board-frame,
+  .station-mail-box,
+  .station-mail-note-frame,
+  .station-mail-actions,
+  .station-house-art,
+  .station-repos-art,
+  .station-end svg,
+  [data-open-sheet],
+  .sound-toggle,
+  .secrets-toggle,
+  .passport,
+  .lang-drop {
+    display: none;
+  }
+
+  main {
+    padding: calc(var(--topbar-height) + 32px) 16px 96px;
+  }
+
+  .mundo-pin {
+    height: auto;
+    overflow: visible;
+    background: none;
+  }
+
+  .mundo-ground {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    max-width: 760px;
+    margin-inline: auto;
+    transform: none;
+  }
+
+  .mundo-station {
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: auto;
+    rotate: none;
+    scale: none;
+  }
+
+  /* The order of a walk through the world, read top to bottom */
+  .station-hero { order: 1; }
+  .station-hero-text { order: 2; }
+  [data-sign='varal'] { order: 3; }
+  .station-line { order: 4; }
+  [data-sign='sobre'] { order: 5; }
+  .station-house { order: 6; }
+  [data-sign='estante'] { order: 7; }
+  .station-lectern { order: 8; }
+  [data-sign='atelie'] { order: 9; }
+  .station-repos { order: 10; }
+  .station-mail { order: 11; }
+  .station-end { order: 12; }
+
+  .station-hero-sheet {
+    position: relative;
+    width: min(260px, 60vw);
+    aspect-ratio: 700 / 1701;
+  }
+
+  .station-hero-text {
+    gap: 12px;
+  }
+
+  .station-hero-name {
+    animation: none;
+  }
+
+  /* Signs become section headings: the little painting beside the title */
+  .station-sign {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--mist);
+  }
+
+  .station-sign-art {
+    position: static;
+    width: 72px;
+    height: auto;
+    mix-blend-mode: multiply;
+  }
+
+  .station-sign-label {
+    position: static;
+    font-size: 2rem;
+    writing-mode: horizontal-tb;
+  }
+
+  .station-line-papers {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .line-paper {
+    margin: 0;
+    rotate: none;
+    transform: none;
+    animation: none;
+    cursor: default;
+  }
+
+  .line-paper-sheet {
+    position: static;
+    animation: none;
+    transform: none;
+  }
+
+  .station-board,
+  .station-board-body,
+  .station-repos-board,
+  .station-mail-note {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+  }
+
+  .station-repos-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .repo-card {
+    rotate: none;
+  }
+
+  .station-lectern-index {
+    display: grid;
+    gap: 20px;
+    margin: 0;
+    padding-left: 1.2em;
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h3 .hand {
+      font-weight: 400;
+      color: var(--ink-soft);
+    }
+
+    p {
+      margin: 4px 0;
+    }
+  }
+
+  .station-end {
+    text-align: center;
+  }
+}

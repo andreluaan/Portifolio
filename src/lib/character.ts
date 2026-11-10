@@ -3,7 +3,7 @@ import { interests, inventory, journey, skillGroups } from '../data/content';
 import { ellipsePoints, frameAll, prefersReducedMotion, renderScene, roughRect, stroke, svgElement } from './brush';
 import { pick, t } from './i18n';
 import { foundSecrets, secrets } from './secrets';
-import { attributeList, portraits } from './sections';
+import { attributeBars as drawAttributeBars, portraits } from './sections';
 import { sounds } from './sound';
 
 function section(titleKey: Parameters<typeof t>[0], className: string) {
@@ -64,8 +64,10 @@ export function openCharacterSheet() {
 
   // Attributes
   const attributesSection = section('about.attributes', 'cs-attributes');
-  const attributeBars = attributeList();
-  attributesSection.append(attributeBars.list);
+  // The same rows the board in the world shows, already rendered in the page's language
+  const attributeList = document.querySelector('.station-board .character-attributes')!.cloneNode(true) as HTMLUListElement;
+  attributesSection.append(attributeList);
+  const attributeBars = drawAttributeBars(attributeList);
 
   // Skill tree
   const skillsSection = section('about.skills', 'cs-skills');

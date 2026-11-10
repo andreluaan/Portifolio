@@ -1,0 +1,26 @@
+{
+  "label": "01-ssr-i18n",
+  "url": "http://localhost:4322/",
+  "date": "2026-11-10T16:18:20.599Z",
+  "conditions": "CPU 4x, Fast 4G, 1440x900, median of 3",
+  "lcpMs": 2716,
+  "tbtMs": 3082,
+  "longestTaskMs": 968,
+  "longTasksBeforeLcp": 7,
+  "cls": 0.016,
+  "transferKb": {
+    "script": 262,
+    "image": 803,
+    "font": 150,
+    "stylesheet": 23,
+    "document": 6,
+    "other": 1
+  },
+  "walk": {
+    "frames": 338,
+    "p50Ms": 16.7,
+    "p95Ms": 33.3,
+    "framesOver33ms": 5
+  },
+  "errors": []
+}

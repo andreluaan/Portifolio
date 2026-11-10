@@ -1,24 +1,36 @@
 ---
 import '../styles/global.css';
-import { strings } from '../data/content';
+import { strings, type Lang } from '../data/content';
 import roll from '../data/rolo.json';
+import { pathFor } from '../lib/i18n';
 
 interface Props {
   title: string;
+  lang: Lang;
 }
 
-const { title } = Astro.props;
+const { title, lang } = Astro.props;
+// Absolute once `site` is set in astro.config.mjs; relative until the domain is known
+const href = (path: string) => (Astro.site ? new URL(path, Astro.site).href : path);
 ---
 
 <!doctype html>
-<html lang="pt-BR">
+<html lang={lang === 'pt' ? 'pt-BR' : 'en'}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="description" content={strings['meta.description'].pt} />
+    <meta name="description" content={strings['meta.description'][lang]} />
     <meta name="theme-color" content="#eeeeec" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={href(pathFor(lang))} />
+    <link rel="alternate" hreflang="pt-BR" href={href(pathFor('pt'))} />
+    <link rel="alternate" hreflang="en" href={href(pathFor('en'))} />
+    <link rel="alternate" hreflang="x-default" href={href(pathFor('pt'))} />
     <title>{title}</title>
+    <script is:inline>
+      // The world takes over the page only when scripts run; without them the same HTML reads as a plain document
+      document.documentElement.classList.add('has-world');
+    </script>
     <script is:inline define:vars={{ roll, groundShare: 0.73 }}>
       // The painting is the largest thing on screen, but world.ts only asks for it once the main script has run.
       // Same choice as drawRoll(), made here so it downloads alongside the HTML; world.ts reuses it via data-roll.
