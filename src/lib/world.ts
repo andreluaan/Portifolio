@@ -341,7 +341,11 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     const shownTile = roll.tileWidth * scale;
     rollTravel = roll.width * scale - viewport;
     const wanted = shownHeight * Math.min(window.devicePixelRatio || 1, 2);
-    const source = roll.sizes.find((size) => size >= wanted) ?? roll.sizes[roll.sizes.length - 1];
+    const preloaded = Number(document.documentElement.dataset.roll);
+    // The first draw takes the size Base.astro already preloaded, so the painting is never fetched twice
+    const source = !rollSource && roll.sizes.includes(preloaded)
+      ? preloaded
+      : roll.sizes.find((size) => size >= wanted) ?? roll.sizes[roll.sizes.length - 1];
     if (rollSource !== source) {
       rollSource = source;
       rollTiles = Array.from({ length: roll.tiles }, (_, index) => {
@@ -350,6 +354,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
         tile.decoding = 'async';
         // Only the opening is on screen at first; the rest of the scroll loads as the walk nears it
         tile.loading = index < 2 ? 'eager' : 'lazy';
+        if (index === 0) tile.fetchPriority = 'high';
         tile.src = `/images/rolo/scroll-${source}-${index}.webp`;
         return tile;
       });
@@ -579,12 +584,16 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     let wind = 0;
     let windValue = '';
     // --wind is set only on the elements that tilt with it (and does not inherit, see global.css): on a container it
-    // restyled every paper's whole subtree each frame. Papers are re-rendered with the language, so they are looked up.
+    // restyled every paper's whole subtree each frame. Papers are re-rendered with the language, so the collections
+    // are live: they follow those re-renders without a selector query on every scroll frame.
+    const windBlown = [root.getElementsByClassName('line-paper'), root.getElementsByClassName('station-sign')];
     const setWind = (value: number) => {
       const next = value.toFixed(1);
       if (next === windValue) return;
       windValue = next;
-      root.querySelectorAll<HTMLElement>('.line-paper, .station-sign').forEach((element) => element.style.setProperty('--wind', next));
+      windBlown.forEach((collection) => {
+        for (const element of collection) (element as HTMLElement).style.setProperty('--wind', next);
+      });
     };
     const frontSkew = gsap.quickTo(layers.front, 'skewX', { duration: 0.9, ease: 'elastic.out(1, 0.35)' });
     gsap.set(layers.front, { transformOrigin: '50% 100%' });

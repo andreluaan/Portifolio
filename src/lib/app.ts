@@ -223,7 +223,8 @@ export async function boot() {
   const world = mountWorld(scrollTo);
   setupNavigation(world);
   applyStrings();
-  ScrollTrigger.refresh();
+  // No refresh here: ScrollTrigger.create already measured the world, and the one after fonts.ready (resolved at
+  // once on a warm cache) catches what the strings and fonts change. Each refresh forces layout twice on boot.
   const linked = HASH_TO_STATION[location.hash.slice(1)] ?? location.hash.slice(1);
   if (linked && world.has(linked)) requestAnimationFrame(() => world.goTo(linked, true));
   (document.fonts?.ready ?? Promise.resolve()).then(() => {
