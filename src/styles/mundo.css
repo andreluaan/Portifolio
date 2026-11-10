@@ -20,36 +20,6 @@
   pointer-events: none;
 }
 
-/* Dusk deepens the sheet from the top; translucent, since the painting is underneath */
-.mundo-sky::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgb(40 41 39 / 0.3) 0%, rgb(40 41 39 / 0.14) 45%, rgb(40 41 39 / 0) 80%);
-  opacity: var(--dusk, 0);
-}
-
-/* Fog over the painting */
-.mundo-veil {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  background: linear-gradient(180deg, rgba(238, 238, 236, 0) 12%, rgba(238, 238, 236, 0.85) 42%, rgba(238, 238, 236, 0.75) 72%, rgba(238, 238, 236, 0) 90%);
-}
-
-.mundo-cloud {
-  display: none;
-  position: absolute;
-  width: 220px;
-  height: 44px;
-  animation: cloud-drift var(--drift, 50s) linear infinite alternate;
-}
-
-@keyframes cloud-drift {
-  to { transform: translateX(120px); }
-}
-
 .mundo-bird {
   position: absolute;
   left: -40px;

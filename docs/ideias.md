@@ -6,7 +6,7 @@ Lista viva do que o portfólio pode ganhar. Ideia nova entra aqui, e o status mu
 
 **Status:** ✅ feito · 🟡 parcial · ⬜ pendente · 💭 proposta nova, ainda não aprovada
 **Esforço:** P, M, G · **Impacto:** baixo, médio, alto
-**Última conferência no código:** 2026-10-30
+**Última conferência no código:** 2026-11-10
 
 As ideias #1 a #20 vêm do relatório em [referencias.md](referencias.md). Toda ideia pesada precisa respeitar a prioridade de desempenho: entra em etapas e medindo.
 
@@ -20,7 +20,7 @@ As ideias #1 a #20 vêm do relatório em [referencias.md](referencias.md). Toda 
 | 10 | Caderno de recados com comandos e e-mail real | 🟡 | M | alto | Endpoint + Resend + rate limit | Comandos prontos; o recado abre o `mailto:`, sem envio real |
 | 12 | Jogo da velha com ensō | ⬜ | M | médio | Canvas/SVG + minimax | — |
 | 13 | Mapa de visitantes em aguada ao vivo | ⬜ | G | médio | Supabase/Upstash + mapa SVG | Exige backend; o site é uma página estática |
-| 14 | Transições de página por pincelada | ⬜ | M | médio | View Transitions + máscara SVG | Só existe uma página; depende de novas rotas |
+| 14 | Transições de página por pincelada | ⬜ | M | médio | View Transitions + máscara SVG | Já existem duas rotas (`/` e `/en/`): a troca de idioma é a primeira candidata |
 | 15 | Navegação em doodles que balançam | 🟡 | P | médio | SVG + keyframes | `world-nav` existe; doodles e balanço não confirmados |
 | 17 | Cards de papel arrastáveis com física | ⬜ | M | médio | GSAP Draggable + Inertia ou Matter.js | Só Borrão e Mel são interativos assim |
 | 18 | 404 "ainda está a lápis" + honeypot /admin | ⬜ | P | médio | Rota + ilustração | Não existe a página 404 |
@@ -41,7 +41,7 @@ As ideias #1 a #20 vêm do relatório em [referencias.md](referencias.md). Toda 
 | # | Ideia | Status | Esforço | Impacto | Técnica | Observação |
 |---|---|---|---|---|---|---|
 | 25 | Chão novo: mais grama e clima de cidadezinha japonesa, com ruas, cercas, lanternas e casinhas | 🟡 | G | alto | Faixa contínua pedida ao ChatGPT, em bloco repetível, no lugar da linha e da mancha atuais | Feito em `floor.ts` (2026-11-09): caminho de pedras ishidatami em projeção oblíqua, cercas de bambu, lanternas, poças, pedras de passo e grama nas bordas. Faltam as casinhas |
-| 26 | Minigame com a Mel: ela pula e sobe nas coisas do mundo em busca de algo | ⬜ | G | alto | Plataforma em canvas sobre `mel.ts`, com colisão nas peças e placar em segredo do passaporte | Definir o que ela procura e como o jogo começa; a Mel hoje só caminha com a rolagem |
+| 26 | Minigame com a Mel: ela pula e sobe nas coisas do mundo em busca de algo | 🟡 | G | alto | `src/world/index.ts` + `props.ts`: a Mel já é controlada (andar, profundidade, pulo com espaço) e as peças têm colisão (desvia das altas, pula as baixas) | Base pronta em 2026-11-10 (modo jogo). Falta definir o que ela procura, subir em cima das peças e o placar |
 | 27 | Mel com movimento em profundidade, como nos beat 'em ups antigos das Tartarugas Ninja: frente, trás, cima e baixo no chão | 🟡 | G | alto | Faixa de chão com eixo Y próprio, Mel maior quando está mais perto e ordem de camadas pela posição | Feito em `floor.ts` + `world.ts` (2026-11-09): faixa de ~27% da tela, W A S D, toque no chão, escala sutil, pegadas e segredo "profundidade". Objetos no meio do chão (lanterna, bacia, balde, pedras) ordenados pela profundidade: ela pula os baixos e desvia dos altos. Todos ficam na linha central de uma fileira de pedras, e há uma lanterna só no site todo (borda de trás e meio do chão), que acende com clique e dá o segredo "acendedor". A versão pintada pelo ChatGPT está no prompt 11 |
 
 ## Feitas
@@ -61,5 +61,6 @@ As ideias #1 a #20 vêm do relatório em [referencias.md](referencias.md). Toda 
 
 - **Público principal:** clientes ou devs e recrutadores? Isso define a ordem das próximas.
 - **Backend:** o site continua estático ou ganha dados ao vivo? Isso decide #10 e #13.
+- **Domínio:** com o endereço definido, preencher `site` em `astro.config.mjs` para os links canônicos e hreflang ficarem absolutos.
 
 **Já decididas:** o protagonista é o mascote de tinta, e a metáfora é o mundo de papel.

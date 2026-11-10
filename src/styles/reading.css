@@ -13,10 +13,9 @@
   /* Decoration and anything that needs a script to do something */
   .intro,
   .mundo-layer:not(.mundo-ground),
-  .mundo-veil,
   .mundo-sky,
   .mundo-paint,
-  .mundo-ground-art,
+  .mundo-floor,
   .mundo-mascot-layer,
   .mundo-progress,
   .mundo-painting-bar,

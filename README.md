@@ -20,9 +20,10 @@ Portfólio pessoal desenhado em nanquim. O site é um mundo de papel que você p
 ## Stack
 
 - [Astro](https://astro.build) (site estático)
-- [GSAP](https://gsap.com) + ScrollTrigger para a rolagem lateral e as animações
-- [Lenis](https://lenis.darkroom.engineering) para rolagem suave
-- SVG gerado em tempo real (motor de pincel próprio) e filtros `feTurbulence` / `feDisplacementMap` para a textura da tinta
+- [GSAP](https://gsap.com) para as animações da interface
+- [PixiJS](https://pixijs.com) para a Mel, recortada em malhas
+- Motor de pincel próprio com filtros `feTurbulence` / `feDisplacementMap`, executado no build: `npm run ink` grava cada pincelada do mundo em WebP no Chrome instalado, e o site só posiciona as imagens
+- O mundo anda sobre a rolagem nativa da página (barra de rolagem, PageDown e toque continuam funcionando)
 - Web Audio API para os sons
 
 ## Rodando localmente
@@ -32,7 +33,11 @@ npm install
 npm run dev
 ```
 
-O site abre em `http://localhost:4321`. Cada estação tem link próprio: `#destaques`, `#estante`, `#github`, `#ano`, `#sobre`, `#contato`. Para gerar a versão de produção:
+O site abre em `http://localhost:4321` (em inglês, `/en/`). Cada estação tem link próprio: `#destaques`, `#estante`, `#github`, `#sobre`, `#contato`, `#mesinha`.
+
+No mundo: **A D** ou **← →** andam com a Mel, **W S** mudam a profundidade, **espaço** pula, **E** usa a estação em que ela está, e um toque no chão leva a Mel até lá. A rolagem da página também anda.
+
+Depois de mudar um desenho, o mapa ou os textos, regrave as pinceladas com `npm run ink`. Para gerar a versão de produção:
 
 ```bash
 npm run build
@@ -46,7 +51,8 @@ src/
   data/content.ts      textos PT/EN, projetos, habilidades e missões
   lib/brush.ts         motor de pincel (traços, máscaras de desenho, molduras)
   lib/scenes.ts        desenhos: projetos, placas, estante, casa, mesinha
-  lib/world.ts         o mundo de papel (camadas, estações, rolagem)
+  world/               o mundo em modo jogo: mapa, câmera, cenário, peças do chão
+  components/          a página (PT em /, EN em /en/) e as pinturas gravadas
   lib/book.ts          caderno da estante com páginas em 3D
   lib/character.ts     ficha de personagem completa
   lib/mascot.ts        Borrão, a criaturinha de tinta
@@ -57,7 +63,9 @@ src/
   lib/sound.ts         sons sintetizados
   lib/painting.ts      pintura com pincel seco
   styles/              estilos globais e de cada parte
-public/images/         retratos em nanquim
+public/images/         retratos em nanquim e o rolo pintado
+public/ink/            pinceladas gravadas por scripts/ink-bake (não editar à mão)
+scripts/perf.mjs       medição de desempenho (npm run perf)
 prototipo/             protótipos anteriores em HTML único
 docs/referencias.md    pesquisa de referências
 ```

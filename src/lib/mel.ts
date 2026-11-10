@@ -137,8 +137,6 @@ export class Mel {
   private nextIdleEvent = 3;
   private nextBlink = 2;
   private blinkStart = -1;
-  private boilTimer = 0;
-  private boilIndex = 0;
   private petTimer = 0;
   private petStartedAt = 0;
   private pets = 0;
@@ -641,15 +639,6 @@ export class Mel {
 
     this.updateDust(dt, moving, pace);
     this.eyes = this.sleeping ? 'sleep' : action === 'pet' || action === 'lick' ? 'happy' : 'open';
-
-    // Line boil without filters: the drawing is redrawn every frame anyway, so it just cycles between three brush
-    // seeds (8 fps moving, 4 fps idle, none asleep), like hand-drawn animation
-    const boilRate = this.sleeping ? 0 : moving || action ? 8 : 4;
-    this.boilTimer += dt * boilRate;
-    if (this.boilTimer >= 1) {
-      this.boilTimer = 0;
-      this.boilIndex = (this.boilIndex + 1) % 3;
-    }
   }
 
   /** Dust kicked up by her paws: a small pool of motes, so nothing is created while she runs. */
