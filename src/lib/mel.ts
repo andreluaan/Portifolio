@@ -84,12 +84,15 @@ export interface MelOptions {
   groundY: () => number;
   startX?: number;
   before?: Element;
+  /** Turns a pointer position in the window into her layer's units (the world zooms its layers). */
+  toLayer?: (clientX: number, clientY: number) => { x: number; y: number };
 }
 
 export class Mel {
   readonly el: HTMLDivElement;
   private readonly reduced = prefersReducedMotion();
   private readonly groundY: () => number;
+  private readonly toLayer: NonNullable<MelOptions['toLayer']>;
   private readonly scale: number;
   private readonly dust = Array.from({ length: DUST_POOL }, () => ({ x: 0, y: 0, vx: 0, vy: 0, r: 1, life: 0, age: 1 }));
   /** The WebGL cut-out, loaded lazily so the page never waits for it. */
@@ -145,6 +148,7 @@ export class Mel {
 
   constructor(options: MelOptions) {
     this.groundY = options.groundY;
+    this.toLayer = options.toLayer ?? ((x, y) => ({ x, y }));
     this.scale = options.scale ?? SCALE;
     this.x = options.startX ?? 120;
     this.targetX = this.x;
@@ -214,6 +218,25 @@ export class Mel {
       this.facing = Math.sign(leaderX - this.x) || 1;
       this.render();
     }
+  }
+
+  /** Game mode: the world decides where she is (`x`, in her layer) and how fast she and the ground move; she only
+   * animates. `vx` is her speed on screen, `groundSpeed` the speed the ground passes under her as the view follows. */
+  place(x: number, vx: number, groundSpeed: number, facing: number) {
+    this.x = x;
+    this.targetX = x;
+    this.vx = vx;
+    this.leaderX = x + facing * 8;
+    this.groundSpeed = groundSpeed;
+    if (Math.abs(vx + groundSpeed) > 8) this.wake();
+    if (this.reduced) {
+      this.facing = facing;
+      this.render();
+    }
+  }
+
+  get isAirborne() {
+    return this.airborne;
   }
 
   /** Follow-the-leader hop: Borrão jumps a rock, she jumps it a beat later. */
@@ -438,7 +461,7 @@ export class Mel {
   };
 
   private onWindowPointerMove = (event: PointerEvent) => {
-    this.pointer = { x: event.clientX, y: event.clientY };
+    this.pointer = this.toLayer(event.clientX, event.clientY);
   };
 
   private tick = (time: number, deltaMs: number) => {
@@ -451,7 +474,12 @@ export class Mel {
 
   private update(dt: number) {
     const now = this.clock;
-    this.scheduled = this.scheduled.filter((task) => (now >= task.at ? (task.run(), false) : true));
+    // Due tasks are taken out before they run: a task that schedules another (the hop's take-off) must not lose it
+    const due = this.scheduled.filter((task) => now >= task.at);
+    if (due.length) {
+      this.scheduled = this.scheduled.filter((task) => now < task.at);
+      due.forEach((task) => task.run());
+    }
     if (this.action && now >= this.action.end) this.action = null;
     const action = this.action?.name;
 
@@ -568,9 +596,11 @@ export class Mel {
 
     // Look at the pointer while idle and awake
     if (this.pointer && !this.sleeping && !moving) {
-      const rect = this.el.getBoundingClientRect();
-      const dx = (this.pointer.x - (rect.left + rect.width * 0.7)) * this.facing;
-      const dy = this.pointer.y - (rect.top + rect.height * 0.35);
+      // Her box, worked out instead of measured: reading the layout here would force it on every idle frame
+      const width = DOG_VIEW.width * this.scale;
+      const top = this.groundY() - DOG_VIEW.ground * this.scale - this.lift;
+      const dx = (this.pointer.x - (this.x - width / 2 + width * 0.7)) * this.facing;
+      const dy = this.pointer.y - (top + DOG_VIEW.height * this.scale * 0.35);
       const distance = Math.min(1, Math.hypot(dx, dy) / 260);
       const angle = Math.atan2(dy, dx);
       this.look.x = mix(this.look.x, Math.cos(angle) * 1.2 * distance, 1 - Math.exp(-dt * 6));

@@ -221,6 +221,8 @@ export const strings = {
   'topbar.sound.on': { pt: 'som ligado', en: 'sound on' },
   'topbar.sound.off': { pt: 'som desligado', en: 'sound off' },
   'topbar.secrets': { pt: 'segredos', en: 'secrets' },
+  'topbar.read': { pt: 'ler como página', en: 'read as a page' },
+  'topbar.play': { pt: 'andar pelo mundo', en: 'walk the world' },
 
   'intro.label': { pt: 'molhando o pincel', en: 'wetting the brush' },
   'intro.hint': { pt: 'desenhando a página, traço a traço', en: 'drawing the page, stroke by stroke' },

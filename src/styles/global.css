@@ -281,3 +281,32 @@ svg.ink {
 [data-boil='3'] .boil-frame-3 {
   visibility: visible;
 }
+
+/* A baked drawing brushed on: a soft-edged wipe uncovers it the way the stroke runs (sections.ts brushOn).
+   `.is-brushing-down` runs top to bottom, for upright drawings such as the signposts. */
+.is-brushing {
+  mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  mask-size: 250% 100%;
+  mask-repeat: no-repeat;
+  mask-position: 100% 0;
+  animation: ink-brush-on 0.9s cubic-bezier(0.45, 0.05, 0.3, 1) forwards;
+}
+
+.is-brushing.is-brushing-down {
+  mask-image: linear-gradient(180deg, #000 40%, transparent 60%);
+  mask-size: 100% 250%;
+  mask-position: 0 100%;
+  animation-name: ink-brush-down;
+}
+
+@keyframes ink-brush-on {
+  to { mask-position: 0 0; }
+}
+
+@keyframes ink-brush-down {
+  to { mask-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-brushing { animation: none; mask-image: none; }
+}

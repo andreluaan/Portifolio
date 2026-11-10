@@ -2,7 +2,14 @@
 import '../styles/global.css';
 import { strings, type Lang } from '../data/content';
 import roll from '../data/rolo.json';
+import world from '../data/world.json';
+import { layoutSizes } from '../world/layout-css';
+import type { WorldLayout } from '../world/layout';
 import { pathFor } from '../lib/i18n';
+// The fonts on screen at first paint: preloaded, so the text does not change width (and shift the bar) as they land
+import handFont from '@fontsource/nanum-pen-script/files/nanum-pen-script-latin-400-normal.woff2?url';
+import nameFont from '@fontsource/shippori-mincho-b1/files/shippori-mincho-b1-latin-800-normal.woff2?url';
+import bodyFont from '@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2?url';
 
 interface Props {
   title: string;
@@ -10,6 +17,7 @@ interface Props {
 }
 
 const { title, lang } = Astro.props;
+const sizes = layoutSizes(Object.values(world.layouts as unknown as Record<string, WorldLayout>));
 // Absolute once `site` is set in astro.config.mjs; relative until the domain is known
 const href = (path: string) => (Astro.site ? new URL(path, Astro.site).href : path);
 ---
@@ -22,24 +30,49 @@ const href = (path: string) => (Astro.site ? new URL(path, Astro.site).href : pa
     <meta name="description" content={strings['meta.description'][lang]} />
     <meta name="theme-color" content="#eeeeec" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {[handFont, nameFont, bodyFont].map((font) => <link rel="preload" as="font" type="font/woff2" href={font} crossorigin />)}
     <link rel="canonical" href={href(pathFor(lang))} />
     <link rel="alternate" hreflang="pt-BR" href={href(pathFor('pt'))} />
     <link rel="alternate" hreflang="en" href={href(pathFor('en'))} />
     <link rel="alternate" hreflang="x-default" href={href(pathFor('pt'))} />
     <title>{title}</title>
     <script is:inline>
-      // The world takes over the page only when scripts run; without them the same HTML reads as a plain document
-      document.documentElement.classList.add('has-world');
+      // The world takes over the page only when scripts run; without them the same HTML reads as a plain document.
+      // A visitor can choose either; with no choice yet, reduced motion means reading.
+      let mode = null;
+      try { mode = localStorage.getItem('portfolio-mode'); } catch {}
+      if (mode === 'world' || (mode !== 'read' && !matchMedia('(prefers-reduced-motion: reduce)').matches)) document.documentElement.classList.add('has-world');
+    </script>
+    <script is:inline define:vars={{ sizes }}>
+      // The map and the zoom, chosen before the first paint so the stations appear already in place (src/world/map.ts
+      // makes the same choice; layout-css.ts holds each map's placement)
+      const root = document.documentElement;
+      if (root.classList.contains('has-world')) {
+      const width = root.clientWidth || innerWidth;
+      const height = innerHeight;
+      const map = sizes[width / height < 10 / 9 ? 'narrow' : 'wide'];
+      const zoom = height / map.height;
+      root.dataset.layout = width / height < 10 / 9 ? 'narrow' : 'wide';
+      root.style.setProperty('--zoom', String(zoom));
+      root.style.setProperty('--world-height', `${map.height}px`);
+      root.style.setProperty('--world-width', `${map.width}px`);
+      root.style.setProperty('--front-width', `${map.frontWidth}px`);
+      root.style.setProperty('--view-span', `${width / zoom}px`);
+      root.style.setProperty('--walk-length', `${Math.max(0, map.width - width / zoom) * zoom}px`);
+      }
     </script>
     <script is:inline define:vars={{ roll, groundShare: 0.73 }}>
-      // The painting is the largest thing on screen, but world.ts only asks for it once the main script has run.
-      // Same choice as drawRoll(), made here so it downloads alongside the HTML; world.ts reuses it via data-roll.
+      // The painting is the largest thing on screen, but the world only asks for it once the main script has run.
+      // Same choice as Scenery.setView(), made here so it downloads alongside the HTML; scenery.ts reuses it via
+      // data-roll. Reading mode shows no painting, so nothing is fetched then.
+      if (document.documentElement.classList.contains('has-world')) {
       const scale = Math.max((innerHeight * groundShare) / (roll.height * 0.8), (innerWidth * 1.4) / roll.width);
       const wanted = roll.height * scale * Math.min(devicePixelRatio || 1, 2);
       const source = roll.sizes.find((size) => size >= wanted) ?? roll.sizes[roll.sizes.length - 1];
       const link = Object.assign(document.createElement('link'), { rel: 'preload', as: 'image', href: `/images/rolo/scroll-${source}-0.webp`, fetchPriority: 'high' });
       document.head.append(link);
       document.documentElement.dataset.roll = String(source);
+      }
     </script>
   </head>
   <body>

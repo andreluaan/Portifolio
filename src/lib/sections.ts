@@ -1,16 +1,19 @@
-import { renderScene } from './brush';
-import { attributeBar } from './scenes';
-
 export { portraits } from './portraits';
 
-/** Draws the dry-brush bars into the attribute rows the page already rendered; `animate` redraws them stroke by stroke. */
+/** Brushes the attribute bars on again, one after another (the bars are baked images, see scripts/ink-bake). */
 export function attributeBars(list: ParentNode) {
-  const bars = [...list.querySelectorAll<HTMLLIElement>('li[data-value]')].map((item, index) => {
-    const svg = item.querySelector('svg')!;
-    const strokes = attributeBar(Number(item.dataset.value), 400 + index * 3);
-    renderScene(svg, strokes);
-    return { svg, strokes };
-  });
-  const animate = (delay = 0) => bars.forEach((bar, index) => renderScene(bar.svg, bar.strokes, { animate: true, delay: delay + index * 0.12 }));
+  const bars = [...list.querySelectorAll<HTMLElement>('.attribute-bar')];
+  const animate = (delay = 0) =>
+    bars.forEach((bar, index) => {
+      bar.style.animationDelay = `${delay + index * 0.12}s`;
+      brushOn(bar);
+    });
   return { animate };
+}
+
+/** Restarts the brushed-on reveal of a baked drawing (`.is-brushing` in global.css). */
+export function brushOn(element: Element) {
+  element.classList.remove('is-brushing');
+  void (element as HTMLElement).offsetWidth;
+  element.classList.add('is-brushing');
 }

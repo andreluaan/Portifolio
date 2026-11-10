@@ -1,0 +1,31 @@
+---
+// A painting baked by scripts/ink-bake. `narrow` names the narrow map's version of a drawing whose size depends on
+// the map; the media query matches viewFor() in src/world/map.ts.
+import world from '../data/world.json';
+
+interface Props {
+  name: string;
+  narrow?: string;
+  class?: string;
+  alt?: string;
+  eager?: boolean;
+}
+
+const { name, narrow, class: className, alt = '', eager = false } = Astro.props;
+const ink = world.ink as Record<string, { width: number; height: number; scales: number[] }>;
+const srcset = (key: string) => ink[key].scales.map((scale) => `/ink/${key}@${scale}x.webp ${scale}x`).join(', ');
+const entry = ink[name];
+if (!entry) throw new Error(`Ink.astro: no baked drawing named ${name}`);
+const fallback = `/ink/${name}@${entry.scales[entry.scales.length - 1]}x.webp`;
+---
+
+{
+  narrow ? (
+    <picture class={className}>
+      <source media="(max-aspect-ratio: 10/9)" srcset={srcset(narrow)} width={Math.round(ink[narrow].width)} height={Math.round(ink[narrow].height)} />
+      <img src={fallback} srcset={srcset(name)} width={Math.round(entry.width)} height={Math.round(entry.height)} alt={alt} loading={eager ? 'eager' : 'lazy'} decoding="async" />
+    </picture>
+  ) : (
+    <img class={className} src={fallback} srcset={srcset(name)} width={Math.round(entry.width)} height={Math.round(entry.height)} alt={alt} loading={eager ? 'eager' : 'lazy'} decoding="async" />
+  )
+}

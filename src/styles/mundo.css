@@ -1,7 +1,16 @@
+/* The section is as tall as the walk is long, so the page's own scroll drives the camera; the view sticks to the
+   top while it scrolls by (world/index.ts sets --walk-length) */
+.has-world .mundo {
+  height: calc(100svh + var(--walk-length, 0px));
+}
+
 .mundo-pin {
-  position: relative;
+  position: sticky;
+  top: 0;
   height: 100svh;
-  overflow: hidden;
+  /* clip, not hidden: a hidden box can still be scrolled, and a link to a station's id would scroll it sideways
+     under the world's own camera */
+  overflow: clip;
   background: var(--paper);
 }
 
@@ -55,12 +64,40 @@
   to { transform: translateX(110vw) translateY(10px); }
 }
 
-.mundo-layer {
+/* Every world layer is zoomed so the world fills the window's height: inside, lengths are world units */
+.mundo-layer,
+.mundo-mascot-layer {
   position: absolute;
   top: 0;
   left: 0;
-  height: 100%;
+  zoom: var(--zoom, 1);
+}
+
+.mundo-layer {
+  width: var(--world-width, 100%);
+  height: var(--world-height, 100%);
   will-change: transform;
+}
+
+.mundo-front {
+  width: var(--front-width, 100%);
+  transform-origin: 50% 100%;
+}
+
+.mundo-floor,
+.scenery-tile,
+.scenery-branch {
+  position: absolute;
+  pointer-events: none;
+}
+
+.mundo-floor {
+  inset: 0;
+}
+
+.scenery-tile,
+.scenery-branch {
+  max-width: none;
 }
 
 .mundo-plane {
@@ -85,36 +122,6 @@
   max-width: none;
 }
 
-/* Paper mist that drifts by itself between the distances */
-.mundo-mist {
-  position: absolute;
-  left: 0;
-  width: calc(100% + 2000px);
-  background-image: url('/images/rolo/mist.webp');
-  background-repeat: repeat-x;
-  pointer-events: none;
-  animation: mist-drift 90s linear infinite;
-}
-
-.mundo-mist.is-low {
-  animation-duration: 60s;
-}
-
-@keyframes mist-drift {
-  to { transform: translateX(var(--drift-by, -50%)); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mundo-mist { animation: none; }
-}
-
-.mundo-layer > svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
 .mundo-ground {
   z-index: 2;
 }
@@ -125,18 +132,20 @@
 }
 
 .mundo-mascot-layer {
-  position: absolute;
-  inset: 0;
   z-index: 3;
+  width: var(--view-span, 100%);
+  height: var(--world-height, 100%);
   pointer-events: none;
 }
 
-.mundo-mascot-layer .mascot {
+.mundo-mascot-layer .mascot,
+.mundo-mascot-layer .mel {
   pointer-events: auto;
 }
 
 /* Set by an IntersectionObserver in world.ts for stations well outside the view */
 .mundo-station.is-far svg,
+.mundo-station.is-far img,
 .mundo-station.is-far canvas {
   visibility: hidden;
 }
@@ -166,14 +175,14 @@
   filter: drop-shadow(0 14px 14px rgb(21 21 21 / 0.14));
 }
 
-.station-hero-frame {
+.station-hero-frame img {
   position: absolute;
   left: 0;
-  top: 0;
+  top: -8px;
   z-index: -1;
-  width: calc(100% + 40px);
-  height: calc(100% + 26px);
-  overflow: visible;
+  width: calc(100% + 48px);
+  height: calc(100% + 42px);
+  max-width: none;
 }
 
 .station-hero-painting {
@@ -220,11 +229,15 @@
 }
 
 /* Clothesline */
-.station-line-art {
+/* Baked with an 8-unit margin on every side (12 below) so the brush tips are not clipped (scripts/ink-bake) */
+.station-line-art img,
+img.station-line-art {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  left: -8px;
+  top: -8px;
+  width: calc(100% + 16px);
+  height: calc(100% + 20px);
+  max-width: none;
 }
 
 .station-line-papers {
@@ -290,7 +303,8 @@
   to { transform: rotate(2.5deg); }
 }
 
-.line-paper svg {
+.line-paper-sketch {
+  display: block;
   width: 100%;
   aspect-ratio: 3 / 2;
   background: var(--paper-deep);
@@ -326,11 +340,14 @@
   box-shadow: 0 20px 30px -24px var(--shadow);
 }
 
-.station-board-frame {
+.station-board-frame img,
+img.station-board-frame {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  left: -6px;
+  top: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+  max-width: none;
   pointer-events: none;
 }
 
@@ -374,7 +391,7 @@
   text-align: center;
 }
 
-.station-end svg {
+.station-end-enso {
   width: 200px;
   height: 200px;
 }
@@ -390,9 +407,17 @@
   translate: -50% 0;
 }
 
-.mundo-progress svg {
+.mundo-progress-base,
+.mundo-progress-fill {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+}
+
+/* Revealed from the left as the walk goes on (world/index.ts sets --progress) */
+.mundo-progress-fill {
+  clip-path: inset(0 calc(100% - var(--progress, 0) * 100%) 0 0);
 }
 
 @media (max-width: 700px) {
@@ -503,14 +528,15 @@
   height: 34px;
 }
 
-.desk-brush svg { opacity: 0; }
+.desk-brush-art { opacity: 0; }
 
 .desk-ink:hover { transform: translateY(-4px) rotate(-6deg); }
 .desk-brush:hover,
 .desk-brush:focus-visible { outline: 1.5px dashed var(--ink); outline-offset: 2px; }
 
-.desk-ink svg,
-.desk-brush svg {
+.desk-ink-art,
+.desk-brush-art {
+  display: block;
   width: 100%;
   height: 100%;
 }
@@ -564,7 +590,7 @@
   pointer-events: none;
 }
 
-.mundo-brush-cursor svg {
+.mundo-brush-cursor img {
   position: absolute;
   left: -88px;
   top: -1px;
@@ -596,6 +622,8 @@
   opacity: 0;
   pointer-events: none;
   animation: paw-fade 5s ease-out forwards;
+  /* Its own layer: fading it would otherwise repaint the whole floor under it on every frame */
+  will-change: opacity;
 }
 
 @keyframes paw-fade {
@@ -611,11 +639,10 @@
 }
 
 /* The drawing itself; a lantern's flame and rays come after it */
-.mundo-prop > svg:first-of-type {
+.mundo-prop-art {
   display: block;
   width: 100%;
   height: 100%;
-  overflow: visible;
 }
 
 /* A lantern on the floor is a button: its window lights up (world.ts) */
@@ -665,6 +692,19 @@
   height: calc(var(--light-size) * 1.9);
   translate: -50% -50%;
   transition: opacity 0.6s;
+}
+
+/* Lit anew: the rays are brushed outwards from the window */
+.mundo-prop-rays.is-brushed {
+  mask-image: radial-gradient(circle, #000 40%, transparent 70%);
+  mask-size: 0% 0%;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  animation: rays-brush 0.7s ease-out forwards;
+}
+
+@keyframes rays-brush {
+  to { mask-size: 300% 300%; }
 }
 
 .is-lit > .mundo-prop-glow { opacity: 1; scale: 1; animation: lantern-breathe 3.2s ease-in-out infinite; }

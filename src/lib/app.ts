@@ -1,27 +1,11 @@
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Lenis from 'lenis';
-import { brushPath, frameAll, prefersReducedMotion, renderScene, roughRect, stroke, svgElement } from './brush';
+import { brushPath, frameAll, prefersReducedMotion, renderScene, roughRect, svgElement } from './brush';
 import { startBoiling } from './effects';
 import { getLang, pick, t } from './i18n';
 import { runIntro } from './intro';
 import { foundSecrets, onSecretsChange, secrets, watchGlobalSecrets } from './secrets';
 import { isSoundOn, onSoundChange, setSound, sounds } from './sound';
-import { mountWorld, type StationName } from './world';
-
-gsap.registerPlugin(ScrollTrigger);
-ScrollTrigger.config({ ignoreMobileResize: true });
-
-let lenis: Lenis | null = null;
-
-function setupSmoothScroll() {
-  if (prefersReducedMotion()) return;
-  // Inside a dialog the wheel scrolls the dialog itself, natively
-  lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.9, prevent: (node) => node instanceof HTMLDialogElement });
-  lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add((time) => lenis?.raf(time * 1000));
-  gsap.ticker.lagSmoothing(0);
-}
+import { mountWorld, type StationName } from '../world';
 
 /** While the notebook, the character sheet or the book is open, the world stays where it is: they have their own
  * scrolling, and the wheel reaching the page underneath would walk the world on behind them. */
@@ -30,21 +14,9 @@ function lockWorldUnderDialogs() {
   const sync = () => {
     const open = dialogs.some((dialog) => dialog.open);
     document.documentElement.classList.toggle('is-locked', open);
-    if (open) lenis?.stop();
-    else lenis?.start();
   };
   const observer = new MutationObserver(sync);
   dialogs.forEach((dialog) => observer.observe(dialog, { attributes: true, attributeFilter: ['open'] }));
-}
-
-function scrollTo(y: number, immediate = false) {
-  // A plain window.scrollTo is undone by Lenis on its next frame, so jumps go through Lenis too.
-  if (lenis) {
-    // Lenis caches the page height; right after the world pins, that value is stale and would clamp the jump.
-    lenis.resize();
-    lenis.scrollTo(y, immediate ? { immediate: true, force: true } : { duration: 1.6 });
-  }
-  else window.scrollTo({ top: y });
 }
 
 function setupTopbar() {
@@ -64,16 +36,10 @@ function setupTopbar() {
   );
 
   const soundButton = document.querySelector<HTMLButtonElement>('.sound-toggle')!;
-  const soundIcon = soundButton.querySelector('svg')!;
+  // Both icons are baked; aria-pressed shows the right one (pieces.css)
   const drawSound = (on: boolean) => {
     soundButton.setAttribute('aria-pressed', String(on));
     soundButton.setAttribute('aria-label', t(on ? 'topbar.sound.on' : 'topbar.sound.off'));
-    renderScene(soundIcon, [
-      stroke([[4, 10], [10, 10], [17, 4], [17, 24], [10, 18], [4, 18], [4, 10]], 2, { seed: 41, start: 0.02, end: 0.04 }),
-      ...(on
-        ? [stroke([[22, 9], [25, 14], [22, 19]], 1.8, { seed: 42 }), stroke([[25, 5], [30, 14], [25, 23]], 1.8, { seed: 43 })]
-        : [stroke([[22, 9], [30, 19]], 2, { seed: 44 }), stroke([[30, 9], [22, 19]], 2, { seed: 45 })]),
-    ]);
   };
   soundButton.addEventListener('click', () => {
     setSound(!isSoundOn());
@@ -130,6 +96,17 @@ function setupDialog() {
   dialog.querySelector('[data-close-sheet]')!.addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', (event) => event.target === dialog && dialog.close());
   dialog.addEventListener('close', () => sounds.paper());
+}
+
+/** Switches between walking the world and reading the page; the choice is kept and the page reloads into it. */
+function setupModeToggle() {
+  document.querySelector('[data-mode-toggle]')?.addEventListener('click', () => {
+    const reading = !document.documentElement.classList.contains('has-world');
+    try {
+      localStorage.setItem('portfolio-mode', reading ? 'world' : 'read');
+    } catch {}
+    location.reload();
+  });
 }
 
 const HASH_TO_STATION: Record<string, StationName> = {
@@ -205,22 +182,33 @@ function setupNavBrush() {
 }
 
 export async function boot() {
+  // A link to a station wins over the scroll the browser would restore from the last visit
+  if (location.hash.length > 1) history.scrollRestoration = 'manual';
   startBoiling();
   watchGlobalSecrets();
-  setupSmoothScroll();
   lockWorldUnderDialogs();
   setupTopbar();
   setupDialog();
+  setupModeToggle();
+  // Reading mode: the same page as a plain document, no world to mount
+  if (!document.documentElement.classList.contains('has-world')) {
+    document.getElementById('intro')?.remove();
+    return;
+  }
   await runIntro();
-  window.scrollTo(0, 0);
-  const world = mountWorld(scrollTo);
-  setupNavigation(world);
-  // No refresh here: ScrollTrigger.create already measured the world, and the one after fonts.ready (resolved at
-  // once on a warm cache) catches what the strings and fonts change. Each refresh forces layout twice on boot.
-  const linked = HASH_TO_STATION[location.hash.slice(1)] ?? location.hash.slice(1);
-  if (linked && world.has(linked)) requestAnimationFrame(() => world.goTo(linked, true));
-  (document.fonts?.ready ?? Promise.resolve()).then(() => {
-    frameAll();
-    ScrollTrigger.refresh();
+  const world = mountWorld();
+  window.addEventListener('hashchange', () => {
+    const station = HASH_TO_STATION[location.hash.slice(1)];
+    if (station) world.goTo(station);
   });
+  setupNavigation(world);
+  const linked = HASH_TO_STATION[location.hash.slice(1)] ?? location.hash.slice(1);
+  if (linked && world.has(linked)) {
+    // The browser also jumps to the element with that id once the page loads, and inside the pinned view that
+    // means the top: the station is taken again after it
+    const go = () => requestAnimationFrame(() => world.goTo(linked, true));
+    go();
+    if (document.readyState !== 'complete') window.addEventListener('load', go, { once: true });
+  }
+  (document.fonts?.ready ?? Promise.resolve()).then(() => frameAll());
 }

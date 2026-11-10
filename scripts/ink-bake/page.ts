@@ -184,10 +184,12 @@ function sharedDrawings(layouts: WorldLayout[]): Drawing[] {
   drawings.push({ name: 'sound-off', strokes: [soundBox, stroke([[22, 9], [30, 19]], 2, { seed: 44 }), stroke([[30, 9], [22, 19]], 2, { seed: 45 })], box: [0, 0, 32, 28], scales: [3] });
 
   // Floor props, each at its own seed (as they stood before), plus the lantern's flame and a few sets of rays
-  const seen = new Set<number>();
+  // The two maps reuse seeds for different kinds of prop, so a drawing is named (and kept) by both
+  const seen = new Set<string>();
   layouts.flatMap((layout) => layout.props).forEach((prop) => {
-    if (seen.has(prop.seed)) return;
-    seen.add(prop.seed);
+    const key = `${prop.name}-${prop.seed}`;
+    if (seen.has(key)) return;
+    seen.add(key);
     const kind = FLOOR_PROPS[prop.name];
     drawings.push({ name: `prop-${prop.name}-${prop.seed}`, strokes: kind.draw(prop.seed), box: [0, 0, kind.width, kind.height], scales: [2] });
   });

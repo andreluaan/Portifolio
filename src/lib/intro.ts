@@ -1,4 +1,4 @@
-import { prefersReducedMotion, renderScene, stroke } from './brush';
+import { prefersReducedMotion } from './brush';
 import { Mascot } from './mascot';
 import { unlock } from './secrets';
 import { sounds } from './sound';
@@ -19,10 +19,10 @@ export function runIntro(): Promise<void> {
 
   intro.hidden = false;
   document.body.classList.add('is-locked');
-  const line = intro.querySelector<SVGSVGElement>('.intro-line')!;
+  // The baked stroke is uncovered as the loading goes (--progress, see pieces.css)
+  const line = intro.querySelector<HTMLElement>('.intro-line')!;
   const stage = intro.querySelector<HTMLElement>('.intro-stage')!;
   const percent = intro.querySelector<HTMLElement>('.intro-percent')!;
-  renderScene(line, [stroke([[0, 9], [160, 7], [320, 10]], 4.5, { seed: 19, dry: true, start: 0.02, end: 0.1 })], { animate: true, pace: 0.32 });
 
   let progress = 0;
   const mascot = new Mascot({ layer: stage, groundY: () => stage.clientHeight - 6, scripted: true, startX: 10 });
@@ -59,6 +59,7 @@ export function runIntro(): Promise<void> {
       const raw = Math.min(1, (now - started) / DURATION);
       progress = raw < 0.5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
       percent.textContent = `${Math.round(progress * 100)}%`;
+      line.style.setProperty('--progress', progress.toFixed(3));
       const x = 22 + progress * (stage.clientWidth - 44);
       mascot.drive(x, (x - previousX) * 60);
       previousX = x;

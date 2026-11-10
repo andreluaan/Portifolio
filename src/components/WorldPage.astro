@@ -1,5 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
+import Ink from './Ink.astro';
+import world from '../data/world.json';
+import { layoutCss } from '../world/layout-css';
+import type { WorldLayout } from '../world/layout';
 import { attributes, projects, type Lang } from '../data/content';
 import { loadGithub } from '../data/github';
 import { pathFor, translator } from '../lib/i18n';
@@ -34,14 +38,16 @@ const signItems = [
   { sign: 'atelie', key: 'mundo.sign.atelie' },
   { sign: 'sobre', key: 'mundo.sign.sobre' },
 ] as const;
+const stationsCss = Object.values(world.layouts as unknown as Record<string, WorldLayout>).map(layoutCss).join(' ');
 const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocaleDateString(locale, { day: '2-digit', month: 'short' });
 ---
 
 <Base lang={lang} title={pick({ pt: 'André Luan · mundo de papel', en: 'André Luan · paper world' })}>
+  <style is:inline set:html={stationsCss}></style>
   <div class="intro" id="intro" hidden>
     <div class="intro-stage">
       <p class="hand intro-label"><span>{t('intro.label')}</span> <span class="intro-percent">0%</span></p>
-      <svg class="intro-line ink" viewBox="0 0 320 18" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <Ink name="intro-line" class="intro-line" eager />
     </div>
     <p class="hand intro-hint">{t('intro.hint')}</p>
     <button class="intro-skip" type="button"><span>{t('intro.skip')}</span> <kbd>Esc</kbd></button>
@@ -61,13 +67,17 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
     </nav>
 
     <div class="topbar-tools">
+      <button class="mode-toggle hand" type="button" data-mode-toggle>
+        <span class="mode-read">{t('topbar.read')}</span><span class="mode-play">{t('topbar.play')}</span>
+      </button>
       <nav class="lang-switch" aria-label="Idioma / Language">
         <a href={pathFor('pt')} hreflang="pt-BR" lang="pt-BR" data-lang="pt" aria-current={lang === 'pt' ? 'true' : undefined}>pt</a>
         <a href={pathFor('en')} hreflang="en" lang="en" data-lang="en" aria-current={lang === 'en' ? 'true' : undefined}>en</a>
         <span class="lang-drop" aria-hidden="true"></span>
       </nav>
       <button class="sound-toggle" type="button" data-frame="ring" aria-pressed="false" aria-label={t('topbar.sound.off')}>
-        <svg class="ink" viewBox="0 0 32 28" aria-hidden="true"></svg>
+        <Ink name="sound-off" class="sound-icon is-off" eager />
+        <Ink name="sound-on" class="sound-icon is-on" eager />
       </button>
       <button class="secrets-toggle" type="button" data-frame="plain" aria-expanded="false" aria-controls="passport">
         <span class="secrets-seal" aria-hidden="true">秘</span>
@@ -86,17 +96,15 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
     <section class="mundo" aria-label={pick({ pt: 'Mundo de papel', en: 'Paper world' })}>
       <div class="mundo-pin">
         <div class="mundo-layer mundo-roll" aria-hidden="true"><div class="mundo-plane"></div></div>
-        <div class="mundo-layer mundo-mists" aria-hidden="true"><div class="mundo-mist"></div><div class="mundo-mist is-low"></div></div>
-        <div class="mundo-veil" aria-hidden="true"></div>
         <div class="mundo-sky"></div>
         <canvas class="mundo-paint" aria-hidden="true"></canvas>
         <div class="mundo-layer mundo-ground">
-          <svg class="ink mundo-ground-art" aria-hidden="true"></svg>
+          <div class="mundo-floor" aria-hidden="true"></div>
 
           <div class="mundo-station station-hero" id="inicio">
             <div class="station-hero-sheet">
               <img class="station-hero-scroll" src="/images/pecas/moldura.webp" alt="" width="700" height="1701" decoding="async" />
-              <svg class="ink station-hero-frame" aria-hidden="true"></svg>
+              <Ink name="hero-post-wide" narrow="hero-post-narrow" class="station-hero-frame" eager />
               <svg class="station-hero-painting" viewBox="0 60 900 1340" preserveAspectRatio="xMidYMid slice" role="img" aria-label={pick({ pt: 'Retrato de André em nanquim, de perfil', en: 'Ink portrait of André, in profile' })}>
                 <image href={portraits.profile.href} x="0" y="0" width={portraits.profile.width} height={portraits.profile.height} preserveAspectRatio="xMidYMid slice"></image>
               </svg>
@@ -117,7 +125,7 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
           {
             signItems.map((item) => (
               <div class="mundo-station station-sign" data-sign={item.sign}>
-                <svg class="ink" viewBox="0 0 200 400" aria-hidden="true" />
+                <Ink name={`signpost-${item.sign}`} class="station-sign-post" />
                 <img class="station-sign-banner" src="/images/pecas/placa.webp" alt="" width="420" height="909" loading="lazy" decoding="async" />
                 <img class="station-sign-art" src={`/images/placas/${item.sign}.webp`} alt="" width="416" height="410" loading="lazy" decoding="async" />
                 <span class="station-sign-label" role="heading" aria-level="2">{t(item.key)}</span>
@@ -159,7 +167,7 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
               <img class="station-mail-art" src="/images/pecas/correio.webp" alt="" width="360" height="698" loading="lazy" decoding="async" />
             </button>
             <div class="station-mail-note">
-              <svg class="ink station-mail-note-frame" aria-hidden="true"></svg>
+              <Ink name="note-frame-wide" narrow="note-frame-narrow" class="station-mail-note-frame" />
               <h2 class="hand">{t('mail.title')}</h2>
               <p class="station-mail-lede">{t('mail.lede')}</p>
               <p class="station-mail-email">andre.luanbq@gmail.com</p>
@@ -172,7 +180,7 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
           </div>
 
           <div class="mundo-station station-line" id="destaques">
-            <svg class="ink station-line-art" aria-hidden="true"></svg>
+            <Ink name="line-wide" narrow="line-narrow" class="station-line-art" />
             <div class="station-line-papers">
               {
                 featured.map((project, index) => (
@@ -185,7 +193,7 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
                   >
                     <span class="line-paper-pin" aria-hidden="true" />
                     <span class="line-paper-sheet">
-                      <svg class="ink" viewBox="0 0 240 160" aria-hidden="true" />
+                      <Ink name={`sketch-${project.id}`} class="line-paper-sketch" />
                       <span class="line-paper-title">{pick(project.title)}</span>
                       <span class="line-paper-summary">{pick(project.stat)}</span>
                       <span class="line-paper-foot">
@@ -221,7 +229,7 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
           <div class="mundo-station station-house" id="sobre">
             <img class="station-house-art" src="/images/pecas/casa.webp" alt="" width="620" height="570" loading="lazy" decoding="async" />
             <div class="station-board">
-              <svg class="ink station-board-frame" aria-hidden="true"></svg>
+              <Ink name="board-frame-wide" narrow="board-frame-narrow" class="station-board-frame" />
               <div class="station-board-body">
                 <div class="character-identity">
                   <img class="character-face" src={portraits.front.href} alt={pick({ pt: 'Retrato de André em nanquim, de frente', en: 'Ink portrait of André, facing forward' })} width="600" height="600" loading="lazy" />
@@ -234,7 +242,7 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
                     attributes.map((attribute) => (
                       <li data-value={attribute.value}>
                         <span class="hand">{pick(attribute.label)}</span>
-                        <svg class="ink" viewBox="0 0 300 16" preserveAspectRatio="none" role="img" aria-label={`${Math.round(attribute.value * 100)}%`} />
+                        <Ink name={`bar-${Math.round(attribute.value * 100)}`} class="attribute-bar" alt={`${Math.round(attribute.value * 100)}%`} />
                       </li>
                     ))
                   }
@@ -245,31 +253,32 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
           </div>
 
           <div class="mundo-station station-end">
-            <svg class="ink" viewBox="0 0 120 120" aria-hidden="true"></svg>
+            <Ink name="enso" class="station-end-enso" />
             <p class="hand">{t('mundo.end')}</p>
           </div>
 
           <div class="mundo-station station-desk">
             <img class="station-desk-art" src="/images/pecas/mesinha.webp" alt="" width="640" height="204" loading="lazy" decoding="async" />
             <button class="desk-ink" type="button" aria-label={t('mundo.ink')}>
-              <svg class="ink" viewBox="0 0 130 115" aria-hidden="true"></svg>
+              <Ink name="desk-ink" class="desk-ink-art" />
             </button>
             <button class="desk-brush" type="button" aria-label={t('mundo.brush')}>
-              <svg class="ink" viewBox="0 0 170 155" aria-hidden="true"></svg>
+              <Ink name="desk-brush" class="desk-brush-art" />
             </button>
           </div>
         </div>
-        <div class="mundo-layer mundo-front"><svg class="ink" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+        <div class="mundo-layer mundo-front" aria-hidden="true"></div>
         <div class="mundo-mascot-layer"></div>
         <div class="mundo-progress" aria-hidden="true">
-          <svg class="ink" viewBox="0 0 400 20" preserveAspectRatio="none"></svg>
+          <Ink name="progress-wide" narrow="progress-narrow" class="mundo-progress-base" eager />
+          <Ink name="progress-fill" class="mundo-progress-fill" eager />
         </div>
       </div>
       <div class="mundo-painting-bar" hidden>
         <span class="hand">{t('mundo.painting')}</span>
         <button class="ink-button small" type="button" data-frame data-clear-sky><span>{t('mundo.clear')}</span></button>
       </div>
-      <div class="mundo-brush-cursor" aria-hidden="true"><svg class="ink" viewBox="0 0 170 155"></svg></div>
+      <div class="mundo-brush-cursor" aria-hidden="true"><Ink name="desk-brush" /></div>
     </section>
   </main>
 
