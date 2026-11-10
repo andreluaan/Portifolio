@@ -6,7 +6,7 @@ Peça **uma imagem por vez**, na ordem abaixo, porque ela vai do que muda mais o
 
 **Entrega:** coloque o resultado na conversa com o Claude. Ele tira o fundo branco, encaixa a peça no site e escreve os textos por cima. O varal de projetos fica como está.
 
-**Já feitas:** 1 Estante, 2 Placa de seção, 3 Quadro do Ateliê, 4 Casa do Sobre, 6 Correio, 7 Moldura do retrato e 8 Mesinha escondida. O 5 Quadro da ficha foi testado e descartado: a ficha fica no cartão branco. Faltam: 9 Bandeira do processo e 10 Ensō final.
+**Já feitas:** 1 Estante, 2 Placa de seção, 3 Quadro do Ateliê, 4 Casa do Sobre, 6 Correio, 7 Moldura do retrato, 8 Mesinha escondida. O 5 Quadro da ficha foi testado e descartado: a ficha fica no cartão branco. A 9 Bandeira do processo foi feita (`prototipo/pecas/bandeira.png`), mas a seção do processo saiu do site. Falta: 10 Ensō final.
 
 ## Estilo (colar sempre)
 
@@ -64,11 +64,19 @@ The object: a low Japanese calligraphy table with short legs, seen from the fron
 ## 9. Bandeira do processo
 
 ```text
-The object: one blank Japanese nobori banner, a tall narrow cloth flag on a thin bamboo pole, gently waving in the wind. The cloth is white and completely blank, with soft folds in light gray wash. Vertical format, 2:3.
+The object: one blank Japanese nobori banner standing in the grass. A thin, slightly crooked bamboo pole on the left, with visible nodes, planted in a small tuft of grass and two flat stones at its base. A short bamboo crossbar at the top holds the cloth, tied to the pole with small cord loops along its left edge. The cloth is a wide rectangle (about 3:4, wider than a usual nobori), white and completely blank, with slightly frayed edges and one softly lifted lower corner, gently waving in the wind with a few soft folds in light gray wash. The cloth takes up most of the upper half of the image and stays bright and clean, because text will be written on it later. Vertical format, 2:3.
 ```
 
 ## 10. Ensō final
 
 ```text
 The object: a single large enso circle, painted in one continuous stroke with a thick loaded brush that runs dry at the end, showing bristle marks and a few small ink splatters. Square format, 1:1.
+```
+
+## 11. Lanterna de pedra do chão
+
+Fica no meio do chão, na frente ou atrás da Mel, e acende com um clique. O site desenha a luz por cima, então a janelinha precisa vir branca e limpa.
+
+```text
+The object: one traditional Japanese stone lantern (a kasuga-style ishidoro), standing alone, seen straight from the front at eye level, with no perspective tilt. From bottom to top: a low square stone base, a slim round pillar with one carved ring, a small square platform, a square fire box with one open window facing the viewer, a wide curved roof with softly upturned corners, and a small onion-shaped jewel on top. Weathered gray stone painted in soft wash, with dry-brush texture, a little moss at the base and on the roof edge, and dark accents only under the roof. The window of the fire box is an empty, clean white opening, with nothing inside it, because a light will be drawn there later. A tiny tuft of grass at the foot. Vertical format, 2:3.
 ```

@@ -18,13 +18,11 @@ const navItems = [
   { station: 'mail', key: 'nav.contato' },
 ] as const;
 const signItems = [
-  { sign: 'processo', key: 'mundo.sign.processo' },
   { sign: 'varal', key: 'mundo.sign.varal' },
   { sign: 'estante', key: 'mundo.sign.estante' },
   { sign: 'atelie', key: 'mundo.sign.atelie' },
   { sign: 'sobre', key: 'mundo.sign.sobre' },
 ] as const;
-const processSteps = [1, 2, 3, 4] as const;
 ---
 
 <Base title="André Luan · mundo de papel">
@@ -113,22 +111,6 @@ const processSteps = [1, 2, 3, 4] as const;
               </div>
             ))
           }
-
-          <div class="mundo-station station-process">
-            <p class="hand station-process-title" data-i18n="process.title">{pt('process.title')}</p>
-            {
-              processSteps.map((step) => (
-                <div class="process-flag" data-step={step}>
-                  <svg class="ink" viewBox="0 0 200 240" aria-hidden="true" />
-                  <div class="process-flag-text">
-                    <span class="process-flag-number">{step}</span>
-                    <strong data-i18n={`process.s${step}.title`}>{pt(`process.s${step}.title` as StringKey)}</strong>
-                    <span data-i18n={`process.s${step}.text`}>{pt(`process.s${step}.text` as StringKey)}</span>
-                  </div>
-                </div>
-              ))
-            }
-          </div>
 
           <div class="mundo-station station-repos">
             <img class="station-repos-art" src="/images/pecas/quadro.webp" alt="" width="1400" height="802" loading="lazy" decoding="async" />

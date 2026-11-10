@@ -68,6 +68,17 @@
   inset: 0;
 }
 
+/* The painting's own ground is blank paper; it carries on down to the bottom of the view under the walkable floor */
+.mundo-plane::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--painting-height, 100%) - 2px);
+  height: 100vh;
+  background: #fffffd;
+}
+
 .mundo-plane img {
   position: absolute;
   top: 0;
@@ -567,4 +578,111 @@
 
 .station-board-body .character-attributes {
   margin: 0;
+}
+
+/* The floor answers a tap: Mel walks to where it lands (world.ts) */
+.mundo-pin.is-over-floor {
+  cursor: pointer;
+}
+
+/* An ink paw print on the floor, drunk by the paper in a few seconds */
+.mundo-paw {
+  position: absolute;
+  left: -5px;
+  top: -4px;
+  width: 10px;
+  height: 8px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8'%3E%3Cg fill='%233b3c3a'%3E%3Cellipse cx='5' cy='5.6' rx='2.6' ry='2'/%3E%3Ccircle cx='1.6' cy='2.6' r='1.1'/%3E%3Ccircle cx='4' cy='1.2' r='1.1'/%3E%3Ccircle cx='6.6' cy='1.4' r='1.1'/%3E%3Ccircle cx='8.6' cy='3' r='1'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain;
+  opacity: 0;
+  pointer-events: none;
+  animation: paw-fade 5s ease-out forwards;
+}
+
+@keyframes paw-fade {
+  0% { opacity: 0.42; }
+  100% { opacity: 0; }
+}
+
+/* A prop standing in the middle of the floor; world.ts places it and sorts it against Mel by its foot */
+.mundo-prop {
+  position: absolute;
+  left: 0;
+  pointer-events: none;
+}
+
+/* The drawing itself; a lantern's flame and rays come after it */
+.mundo-prop > svg:first-of-type {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* A lantern on the floor is a button: its window lights up (world.ts) */
+.mundo-prop.is-lantern {
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.mundo-prop.is-lantern:focus-visible {
+  outline: 2px dashed var(--ink-soft);
+  outline-offset: 4px;
+}
+
+.mundo-prop-glow,
+.mundo-prop-flame,
+.mundo-prop-rays {
+  position: absolute;
+  left: var(--light-x);
+  top: var(--light-y);
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* White light reads on the grey stone around the window; on the paper it simply fades into it */
+.mundo-prop-glow {
+  width: var(--light-size);
+  height: var(--light-size);
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #fffffd 0 34%, rgb(255 255 253 / 0.75) 58%, rgb(255 255 253 / 0));
+  scale: 0.3;
+  transition: opacity 0.5s, scale 0.8s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.mundo-prop-flame {
+  width: calc(var(--light-size) * 0.24);
+  height: calc(var(--light-size) * 0.34);
+  translate: -50% -78%;
+  transform-origin: 50% 100%;
+  scale: 0.2;
+  transition: opacity 0.3s 0.15s, scale 0.5s 0.15s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.mundo-prop-rays {
+  width: calc(var(--light-size) * 1.9);
+  height: calc(var(--light-size) * 1.9);
+  translate: -50% -50%;
+  transition: opacity 0.6s;
+}
+
+.is-lit > .mundo-prop-glow { opacity: 1; scale: 1; animation: lantern-breathe 3.2s ease-in-out infinite; }
+.is-lit > .mundo-prop-flame { opacity: 1; scale: 1; animation: flame-flicker 0.42s ease-in-out infinite alternate; }
+.is-lit > .mundo-prop-rays { opacity: 0.7; animation: lantern-breathe 3.2s ease-in-out infinite; }
+
+@keyframes lantern-breathe {
+  50% { opacity: 0.55; }
+}
+
+@keyframes flame-flicker {
+  0% { transform: scale(0.94, 1.05) skewX(-3deg); }
+  60% { transform: scale(1.04, 0.92) skewX(2deg); }
+  100% { transform: scale(0.98, 1.08) skewX(4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-lit > .mundo-prop-glow,
+  .is-lit > .mundo-prop-flame,
+  .is-lit > .mundo-prop-rays { animation: none; }
 }

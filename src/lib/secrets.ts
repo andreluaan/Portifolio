@@ -22,6 +22,8 @@ export const secrets: Secret[] = [
   { id: 'konami', glyph: '古', name: { pt: 'código antigo', en: 'ancient code' }, hint: { pt: '↑ ↑ ↓ ↓ ← → ← → b a', en: '↑ ↑ ↓ ↓ ← → ← → b a' } },
   { id: 'carinho', glyph: '愛', name: { pt: 'carinho', en: 'belly rubs' }, hint: { pt: 'fez carinho na Mel cinco vezes', en: 'petted Mel five times' } },
   { id: 'mel', glyph: '蜜', name: { pt: 'chamou a Mel', en: 'called Mel' }, hint: { pt: 'escreveu o nome dela', en: 'typed her name' } },
+  { id: 'depth', glyph: '奥', name: { pt: 'profundidade', en: 'depth' }, hint: { pt: 'levou a Mel do fundo até a frente do chão', en: 'walked Mel from the back of the ground to the front' } },
+  { id: 'lanterns', glyph: '灯', name: { pt: 'acendedor', en: 'lamplighter' }, hint: { pt: 'acendeu todas as lanternas do caminho', en: 'lit every lantern along the path' } },
   { id: 'owl', glyph: '夜', name: { pt: 'coruja', en: 'night owl' }, hint: { pt: 'visitou entre meia-noite e 5h', en: 'visited between midnight and 5am' } },
 ];
 

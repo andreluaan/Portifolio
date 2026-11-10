@@ -8,16 +8,17 @@ import { openNotebook } from './notebook';
 import type { GithubData } from '../data/github';
 import { paintPortrait } from './effects';
 import { getLang, onLangChange, pick, t } from './i18n';
+import { BACK_EDGE_DEPTH, depthAt, depthScale, drawFloor, FLOOR_PROPS, LANE_DEPTH, lanternFlame, lanternRays, laneY, ROW_DEPTHS, type FloorPropKind, type FloorPropName, type Lane } from './floor';
 import { Mascot } from './mascot';
 import { Mel } from './mel';
 import { InkPainter } from './painting';
 import roll from '../data/rolo.json';
-import { deskObjects, foregroundBranch, grassTufts, sketchFor, worldProps } from './scenes';
+import { deskObjects, foregroundBranch, sketchFor, worldProps } from './scenes';
 import { unlock } from './secrets';
 import { attributeList, characterIdentity, portraits } from './sections';
 import { sounds } from './sound';
 
-export type StationName = 'hero' | 'processo' | 'process' | 'varal' | 'line' | 'estante' | 'lectern' | 'atelie' | 'repos' | 'sobre' | 'house' | 'mail' | 'end' | 'desk';
+export type StationName = 'hero' | 'varal' | 'line' | 'estante' | 'lectern' | 'atelie' | 'repos' | 'sobre' | 'house' | 'mail' | 'end' | 'desk';
 
 interface WorldLayout {
   width: number;
@@ -43,6 +44,11 @@ const MOODS: Mood[] = [
   { mist: 0, veil: 0, dusk: 0 },
   { mist: 0, veil: 0, dusk: 0 },
 ];
+/** Where the floor begins, as a share of the view's height: the quarter below is the walkable band. */
+const GROUND_SHARE = 0.73;
+/** Depth crossed per second while walking up or down the floor, and world pixels per second walking sideways. */
+const DEPTH_SPEED = 0.75;
+const SIDE_SPEED = 620;
 const NAV_STATIONS: StationName[] = ['hero', 'line', 'house', 'lectern', 'repos', 'mail'];
 
 /** How far a hanging sign rises above the ground; the pole's foot is at the bottom of its box. */
@@ -78,13 +84,12 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   const heroSheet = $(root, '.station-hero-sheet');
   const heroText = $(root, '.station-hero-text');
   const signs = {
-    processo: $(root, '[data-sign="processo"]'),
     varal: $(root, '[data-sign="varal"]'),
     estante: $(root, '[data-sign="estante"]'),
     atelie: $(root, '[data-sign="atelie"]'),
     sobre: $(root, '[data-sign="sobre"]'),
   };
-  const signSeeds = { processo: 1300, varal: 1310, estante: 1320, atelie: 1330, sobre: 1340 };
+  const signSeeds = { varal: 1310, estante: 1320, atelie: 1330, sobre: 1340 };
 
   /** Shrinks a sign's label until it fits the plank, since translations and late fonts change its width. */
   function fitSignLabels() {
@@ -102,7 +107,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   function drawSign(name: keyof typeof signs, animate = false) {
     renderScene($<SVGSVGElement>(signs[name], 'svg'), worldProps.signpost(signSeeds[name]), { animate });
   }
-  const process = $(root, '.station-process');
   const repos = $(root, '.station-repos');
   const reposBoard = $(root, '.station-repos-board');
   const mail = $(root, '.station-mail');
@@ -136,6 +140,12 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   let activeSection: StationName = 'hero';
   let inkSpilled = false;
   let settleOnStop: (() => void) | null = null;
+  // Mel's place on the floor's depth axis (see floor.ts), and how far the world has scrolled under her
+  let depth = LANE_DEPTH.start;
+  let depthGoal = depth;
+  let worldOffset = 0;
+  let scrollVelocity = 0;
+  const lane = (): Lane => ({ back: world.ground, front: world.height });
 
   // Content that depends on the language
   function renderBoard() {
@@ -209,7 +219,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   function buildWorld(): WorldLayout {
     const viewport = pin.clientWidth;
     const height = pin.clientHeight;
-    const ground = Math.round(height * 0.8);
+    const ground = Math.round(height * GROUND_SHARE);
     const mobile = viewport < 700;
     const topbar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topbar-height')) || 64;
     const stations = {} as Record<StationName, number>;
@@ -234,16 +244,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
       place(heroText, x, { width: `${textWidth}px`, top: `${topbar + 36}px` });
       x += textWidth + viewport * 0.22;
     }
-
-    stations.processo = x;
-    place(signs.processo, x, { top: `${ground - SIGN_HEIGHT}px` });
-    x += 300;
-
-    const flagWidth = mobile ? 190 : 210;
-    stations.process = x;
-    place(process, x, { top: `${ground - 260}px`, width: `${flagWidth * 4 + 60}px`, height: '260px' });
-    process.style.setProperty('--flag-width', `${flagWidth}px`);
-    x += flagWidth * 4 + 60 + viewport * 0.2;
 
     stations.varal = x;
     place(signs.varal, x, { top: `${ground - SIGN_HEIGHT}px` });
@@ -319,7 +319,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     const width = Math.max(x, viewport * 2);
     const random = seededRandom(Math.round(width));
     const rocks = [
-      stations.processo - viewport * 0.1,
       stations.varal - viewport * 0.1,
       stations.line + lineWidth * 0.5,
       stations.estante - 120,
@@ -358,6 +357,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     }
     rollTiles.forEach((tile, index) => Object.assign(tile.style, { left: `${index * shownTile}px`, width: `${shownTile + 1}px`, height: `${shownHeight}px` }));
     rollPainting.style.top = `${ground - shownHeight * 0.8}px`;
+    rollPainting.style.setProperty('--painting-height', `${shownHeight}px`);
     layers.roll.style.width = `${roll.width * scale}px`;
     mists.forEach((mist, index) => {
       const period = index ? 1000 : 1400;
@@ -374,15 +374,25 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
 
     layers.ground.style.width = `${width}px`;
     groundArt.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    const groundStrokes: Stroke[] = [
-      stroke([[0, ground + 2], [width * 0.3, ground - 2], [width * 0.6, ground + 3], [width, ground]], 5, { seed: 11, dry: true, start: 0.005, end: 0.01 }),
-      stroke([[0, ground + 24], [width, ground + 20]], 30, { tone: 'mist', filter: 'wash', seed: 12, start: 0.01, end: 0.01 }),
-      ...grassTufts(width, ground, Math.round(width / 70), 5),
-    ];
-    rocks.forEach((rockX, index) => {
-      worldProps.rock(500 + index).forEach((item) => groundStrokes.push({ ...item, points: item.points.map(([x, y]) => [x + rockX - 26, y + ground - 30] as Point) }));
+    // The back edge is free wherever no station stands on it: that is where fences and lanterns go
+    // Some stations are zero-sized boxes around their pieces, so the pieces are measured too
+    const layerLeft = layers.ground.getBoundingClientRect().left;
+    const occupied = [...layers.ground.querySelectorAll<HTMLElement>(':scope > .mundo-station, :scope > .mundo-station > *')]
+      .map((piece) => piece.getBoundingClientRect())
+      .filter((box) => box.width > 0)
+      .map((box) => [box.left - layerLeft - 50, box.right - layerLeft + 50] as [number, number])
+      .sort((a, b) => a[0] - b[0]);
+    const gaps: [number, number][] = [];
+    let freeFrom = viewport * 0.02;
+    occupied.forEach(([from, to]) => {
+      if (from - freeFrom > 100) gaps.push([freeFrom, from]);
+      freeFrom = Math.max(freeFrom, to);
     });
-    renderScene(groundArt, groundStrokes);
+    if (width - freeFrom > 100) gaps.push([freeFrom, width]);
+    const landmarks = [house, lectern, mail, desk].map((station) => station.offsetLeft + Math.max(60, station.offsetWidth / 2));
+    const floor = drawFloor({ width, lane: lane(), landmarks, gaps, rocks });
+    renderScene(groundArt, floor.strokes);
+    backLanterns = floor.lanterns;
 
     const frontWidth = layerWidth(PARALLAX.front);
     const front = $<SVGSVGElement>(layers.front, 'svg');
@@ -392,7 +402,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     const blades: Stroke[] = [];
     for (let i = 0; i < frontWidth / 160; i++) {
       const x = random() * frontWidth;
-      const tall = 50 + random() * 90;
+      const tall = 34 + random() * 60;
       blades.push(stroke([[x, height + 10], [x + 10, height - tall * 0.5], [x + 26 * (random() - 0.3), height - tall]], 7 + random() * 6, { seed: 700 + i, start: 0.05, end: 0.8, tone: random() > 0.5 ? 'ink' : 'soft' }));
     }
     // A few pine branches hang in from the top edge along the way, close to the eye
@@ -449,7 +459,6 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
       stroke(sag, 1.6, { seed: 1405, start: 0.01, end: 0.01 }),
     ]);
 
-    process.querySelectorAll<SVGSVGElement>('.process-flag svg').forEach((svg, index) => renderScene(svg, worldProps.flag(2400 + index * 10)));
     const note = $(mail, '.station-mail-note');
     const noteFrame = $<SVGSVGElement>(mail, '.station-mail-note-frame');
     noteFrame.setAttribute('viewBox', `0 0 ${note.offsetWidth} ${note.offsetHeight}`);
@@ -478,11 +487,10 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   let boardBars: ReturnType<typeof attributeList> | null = null;
   const reveals: Partial<Record<StationName, () => void>> = {
     hero: () => paintPortrait($<SVGSVGElement>(heroSheet, '.station-hero-painting'), { ...portraits.profile, animate: true, delay: 0.2 }),
-    varal: () => drawSign('varal', true),
-    processo: () => drawSign('processo', true),
-    process: () => {
-      if (reduced) return;
-      gsap.fromTo(process.querySelectorAll('.process-flag'), { rotation: 80, autoAlpha: 0, transformOrigin: '8% 100%' }, { rotation: 0, autoAlpha: 1, duration: 1, stagger: 0.18, ease: 'back.out(1.8)', clearProps: 'transform,opacity,visibility' });
+    varal: () => {
+      drawSign('varal', true);
+      // Once the visitor is walking, Mel tells them the floor goes back and forth too
+      window.setTimeout(() => mel.say(t('mundo.depth'), 3600), 900);
     },
     atelie: () => drawSign('atelie', true),
     repos: () => {
@@ -552,6 +560,8 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     previousRockX = [...world.rocks];
     mel.setWall(world.portraitRight);
     mel.walk(mascotX, melFacing, 0);
+    mel.setDepthScale(depthScale(depth));
+    placeFloorProps();
     mascot.place(world.stations.desk + 150);
     painter.resize();
     frameAll(root);
@@ -582,6 +592,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
     if (settleOnStop) ScrollTrigger.removeEventListener('scrollEnd', settleOnStop);
     settleOnStop = () => {
       wind = 0;
+      scrollVelocity = 0;
       gsap.to({ value: Number(windValue) || 0 }, { value: 0, duration: 0.8, ease: 'power2.out', onUpdate() { setWind(this.targets()[0].value); } });
       if (!reduced) frontSkew(0);
     };
@@ -595,6 +606,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
       scrub: reduced ? true : 0.7,
       onUpdate: (self) => {
         const offset = self.progress * distance;
+        worldOffset = offset;
         setters.roll(-self.progress * rollTravel);
         setters.mist(-offset * PARALLAX.mist);
         setters.ground(-offset);
@@ -603,6 +615,7 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
         setMood(self.progress);
 
         const velocity = self.getVelocity();
+        scrollVelocity = velocity;
         wind += (Math.max(-14, Math.min(14, velocity / 260)) - wind) * 0.2;
         setWind(wind);
         // The foreground drags behind the scroll like grass in the wind, and springs back when it stops
@@ -614,7 +627,8 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
         world.rocks.forEach((rockX, index) => {
           const screenX = rockX - offset;
           const before = previousRockX[index];
-          if ((before > mascotX + 6 && screenX <= mascotX + 6) || (before < mascotX - 6 && screenX >= mascotX - 6)) mel.hop(0);
+          // Rocks sit at the back of the floor: only a walk along the back runs into them
+          if (depth < 0.3 && ((before > mascotX + 6 && screenX <= mascotX + 6) || (before < mascotX - 6 && screenX >= mascotX - 6))) mel.hop(0);
           previousRockX[index] = screenX;
         });
 
@@ -700,8 +714,247 @@ export function mountWorld(scrollTo: (y: number, immediate?: boolean) => void) {
   });
 
   // Mel, André's dog, is the one who walks the world with the visitor
-  const mel = new Mel({ layer: mascotLayer, groundY: () => (world ? world.ground + 4 : pin.clientHeight * 0.8) });
+  const mel = new Mel({ layer: mascotLayer, groundY: () => (world ? laneY(lane(), depth) : pin.clientHeight * GROUND_SHARE) });
   let melFacing = 1;
+
+  // The floor as a game: W/S walk up and down it, A/D along it, and a tap on the floor sends her there
+  const KEY_AXES: Record<string, [side: number, forward: number]> = { w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] };
+  const heldKeys = new Set<string>();
+  const busyTarget = (target: EventTarget | null) => target instanceof Element && Boolean(target.closest('input, textarea, select, [contenteditable], dialog'));
+  window.addEventListener('keydown', (event) => {
+    const key = event.key.toLowerCase();
+    if (!(key in KEY_AXES) || event.ctrlKey || event.metaKey || event.altKey || busyTarget(event.target) || document.querySelector('dialog[open]')) return;
+    heldKeys.add(key);
+    // A quick tap can start and end between two frames: it still takes one small step
+    if (!event.repeat && KEY_AXES[key][1]) depthGoal = clampDepth(depthGoal + KEY_AXES[key][1] * 0.07);
+  });
+  window.addEventListener('keyup', (event) => heldKeys.delete(event.key.toLowerCase()));
+  window.addEventListener('blur', () => heldKeys.clear());
+
+  const clampDepth = (value: number) => gsap.utils.clamp(LANE_DEPTH.min, LANE_DEPTH.max, value);
+  const pinPoint = (event: MouseEvent) => {
+    const box = pin.getBoundingClientRect();
+    return { x: event.clientX - box.left, y: event.clientY - box.top };
+  };
+  pin.addEventListener('click', (event) => {
+    if (!world || !trigger || painter.enabled) return;
+    if (event.target instanceof Element && event.target.closest('button, a, input, textarea, label, [role="button"]')) return;
+    const { x, y } = pinPoint(event);
+    if (y < world.ground - 4) return;
+    depthGoal = clampDepth(depthAt(lane(), y));
+    if (Math.abs(x - mascotX) > 40) scrollTo(trigger.scroll() + x - mascotX);
+  });
+  pin.addEventListener('pointermove', (event) => world && pin.classList.toggle('is-over-floor', pinPoint(event).y >= world.ground - 4), { passive: true });
+
+  /** Ink paw prints left on the floor behind her, fading as the paper drinks them. */
+  const paws: HTMLElement[] = [];
+  let pawSide = 1;
+  let pawTravel = 0;
+  let lastFoot: [number, number] | null = null;
+  function stampPaw(x: number, y: number, scale: number) {
+    const paw = document.createElement('span');
+    paw.className = 'mundo-paw';
+    paw.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) scale(${scale.toFixed(2)})`;
+    layers.ground.append(paw);
+    paws.push(paw);
+    if (paws.length > 36) paws.shift()!.remove();
+    paw.addEventListener('animationend', () => {
+      paw.remove();
+      const index = paws.indexOf(paw);
+      if (index >= 0) paws.splice(index, 1);
+    }, { once: true });
+  }
+
+  let walkingInDepth = false;
+  let reachedBack = false;
+  let reachedFront = false;
+  /** Props standing in the middle of the floor. They share Mel's layer, so whoever stands nearer the viewer (lower
+   * feet) is drawn in front, as in the arcade beat 'em ups. */
+  interface FloorProp {
+    kind: FloorPropKind;
+    x: number;
+    depth: number;
+    halfWidth: number;
+    el: HTMLDivElement;
+    previousX: number;
+    visible: boolean;
+    lit: boolean;
+  }
+  let props: FloorProp[] = [];
+  /** Spots on the back edge the floor left for lanterns; they are the same lantern props as on the path. */
+  let backLanterns: number[] = [];
+  let propsOffset = Number.NaN;
+  const sortMel = () => (mel.el.style.zIndex = String(Math.round(laneY(lane(), depth))));
+
+  function placeFloorProps() {
+    props.forEach((prop) => prop.el.remove());
+    const random = seededRandom(4242);
+    const names = Object.keys(FLOOR_PROPS) as FloorPropName[];
+    // Nothing may stand in front of the pieces people click on
+    const keepClear = [world.stations.house, world.stations.lectern, world.stations.repos, world.stations.mail, world.stations.desk];
+    const shrink = world.viewport < 700 ? 0.8 : 1;
+    props = [];
+    const spots: { x: number; name: FloorPropName; depth: number }[] = backLanterns.map((x) => ({ x, name: 'lantern', depth: BACK_EDGE_DEPTH }));
+    for (let x = world.viewport * 1.15, index = 0; x < world.width - world.viewport * 0.4; x += 650 + random() * 650, index++) {
+      // Every third prop is a lantern; every prop stands on the centre line of one row of flagstones
+      const drawn = names[Math.floor(random() * names.length)];
+      const row = ROW_DEPTHS[Math.floor(random() * ROW_DEPTHS.length)];
+      if (keepClear.some((at) => x > at - 160 && x < at + 420)) continue;
+      spots.push({ x, name: index % 3 === 0 ? 'lantern' : drawn, depth: row });
+    }
+    spots.forEach(({ x, name, depth: propDepth }, index) => {
+      const kind: FloorPropKind = FLOOR_PROPS[name];
+      const size = depthScale(propDepth) * shrink;
+      const baseY = laneY(lane(), propDepth);
+      const el = document.createElement('div');
+      el.className = 'mundo-prop';
+      Object.assign(el.style, { width: `${kind.width * size}px`, height: `${kind.height * size}px`, top: `${baseY - kind.base * size}px`, zIndex: String(Math.round(baseY)) });
+      const svg = svgElement('svg', { class: 'ink', viewBox: `0 0 ${kind.width} ${kind.height}`, 'aria-hidden': 'true' }, el);
+      mascotLayer.append(el);
+      renderScene(svg, kind.draw(3000 + index * 20));
+      const prop: FloorProp = { kind, x, depth: propDepth, halfWidth: (kind.width * size) / 2, el, previousX: x - worldOffset, visible: true, lit: false };
+      if (kind.light) makeLantern(prop, kind.light, size, 3000 + index * 20);
+      props.push(prop);
+    });
+    propsOffset = Number.NaN;
+    sortMel();
+  }
+
+  /** A lantern is a button: a click (or Enter) lights its window, another blows it out. */
+  function makeLantern(prop: FloorProp, light: NonNullable<FloorPropKind['light']>, size: number, seed: number) {
+    const { el, kind } = prop;
+    el.classList.add('is-lantern');
+    el.tabIndex = 0;
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-pressed', 'false');
+    el.setAttribute('aria-label', pick({ pt: 'acender a lanterna', en: 'light the lantern' }));
+    el.style.setProperty('--light-x', `${(light.x / kind.width) * 100}%`);
+    el.style.setProperty('--light-y', `${(light.y / kind.height) * 100}%`);
+    el.style.setProperty('--light-size', `${light.radius * 2 * size}px`);
+    const glow = document.createElement('span');
+    glow.className = 'mundo-prop-glow';
+    el.append(glow);
+    const flame = svgElement('svg', { class: 'ink mundo-prop-flame', viewBox: '-6 -16 12 17', 'aria-hidden': 'true' }, el);
+    renderScene(flame, lanternFlame);
+    const rays = svgElement('svg', { class: 'ink mundo-prop-rays', viewBox: '-50 -50 100 100', 'aria-hidden': 'true' }, el);
+    const toggle = () => toggleLantern(prop, rays, seed);
+    el.addEventListener('click', toggle);
+    el.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      toggle();
+    });
+  }
+
+  let firstLight = true;
+  function toggleLantern(prop: FloorProp, rays: SVGSVGElement, seed: number) {
+    prop.lit = !prop.lit;
+    prop.el.classList.toggle('is-lit', prop.lit);
+    prop.el.setAttribute('aria-pressed', String(prop.lit));
+    prop.el.setAttribute('aria-label', prop.lit ? pick({ pt: 'apagar a lanterna', en: 'blow out the lantern' }) : pick({ pt: 'acender a lanterna', en: 'light the lantern' }));
+    if (!prop.lit) {
+      sounds.paper();
+      return;
+    }
+    sounds.light();
+    // The rays are brushed on anew every time it is lit, never twice the same
+    renderScene(rays, lanternRays(seed + Math.floor(Math.random() * 99)), { animate: true, pace: 1.8 });
+    if (firstLight) {
+      firstLight = false;
+      mel.say(pick({ pt: 'que luzinha bonita!', en: 'what a pretty light!' }));
+    }
+    if (props.filter((item) => item.kind.light).every((item) => item.lit)) {
+      unlock('lanterns');
+      mel.bark(2);
+    }
+  }
+
+  function positionProps() {
+    if (worldOffset === propsOffset) return;
+    propsOffset = worldOffset;
+    props.forEach((prop) => {
+      const screenX = prop.x - worldOffset;
+      const visible = screenX > -300 && screenX < world.viewport + 300;
+      if (visible !== prop.visible) {
+        prop.visible = visible;
+        prop.el.style.visibility = visible ? '' : 'hidden';
+      }
+      if (visible) prop.el.style.transform = `translate3d(${(screenX - prop.halfWidth).toFixed(1)}px, 0, 0)`;
+    });
+  }
+
+  /** Low props are hopped over when she walks into them in their row; tall ones are walked around, and block her
+   * from stepping through them up or down the floor. Returns true while she is being pushed out of one. */
+  function meetProps() {
+    let dodging = false;
+    props.forEach((prop) => {
+      const screenX = prop.x - worldOffset;
+      const distance = Math.abs(screenX - mascotX);
+      const reach = prop.halfWidth * 0.7 + 18;
+      const inRow = Math.abs(depth - prop.depth) < prop.kind.band;
+      if (prop.kind.tall) {
+        const heading = Math.abs(depthGoal - prop.depth) < prop.kind.band + 0.01;
+        if ((distance < reach + 40 && heading) || (distance < reach && inRow)) {
+          const clearance = prop.kind.band + 0.04;
+          let sideOf = depth <= prop.depth ? -1 : 1;
+          const edge = prop.depth + sideOf * clearance;
+          if (edge < LANE_DEPTH.min || edge > LANE_DEPTH.max) sideOf = -sideOf;
+          depthGoal = clampDepth(prop.depth + sideOf * clearance);
+          dodging ||= distance < reach && inRow;
+        }
+      } else if (inRow && ((prop.previousX > mascotX && screenX <= mascotX) || (prop.previousX < mascotX && screenX >= mascotX))) {
+        mel.hop(0, 380);
+      }
+      prop.previousX = screenX;
+    });
+    return dodging;
+  }
+
+  function stepFloor(_time: number, deltaMs: number) {
+    if (!world || !trigger) return;
+    const dt = Math.min(0.05, deltaMs / 1000);
+    let side = 0;
+    let forward = 0;
+    heldKeys.forEach((key) => {
+      side += KEY_AXES[key][0];
+      forward += KEY_AXES[key][1];
+    });
+    if (forward) depthGoal = clampDepth(depth + forward * 0.06);
+    if (side) scrollTo(trigger.scroll() + side * SIDE_SPEED * dt, true);
+    positionProps();
+    const dodging = meetProps();
+
+    const gap = depthGoal - depth;
+    const speed = DEPTH_SPEED * (dodging ? 2.5 : 1);
+    const step = reduced ? gap : Math.sign(gap) * Math.min(Math.abs(gap), speed * dt);
+    depth += step;
+    if (step) {
+      mel.setDepthScale(depthScale(depth));
+      sortMel();
+      // Walking up or down the floor drives her gait the way scrolling does, unless the scroll is already driving it
+      const pixelsPerSecond = (Math.abs(step) * (world.height - world.ground)) / dt;
+      if (Math.abs(scrollVelocity) < 12) mel.walk(mascotX, melFacing, (melFacing * pixelsPerSecond) / 2.4);
+      walkingInDepth = true;
+      if (depth <= LANE_DEPTH.min + 0.01) reachedBack = true;
+      if (depth >= LANE_DEPTH.max - 0.01) reachedFront = true;
+      if (reachedBack && reachedFront) unlock('depth');
+    } else if (walkingInDepth) {
+      walkingInDepth = false;
+      if (Math.abs(scrollVelocity) < 12) mel.walk(mascotX, melFacing, 0);
+    }
+
+    if (reduced) return;
+    const foot: [number, number] = [worldOffset + mascotX, laneY(lane(), depth)];
+    if (lastFoot) pawTravel += Math.hypot(foot[0] - lastFoot[0], foot[1] - lastFoot[1]);
+    lastFoot = foot;
+    const scale = depthScale(depth);
+    if (pawTravel > 26 * scale) {
+      pawTravel = 0;
+      pawSide = -pawSide;
+      stampPaw(foot[0] - 8 * melFacing, foot[1] - 3 + pawSide * 3 * scale, scale);
+    }
+  }
+  gsap.ticker.add(stepFloor);
 
   // Stations far off to either side stop animating and drop their drawings from paint; buttons stay focusable.
   // Some stations are zero-sized boxes around absolutely placed pieces, so the pieces are what gets observed.

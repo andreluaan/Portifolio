@@ -40,9 +40,9 @@ As ideias #1 a #20 vêm do relatório em [referencias.md](referencias.md). Toda 
 
 | # | Ideia | Status | Esforço | Impacto | Técnica | Observação |
 |---|---|---|---|---|---|---|
-| 25 | Chão novo: mais grama e clima de cidadezinha japonesa, com ruas, cercas, lanternas e casinhas | ⬜ | G | alto | Faixa contínua pedida ao ChatGPT, em bloco repetível, no lugar da linha e da mancha atuais | Definir antes se é chão de terra, pedra ou madeira; precisa manter a faixa clara para os personagens |
+| 25 | Chão novo: mais grama e clima de cidadezinha japonesa, com ruas, cercas, lanternas e casinhas | 🟡 | G | alto | Faixa contínua pedida ao ChatGPT, em bloco repetível, no lugar da linha e da mancha atuais | Feito em `floor.ts` (2026-11-09): caminho de pedras ishidatami em projeção oblíqua, cercas de bambu, lanternas, poças, pedras de passo e grama nas bordas. Faltam as casinhas |
 | 26 | Minigame com a Mel: ela pula e sobe nas coisas do mundo em busca de algo | ⬜ | G | alto | Plataforma em canvas sobre `mel.ts`, com colisão nas peças e placar em segredo do passaporte | Definir o que ela procura e como o jogo começa; a Mel hoje só caminha com a rolagem |
-| 27 | Mel com movimento em profundidade, como nos beat 'em ups antigos das Tartarugas Ninja: frente, trás, cima e baixo no chão | ⬜ | G | alto | Faixa de chão com eixo Y próprio, Mel maior quando está mais perto e ordem de camadas pela posição | Combina com #26. O quadro do Ateliê com os pés à frente da linha do chão é a referência dessa profundidade: manter assim |
+| 27 | Mel com movimento em profundidade, como nos beat 'em ups antigos das Tartarugas Ninja: frente, trás, cima e baixo no chão | 🟡 | G | alto | Faixa de chão com eixo Y próprio, Mel maior quando está mais perto e ordem de camadas pela posição | Feito em `floor.ts` + `world.ts` (2026-11-09): faixa de ~27% da tela, W A S D, toque no chão, escala sutil, pegadas e segredo "profundidade". Objetos no meio do chão (lanterna, bacia, balde, pedras) ordenados pela profundidade: ela pula os baixos e desvia dos altos. Todos ficam na linha central de uma fileira de pedras, e há uma lanterna só no site todo (borda de trás e meio do chão), que acende com clique e dá o segredo "acendedor". A versão pintada pelo ChatGPT está no prompt 11 |
 
 ## Feitas
 

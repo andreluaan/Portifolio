@@ -303,6 +303,14 @@ export class Mel {
   }
 
   private minX = -Infinity;
+  private depthScale = 1;
+
+  /** How near she stands on the floor's depth axis, as a size: the world's lane decides it. */
+  setDepthScale(scale: number) {
+    if (Math.abs(scale - this.depthScale) < 0.0005) return;
+    this.depthScale = scale;
+    if (this.reduced) this.render();
+  }
 
   /** Lab only: draw the skeleton's joints over the drawing. */
   showSkeleton = false;
@@ -763,7 +771,8 @@ export class Mel {
   private render() {
     const f = (value: number) => value.toFixed(1);
     const ground = this.groundY();
-    this.el.style.transform = `translate3d(${f(this.x - (DOG_VIEW.width * this.scale) / 2)}px, ${f(ground - DOG_VIEW.ground * this.scale - this.lift)}px, 0)`;
+    // Scaled about her feet (see the transform-origin in pieces.css), so depth never lifts her off the floor
+    this.el.style.transform = `translate3d(${f(this.x - (DOG_VIEW.width * this.scale) / 2)}px, ${f(ground - DOG_VIEW.ground * this.scale - this.lift * this.depthScale)}px, 0) scale(${this.depthScale.toFixed(3)})`;
     this.el.style.setProperty('--facing', String(this.facing));
     this.el.dataset.action = this.action?.name ?? '';
     if (!this.cutout) return;

@@ -139,7 +139,6 @@ function setupDialog() {
 
 const HASH_TO_STATION: Record<string, StationName> = {
   inicio: 'hero',
-  processo: 'process',
   destaques: 'line',
   estante: 'lectern',
   github: 'repos',

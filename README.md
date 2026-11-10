@@ -6,7 +6,6 @@ Portfólio pessoal desenhado em nanquim. O site é um mundo de papel que você p
 
 - **Intro "molhando o pincel"**, que pode ser pulada com `Esc`.
 - **Início**: retrato em nanquim revelado por pinceladas.
-- **Como eu trabalho**: quatro bandeirinhas com o caminho de um projeto.
 - **Destaques**: um varal com os projetos principais, que balançam com o vento da rolagem.
 - **Estante**: um caderno com todos os projetos, aberto em tela cheia, com páginas que viram em 3D (dá para arrastar o canto, clicar, usar a roda do mouse ou ← →).
 - **Ateliê**: mural com os repositórios do GitHub, lidos na hora do build.
@@ -33,7 +32,7 @@ npm install
 npm run dev
 ```
 
-O site abre em `http://localhost:4321`. Cada estação tem link próprio: `#processo`, `#destaques`, `#estante`, `#github`, `#ano`, `#sobre`, `#contato`. Para gerar a versão de produção:
+O site abre em `http://localhost:4321`. Cada estação tem link próprio: `#destaques`, `#estante`, `#github`, `#ano`, `#sobre`, `#contato`. Para gerar a versão de produção:
 
 ```bash
 npm run build

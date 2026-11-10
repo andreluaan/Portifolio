@@ -985,6 +985,8 @@
   left: 0;
   top: 0;
   z-index: 39;
+  /* Her feet: DOG_VIEW.ground / DOG_VIEW.height */
+  transform-origin: 50% 93.75%;
   cursor: pointer;
   touch-action: manipulation;
   user-select: none;

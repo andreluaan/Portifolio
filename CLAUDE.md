@@ -20,6 +20,7 @@ Astro + GSAP (ScrollTrigger) + Lenis. Canvas/WebGL quando o efeito pedir. Servid
 
 ## Pastas
 - `src/lib/brush.ts` — motor de pincel (traços em SVG, máscaras de desenho, molduras à mão). `scenes.ts` guarda os desenhos.
+- `src/lib/floor.ts` — o chão jogável: faixa com profundidade (estilo beat 'em up), caminho de pedras, cercas e lanternas desenhados no motor de pincel; `world.ts` move a Mel nele (W A S D e toque no chão).
 - `src/lib/mascot.ts` — Borrão, a criaturinha de tinta (estados, física de mola, arrastar e soltar). O André prefere esta versão.
 - `src/lib/mascot-dog.ts` + `src/styles/mascot-dog.css` — versão cachorrinho guardada para uso futuro (não importada). Ele não gostou dela como personagem principal.
 - `src/lib/world.ts` — o mundo de papel (estações, camadas, rolagem lateral, clima manhã/névoa/entardecer). O fundo é um rolo emaki único e pré-pintado: a pintura do André em `prototipo/rolo/original.webp`, só redimensionada por `adapt.py` para `public/images/rolo/`; nunca repintar.

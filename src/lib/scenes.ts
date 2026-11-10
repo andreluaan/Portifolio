@@ -180,11 +180,6 @@ export const worldProps = {
   ],
   cloud: (seed: number): Stroke[] => [stroke([[0, 20], [60, 12], [130, 18], [200, 14]], 16, { tone: 'mist', filter: 'wash', seed })],
   bird: (seed: number): Stroke[] => [stroke([[0, 8], [8, 2], [14, 8], [20, 2], [28, 8]], 1.4, { seed })],
-  flag: (seed: number): Stroke[] => [
-    stroke([[14, 6], [16, 230]], 3.4, { seed, start: 0.02, end: 0.05 }),
-    stroke([[16, 10], [190, 18], [176, 70], [192, 120], [18, 112]], 2, { seed: seed + 1, start: 0.01, end: 0.03 }),
-    stroke([[0, 230], [34, 232]], 8, { tone: 'mist', filter: 'wash', seed: seed + 2 }),
-  ],
 };
 
 // Landscape planes (shan shui): farther = lighter, wetter, no outline; mist is painted in paper between distances.
