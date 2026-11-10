@@ -1,0 +1,26 @@
+{
+  "label": "00-base",
+  "url": "http://localhost:4322/",
+  "date": "2026-11-10T16:12:15.347Z",
+  "conditions": "CPU 4x, Fast 4G, 1440x900, median of 3",
+  "lcpMs": 2584,
+  "tbtMs": 3358,
+  "longestTaskMs": 1046,
+  "longTasksBeforeLcp": 7,
+  "cls": 0.015,
+  "transferKb": {
+    "script": 270,
+    "image": 608,
+    "font": 150,
+    "stylesheet": 22,
+    "document": 5,
+    "other": 1
+  },
+  "walk": {
+    "frames": 328,
+    "p50Ms": 16.7,
+    "p95Ms": 33.3,
+    "framesOver33ms": 7
+  },
+  "errors": []
+}
