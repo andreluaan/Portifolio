@@ -1,0 +1,26 @@
+{
+  "label": "11-marca-andreluaan-mobile",
+  "url": "http://localhost:4322/",
+  "date": "2026-11-24T18:38:08.342Z",
+  "conditions": "CPU 4x, Fast 4G, 390x844 @3x touch, median of 3",
+  "lcpMs": 1100,
+  "tbtMs": 214,
+  "longestTaskMs": 178,
+  "longTasksBeforeLcp": 2,
+  "cls": 0.008,
+  "transferKb": {
+    "script": 241,
+    "image": 346,
+    "font": 62,
+    "stylesheet": 13,
+    "document": 9,
+    "other": 1
+  },
+  "walk": {
+    "frames": 339,
+    "p50Ms": 16.7,
+    "p95Ms": 16.8,
+    "framesOver33ms": 5
+  },
+  "errors": []
+}

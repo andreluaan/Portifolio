@@ -1,0 +1,26 @@
+{
+  "label": "11-marca-andreluaan",
+  "url": "http://localhost:4322/",
+  "date": "2026-11-24T18:37:35.875Z",
+  "conditions": "CPU 4x, Fast 4G, 1440x900, median of 3",
+  "lcpMs": 1124,
+  "tbtMs": 229,
+  "longestTaskMs": 190,
+  "longTasksBeforeLcp": 2,
+  "cls": 0.006,
+  "transferKb": {
+    "script": 241,
+    "image": 443,
+    "font": 62,
+    "stylesheet": 13,
+    "document": 9,
+    "other": 1
+  },
+  "walk": {
+    "frames": 332,
+    "p50Ms": 16.7,
+    "p95Ms": 16.8,
+    "framesOver33ms": 5
+  },
+  "errors": []
+}

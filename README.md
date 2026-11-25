@@ -1,10 +1,10 @@
-# André Luan · mundo de papel
+# André Luan · andreluaan.dev
 
-Portfólio pessoal desenhado em nanquim. O site é um mundo de papel que você percorre rolando a página: cada pincelada é gerada por código, e uma criaturinha de tinta, o Borrão, acompanha a caminhada.
+Portfólio pessoal desenhado em nanquim, com a identidade da marca **andreluaan.dev**: papel, sumi, um toque de shu e Geist ("tinta, corte e código"). Detalhes em [docs/identidade.md](docs/identidade.md). O site é um mundo de papel que você percorre rolando a página: cada pincelada é gerada por código, e uma criaturinha de tinta, o Borrão, acompanha a caminhada.
 
 ## O que tem no caminho
 
-- **Intro "molhando o pincel"**, que pode ser pulada com `Esc`.
+- **Intro "molhando o pincel"**: a marca de memória se desenha (círculo, fio, corte) enquanto a página carrega. Pode ser pulada com `Esc`.
 - **Início**: retrato em nanquim revelado por pinceladas.
 - **Destaques**: um varal com os projetos principais, que balançam com o vento da rolagem.
 - **Estante**: um caderno com todos os projetos, aberto em tela cheia, com páginas que viram em 3D (dá para arrastar o canto, clicar, usar a roda do mouse ou ← →).
@@ -62,10 +62,14 @@ src/
   lib/secrets.ts       segredos e passaporte
   lib/sound.ts         sons sintetizados
   lib/painting.ts      pintura com pincel seco
-  styles/              estilos globais e de cada parte
+  styles/              estilos globais e de cada parte (brand.css: as marcas)
+  lib/memory-mark.ts   a marca de memória construída pelas medidas do manual
 public/images/         retratos em nanquim e o rolo pintado
 public/ink/            pinceladas gravadas por scripts/ink-bake (não editar à mão)
-scripts/perf.mjs       medição de desempenho (npm run perf)
+public/brand/          SVGs da marca (AL, AL completo claro e escuro, hanko)
+public/fonts/          ponto redondo e kana, recortados por scripts/fonts/subset.py
+scripts/brand/         favicons a partir das marcas
+scripts/perf.mjs       medição de desempenho (npm run perf, --mobile para celular)
 prototipo/             protótipos anteriores em HTML único
 docs/referencias.md    pesquisa de referências
 ```
