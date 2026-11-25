@@ -1,0 +1,26 @@
+{
+  "label": "10-antes-da-marca",
+  "url": "http://localhost:4322/",
+  "date": "2026-11-24T18:03:29.592Z",
+  "conditions": "CPU 4x, Fast 4G, 1440x900, median of 3",
+  "lcpMs": 1192,
+  "tbtMs": 279,
+  "longestTaskMs": 201,
+  "longTasksBeforeLcp": 2,
+  "cls": 0.006,
+  "transferKb": {
+    "script": 241,
+    "image": 453,
+    "font": 150,
+    "stylesheet": 23,
+    "document": 8,
+    "other": 1
+  },
+  "walk": {
+    "frames": 312,
+    "p50Ms": 16.7,
+    "p95Ms": 16.8,
+    "framesOver33ms": 7
+  },
+  "errors": []
+}

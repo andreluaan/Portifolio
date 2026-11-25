@@ -1,0 +1,26 @@
+{
+  "label": "10-antes-da-marca-mobile",
+  "url": "http://localhost:4322/",
+  "date": "2026-11-24T18:04:02.344Z",
+  "conditions": "CPU 4x, Fast 4G, 390x844 @3x touch, median of 3",
+  "lcpMs": 1116,
+  "tbtMs": 230,
+  "longestTaskMs": 181,
+  "longTasksBeforeLcp": 2,
+  "cls": 0.011,
+  "transferKb": {
+    "script": 241,
+    "image": 352,
+    "font": 150,
+    "stylesheet": 23,
+    "document": 8,
+    "other": 1
+  },
+  "walk": {
+    "frames": 337,
+    "p50Ms": 16.7,
+    "p95Ms": 16.8,
+    "framesOver33ms": 5
+  },
+  "errors": []
+}

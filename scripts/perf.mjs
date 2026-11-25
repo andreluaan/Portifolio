@@ -1,11 +1,17 @@
 // Performance budget check: cold loads and a scripted walk through the world on a slowed-down machine.
-// Usage: npm run build && npm run preview -- --port 4322, then `node scripts/perf.mjs [label] [url]`.
+// Usage: npm run build && npm run preview -- --port 4322, then `node scripts/perf.mjs [label] [url] [--mobile]`.
+// `--mobile` loads and walks as a phone (390x844, 3x pixels, touch), the narrow map's hardest case.
 // Uses the installed Google Chrome through playwright-core, so no browser download is needed.
 import { chromium } from 'playwright-core';
 import { mkdir, writeFile } from 'node:fs/promises';
 
-const label = process.argv[2] ?? 'run';
-const url = process.argv[3] ?? 'http://localhost:4322/';
+const positional = process.argv.slice(2).filter((arg) => !arg.startsWith('--'));
+const mobile = process.argv.includes('--mobile');
+const label = positional[0] ?? 'run';
+const url = positional[1] ?? 'http://localhost:4322/';
+const DEVICE = mobile
+  ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true }
+  : { viewport: { width: 1440, height: 900 } };
 const RUNS = 3;
 const CPU_SLOWDOWN = 4;
 // Chrome DevTools' "Fast 4G" preset
@@ -34,7 +40,7 @@ async function throttled(context, page) {
 }
 
 async function coldLoad(browser) {
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const context = await browser.newContext(DEVICE);
   const page = await context.newPage();
   await page.addInitScript(OBSERVERS);
   const cdp = await throttled(context, page);
@@ -67,7 +73,7 @@ async function coldLoad(browser) {
 }
 
 async function walk(browser) {
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const context = await browser.newContext(DEVICE);
   const page = await context.newPage();
   await page.addInitScript(OBSERVERS);
   await page.goto(url, { waitUntil: 'load' });
@@ -108,7 +114,7 @@ const report = {
   label,
   url,
   date: new Date().toISOString(),
-  conditions: `CPU ${CPU_SLOWDOWN}x, Fast 4G, 1440x900, median of ${RUNS}`,
+  conditions: `CPU ${CPU_SLOWDOWN}x, Fast 4G, ${DEVICE.viewport.width}x${DEVICE.viewport.height}${mobile ? ' @3x touch' : ''}, median of ${RUNS}`,
   lcpMs: Math.round(median(loads.map((l) => l.lcp))),
   tbtMs: Math.round(median(loads.map((l) => l.tbt))),
   longestTaskMs: Math.round(median(loads.map((l) => l.longestTask))),
