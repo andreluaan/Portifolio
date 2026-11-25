@@ -83,7 +83,8 @@
   right: 0;
   top: calc(var(--painting-height, 100%) - 2px);
   height: 100vh;
-  background: #fffffd;
+  /* The painting is printed on the brand's paper (prototipo/rolo/adapt.py), so its ground is exactly this */
+  background: var(--paper);
 }
 
 .mundo-plane img {
@@ -171,18 +172,87 @@
   gap: 16px;
 }
 
+/* The top bar keeps its pixel height while the world zooms out on short screens: the hero text steps down by the
+   difference, so the bar never covers its first line (64 and 104 are the bar heights layout.ts plans each map for) */
+:root[data-layout='wide'] .station-hero-text {
+  translate: 0 max(0px, calc(var(--topbar-height) / var(--zoom) - 64px));
+}
+
+:root[data-layout='narrow'] .station-hero-text {
+  gap: 11px;
+  translate: 0 max(0px, calc(var(--topbar-height) / var(--zoom) - 104px));
+}
+
+/* The eyebrow of the manual's site page (p. 16): mono capitals in shu over the title */
+.station-hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--shu);
+  font-weight: 500;
+}
+
+.station-hero-eyebrow::before {
+  content: '';
+  flex: none;
+  width: 28px;
+  height: 1.5px;
+  background: currentColor;
+}
+
+.station-hero-title {
+  position: relative;
+  justify-self: start;
+}
+
 .station-hero-name {
   font-size: clamp(3.2rem, 8vw, 6.4rem);
-  font-weight: 800;
-  line-height: 0.9;
-  letter-spacing: -0.025em;
-  text-shadow: 0.05em 0.05em 0 rgb(141 143 139 / 0.35);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+/* Beside the title, as on the brand's lockup: the name in katakana running down, and the hanko under it where
+   André signs, a little tilted as if stamped by hand */
+.station-hero-seal {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 0.4em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.station-hero-kana {
+  writing-mode: vertical-rl;
+  font-family: var(--font-kana);
+  font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+  letter-spacing: 0.12em;
+  line-height: 1;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.station-hero-hanko {
+  width: clamp(28px, 2.6vw, 36px);
+  rotate: -4deg;
+}
+
+/* A phone's title is only two short lines tall: the hanko alone signs it */
+:root[data-layout='narrow'] .station-hero-seal {
+  top: auto;
+  bottom: 0.12em;
+}
+
+:root[data-layout='narrow'] .station-hero-kana {
+  display: none;
 }
 
 .station-hero-role {
-  font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: 1.4rem;
   font-weight: 500;
+  letter-spacing: -0.015em;
 }
 
 .station-hero-lede {
@@ -254,7 +324,7 @@ img.station-line-art {
   display: grid;
   gap: 6px;
   padding: 14px 14px 16px;
-  background: #f5f5f3;
+  background: var(--sheet);
   box-shadow: 0 14px 18px -14px var(--shadow);
   transform-origin: 50% 0;
   animation: paper-sway 3.6s ease-in-out infinite alternate;
@@ -281,14 +351,14 @@ img.station-line-art {
 }
 
 .line-paper-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.05rem;
+  font-weight: 600;
+  font-size: 1.02rem;
   line-height: 1.15;
+  letter-spacing: -0.015em;
 }
 
 .line-paper-status {
-  font-size: 1.2rem;
+  font-size: 0.64rem;
 }
 
 /* House and board */
@@ -305,7 +375,7 @@ img.station-line-art {
   right: 0;
   bottom: 0;
   padding: 28px;
-  background: #f5f5f3;
+  background: var(--sheet);
   isolation: isolate;
   box-shadow: 0 20px 30px -24px var(--shadow);
 }
@@ -326,7 +396,8 @@ img.station-board-frame {
   display: grid;
   gap: 16px;
   height: 100%;
-  align-content: start;
+  /* The rows spread over the board's paper instead of leaving its lower half blank */
+  align-content: space-evenly;
   overflow: hidden;
 }
 
@@ -352,18 +423,23 @@ img.station-board-frame {
   justify-self: start;
 }
 
-/* End */
+/* End: the ensō cut into the memory mark (brand.css .cut-mark), signed with the wordmark */
 .station-end {
   display: grid;
   justify-items: center;
-  gap: 10px;
+  gap: 14px;
   width: 260px;
   text-align: center;
 }
 
-.station-end-enso {
-  width: 200px;
-  height: 200px;
+.station-end-wordmark {
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+
+.station-end-wordmark::after {
+  left: 50%;
+  translate: -50% 0;
 }
 
 /* Progress */
@@ -446,10 +522,10 @@ img.station-board-frame {
 .station-lectern-label {
   position: absolute;
   left: 50%;
-  top: -54px;
+  top: -44px;
   width: max-content;
   white-space: nowrap;
-  font-size: 1.35rem;
+  font-size: 0.72rem;
   text-align: center;
   translate: -50% 0;
   animation: nudge-up 2.4s ease-in-out infinite;
@@ -545,7 +621,7 @@ img.station-board-frame {
   padding: 8px 10px 8px 18px;
   background: var(--paper);
   border: 1.5px solid var(--ink);
-  box-shadow: 6px 6px 0 var(--mist);
+  box-shadow: 6px 6px 0 var(--paper-shade);
   translate: -50% 0;
 }
 
@@ -588,7 +664,7 @@ img.station-board-frame {
   top: -4px;
   width: 10px;
   height: 8px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8'%3E%3Cg fill='%233b3c3a'%3E%3Cellipse cx='5' cy='5.6' rx='2.6' ry='2'/%3E%3Ccircle cx='1.6' cy='2.6' r='1.1'/%3E%3Ccircle cx='4' cy='1.2' r='1.1'/%3E%3Ccircle cx='6.6' cy='1.4' r='1.1'/%3E%3Ccircle cx='8.6' cy='3' r='1'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8'%3E%3Cg fill='%233a3835'%3E%3Cellipse cx='5' cy='5.6' rx='2.6' ry='2'/%3E%3Ccircle cx='1.6' cy='2.6' r='1.1'/%3E%3Ccircle cx='4' cy='1.2' r='1.1'/%3E%3Ccircle cx='6.6' cy='1.4' r='1.1'/%3E%3Ccircle cx='8.6' cy='3' r='1'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain;
   opacity: 0;
   pointer-events: none;
   animation: paw-fade 5s ease-out forwards;

@@ -2,7 +2,8 @@ import gsap from 'gsap';
 import { projects, type Project } from '../data/content';
 import { prefersReducedMotion, renderScene, stroke } from './brush';
 import { pick, t } from './i18n';
-import { decorations, sketchFor, worldProps } from './scenes';
+import { memoryMarkMarkup } from './memory-mark';
+import { decorations, sketchFor } from './scenes';
 import { unlock } from './secrets';
 import { sounds } from './sound';
 
@@ -87,17 +88,17 @@ class Book {
     const cover = page(
       'book-cover',
       `<svg class="ink book-cover-art" viewBox="0 0 360 500" preserveAspectRatio="none" aria-hidden="true"></svg>
+       <img class="book-cover-symbol" src="/brand/al-completo-escuro.svg" alt="" width="440" height="495" decoding="async">
        <div class="book-cover-content">
          <p class="hand"></p>
          <h2 class="book-cover-title"></h2>
          <p class="book-cover-author">André Luan</p>
-         <svg class="ink book-cover-seal" viewBox="0 0 44 44" aria-hidden="true"></svg>
+         <img class="hanko book-cover-seal" src="/brand/hanko.svg" alt="" width="46" height="45" decoding="async">
        </div>`
     );
     cover.querySelector('.hand')!.textContent = pick({ pt: 'estante nº 1', en: 'bookstand no. 1' });
     cover.querySelector('.book-cover-title')!.textContent = t('book.title');
     renderScene(cover.querySelector('.book-cover-art')!, coverArt);
-    renderScene(cover.querySelector('.book-cover-seal')!, decorations.seal);
 
     const intro = page(
       'book-intro',
@@ -137,9 +138,9 @@ class Book {
       indexList.append(item);
     });
 
-    const end = page('book-end', `<svg class="ink book-end-enso" viewBox="0 0 120 120" aria-hidden="true"></svg><p class="hand"></p>`);
+    // The brand's memory mark closes the book, the short signature it uses in place of "the end"
+    const end = page('book-end', `${memoryMarkMarkup('book-end-mark')}<p class="hand"></p>`);
     end.querySelector('.hand')!.textContent = t('book.end');
-    renderScene(end.querySelector('svg')!, worldProps.enso(1900));
     pageNumber(end, number);
 
     return [cover, intro, index, ...projectPages, end];
@@ -297,8 +298,11 @@ class Book {
         renderScene(element.querySelector('.book-underline')!, decorations.underline, { animate: true, delay: 0.2 });
       } else if (element.classList.contains('book-index') && !this.reduced) {
         gsap.fromTo(element.querySelectorAll('li'), { autoAlpha: 0, x: -10 }, { autoAlpha: 1, x: 0, stagger: 0.06, duration: 0.4, clearProps: 'all' });
-      } else if (element.classList.contains('book-end')) {
-        renderScene(element.querySelector('svg')!, worldProps.enso(1900), { animate: true, pace: 0.6 });
+      } else if (element.classList.contains('book-end') && !this.reduced) {
+        const mark = element.querySelector('.memory-mark')!;
+        mark.classList.remove('is-playing');
+        void mark.getBoundingClientRect();
+        mark.classList.add('is-playing');
       }
     });
   }

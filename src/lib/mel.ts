@@ -1,6 +1,7 @@
 import gsap from 'gsap';
 import { brushPath, prefersReducedMotion, svgElement, type Point } from './brush';
 import { DOG_VIEW, EAR_REST, LEG_RIGS, PIVOTS, type Bone, type LegName } from './dog-rig';
+import { keepOnScreen } from './mascot';
 import type { MelCutout } from './mel-cutout';
 import { pick, t } from './i18n';
 import { unlock } from './secrets';
@@ -390,6 +391,7 @@ export class Mel {
   say(text: string, duration = 1400) {
     this.bubble.textContent = text;
     this.bubble.hidden = false;
+    keepOnScreen(this.bubble);
     this.bubble.classList.remove('is-popping');
     void this.bubble.offsetWidth;
     this.bubble.classList.add('is-popping');

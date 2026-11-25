@@ -67,7 +67,10 @@ function setupTopbar() {
 
 function renderPassport() {
   const found = foundSecrets();
-  document.querySelector('.secrets-count')!.textContent = `${found.size}/${secrets.length}`;
+  const count = `${found.size}/${secrets.length}`;
+  document.querySelector('.secrets-count')!.textContent = count;
+  // Repeated in the passport itself, since a phone's top bar only has room for the seal
+  document.querySelector('.passport-count')!.textContent = count;
   document.querySelector('.secrets-toggle')!.classList.toggle('is-complete', found.size === secrets.length);
   document.querySelector('.passport-grid')!.replaceChildren(
     ...secrets.map((secret) => {

@@ -32,13 +32,14 @@ const boilFilter = (frame: number) => `
   <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" xChannelSelector="R" yChannelSelector="G"/>
 </filter>`;
 
-/** The tones of global.css (.ink-ink, .ink-soft…), inlined because a drawing rendered as an image sees no page CSS. */
+/** The tones of global.css (.ink-ink, .ink-soft…), inlined because a drawing rendered as an image sees no page CSS.
+ * They are the andreluaan.dev neutrals: sumi, the manual's support grey, two washes of its warm grey, and paper. */
 const TONES = {
   ink: 'fill="#151515"',
-  soft: 'fill="#3b3c3a"',
-  wash: 'fill="#8d8f8b" fill-opacity="0.55"',
-  mist: 'fill="#c6c8c4" fill-opacity="0.85"',
-  paper: 'fill="#eeeeec"',
+  soft: 'fill="#3A3835"',
+  wash: 'fill="#8E8A82" fill-opacity="0.55"',
+  mist: 'fill="#C9C4BA" fill-opacity="0.85"',
+  paper: 'fill="#F3F0E8"',
 };
 
 const filterOf = (item: Stroke): InkFilter => item.filter ?? (item.dry ? 'dry' : 'bleed');

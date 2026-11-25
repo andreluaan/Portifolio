@@ -95,9 +95,12 @@ export function watchGlobalSecrets() {
     }
   });
 
+  // Signed in the brand's colours: a sumi block, paper letters and the shu dot of ".dev"
   console.log(
-    '%c  ~ nanquim ~  %c\nOlá, dev curioso. Este site foi desenhado traço a traço.\nDica: o Borrão não gosta de altura.',
-    'background:#151515;color:#eeeeec;font:600 14px serif;padding:6px 10px',
-    'color:#3b3c3a;font:13px sans-serif'
+    '%c andreluaan%c.%cdev %c\nOlá, dev curioso. Este site foi desenhado traço a traço.\nDica: o Borrão não gosta de altura.',
+    'background:#151515;color:#f3f0e8;font:300 14px monospace;letter-spacing:.3em;padding:6px 0 6px 10px',
+    'background:#151515;color:#c8503e;font:700 14px monospace;padding:6px 0',
+    'background:#151515;color:#f3f0e8;font:300 14px monospace;letter-spacing:.3em;padding:6px 10px 6px 0',
+    'color:#3a3835;font:13px monospace'
   );
 }

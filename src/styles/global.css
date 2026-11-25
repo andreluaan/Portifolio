@@ -1,11 +1,8 @@
-@import '@fontsource/shippori-mincho-b1/latin-500.css';
-@import '@fontsource/shippori-mincho-b1/latin-700.css';
-@import '@fontsource/shippori-mincho-b1/latin-800.css';
-@import '@fontsource/shippori-mincho-b1/latin-ext-500.css';
-@import '@fontsource/shippori-mincho-b1/latin-ext-700.css';
-@import '@fontsource/shippori-mincho-b1/latin-ext-800.css';
-@import '@fontsource/nanum-pen-script/latin-400.css';
-@import '@fontsource-variable/hanken-grotesk';
+/* andreluaan.dev typography (manual p. 05): Geist for everything, Geist Mono for the "code" voice. The two borrowed
+   faces in brand-fonts.css are cut to a few glyphs: the round dot and the kana. */
+@import '@fontsource-variable/geist/wght.css';
+@import '@fontsource-variable/geist-mono/wght.css';
+@import './brand-fonts.css';
 
 /* The scroll wind (world.ts) is written every frame on the few elements that tilt with it; not inheriting keeps
    each write from restyling their contents */
@@ -16,26 +13,39 @@
 }
 
 :root {
-  --paper: #eeeeec;
-  --paper-deep: #e3e4e1;
-  --paper-shade: #d6d7d3;
-  --desk: #d9dad6;
+  /* andreluaan.dev colours (manual p. 04). Paper 70%, sumi 22%, grey 6%, shu 2%: the shu only ever marks the cut
+     (the wire), the dot, a seal or the hanko, never an area. */
+  --paper: #f3f0e8;
+  --paper-deep: #ece8df;
+  --paper-shade: #dcd7cc;
+  /* A sheet hung in the world reads as fresh paper against the painting: a breath lighter than the page */
+  --sheet: #f8f6f0;
   --ink: #151515;
-  --ink-soft: #3b3c3a;
-  --wash: #8d8f8b;
-  --mist: #c6c8c4;
-  --rule: rgb(21 21 21 / 0.16);
-  --shadow: rgb(21 21 21 / 0.22);
+  --ink-soft: #3a3835;
+  /* The brand grey (#7a766e) one step deeper: at caption sizes it needs 4.5:1 on paper (this is 4.9:1) */
+  --wash: #6b675f;
+  /* The brush wash is lighter than the text grey: strokes keep the weight they had, text keeps its contrast */
+  --ink-wash: #8e8a82;
+  --mist: #c9c4ba;
+  --circuit: #a9a49b;
+  --shu: #b5392c;
+  --rule: rgb(21 21 21 / 0.14);
+  --shadow: rgb(21 21 21 / 0.2);
 
-  --font-display: 'Shippori Mincho B1', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
-  --font-body: 'Hanken Grotesk Variable', 'Segoe UI', system-ui, sans-serif;
-  --font-hand: 'Nanum Pen Script', 'Segoe Print', 'Bradley Hand', cursive;
+  /* 'Ponto' only holds U+002E (the round dot) and 'Kana' only the katakana and seal glyphs: listed first, they take
+     those characters and leave the rest to Geist */
+  --font-sans: 'Ponto', 'Geist Variable', 'Kana', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Ponto', 'Geist Mono Variable', 'Kana', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --font-kana: 'Kana', 'Shippori Mincho B1', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --font-display: var(--font-sans);
+  --font-body: var(--font-sans);
 
   --text-body: 1.0625rem;
-  --text-hand: 1.55rem;
-  --text-h3: 1.45rem;
-  --text-h2: clamp(2rem, 3.8vw, 2.9rem);
-  --text-h1: clamp(3rem, 8vw, 6.6rem);
+  --text-caption: 0.75rem;
+  --tracking-caption: 0.1em;
+  --text-h3: 1.4rem;
+  --text-h2: clamp(1.9rem, 3.6vw, 2.75rem);
+  --text-h1: clamp(3rem, 8vw, 6.4rem);
 
   --topbar-height: 64px;
   --ease-ink: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -71,6 +81,7 @@ html.lenis body {
 
 body {
   margin: 0;
+  font-optical-sizing: auto;
   min-height: 100svh;
   background-color: var(--paper);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.08 0 0 0 0 0.08 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23p)'/%3E%3C/svg%3E");
@@ -91,8 +102,9 @@ h2,
 h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.1;
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
@@ -123,6 +135,11 @@ img {
   outline-offset: 4px;
 }
 
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -132,24 +149,38 @@ img {
   white-space: nowrap;
 }
 
+/* The brand's mono voice: captions, notes and numbers, set like code comments (manual p. 05). The class kept its
+   old name from the hand-lettered days; every annotation in the world uses it. */
 .hand {
-  font-family: var(--font-hand);
-  font-size: var(--text-hand);
-  line-height: 1.1;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 450;
+  line-height: 1.35;
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
   color: var(--ink-soft);
 }
 
 .label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: var(--tracking-caption);
   text-transform: uppercase;
   color: var(--wash);
 }
 
+/* The wordmark's cursor (manual p. 03): a short shu wire under a label, the one line of colour on a heading */
+.cursor-rule {
+  display: block;
+  width: 1.75em;
+  height: 2px;
+  background: var(--shu);
+}
+
 .ink-ink { fill: var(--ink); }
 .ink-soft { fill: var(--ink-soft); }
-.ink-wash { fill: var(--wash); opacity: 0.55; }
+.ink-wash { fill: var(--ink-wash); opacity: 0.55; }
 .ink-mist { fill: var(--mist); opacity: 0.85; }
 .ink-paper { fill: var(--paper); }
 
@@ -177,7 +208,8 @@ svg.ink {
   border: 0;
   background: none;
   color: var(--ink);
-  font: 600 0.98rem var(--font-body);
+  font: 500 0.95rem var(--font-body);
+  letter-spacing: -0.005em;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -219,7 +251,7 @@ svg.ink {
 /* Every button is a hand-drawn frame; on hover a grey wash sweeps in under the text from the left */
 .ink-button .ink-layer {
   /* A touch deeper than --mist, so the wash still reads on bright screens */
-  background: #b9bbb7;
+  background: #d3cdc1;
   clip-path: inset(0 100% 0 0);
   transition: clip-path 0.42s cubic-bezier(0.45, 0.05, 0.3, 1);
 }
@@ -251,12 +283,14 @@ svg.ink {
 .tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px 14px;
+  gap: 4px 16px;
   margin: 0;
   padding: 0;
   list-style: none;
-  font-family: var(--font-hand);
-  font-size: 1.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
   color: var(--wash);
 }
 

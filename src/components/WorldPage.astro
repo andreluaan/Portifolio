@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Ink from './Ink.astro';
+import MemoryMark from './MemoryMark.astro';
 import world from '../data/world.json';
 import { layoutCss } from '../world/layout-css';
 import type { WorldLayout } from '../world/layout';
@@ -13,6 +14,7 @@ import '../styles/mundo.css';
 import '../styles/book.css';
 import '../styles/stations.css';
 import '../styles/reading.css';
+import '../styles/brand.css';
 
 interface Props {
   lang: Lang;
@@ -42,10 +44,12 @@ const stationsCss = Object.values(world.layouts as unknown as Record<string, Wor
 const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocaleDateString(locale, { day: '2-digit', month: 'short' });
 ---
 
-<Base lang={lang} title={pick({ pt: 'André Luan · mundo de papel', en: 'André Luan · paper world' })}>
+<Base lang={lang} title={pick({ pt: 'André Luan · andreluaan.dev — tinta, corte e código', en: 'André Luan · andreluaan.dev — ink, cut and code' })}>
   <style is:inline set:html={stationsCss}></style>
   <div class="intro" id="intro" hidden>
     <div class="intro-stage">
+      <MemoryMark class="intro-mark" />
+      <p class="wordmark intro-wordmark">andreluaan.dev</p>
       <p class="hand intro-label"><span>{t('intro.label')}</span> <span class="intro-percent">0%</span></p>
       <Ink name="intro-line" class="intro-line" eager />
     </div>
@@ -54,7 +58,10 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
   </div>
 
   <header class="topbar">
-    <a class="topbar-signature" href={pathFor(lang)} data-go="hero" aria-label="André Luan">André Luan</a>
+    <a class="topbar-signature brand-lockup" href={pathFor(lang)} data-go="hero" aria-label="andreluaan.dev · André Luan">
+      <img class="brand-lockup-symbol" src="/brand/al.svg" alt="" width="34" height="34" />
+      <span class="wordmark">andreluaan.dev</span>
+    </a>
 
     <nav class="world-nav" aria-label={t('nav.label')}>
       {
@@ -87,7 +94,7 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
     </div>
 
     <div class="passport" id="passport" hidden>
-      <p class="label">{t('secrets.title')}</p>
+      <p class="label">{t('secrets.title')} · <span class="passport-count"></span></p>
       <ul class="passport-grid"></ul>
     </div>
   </header>
@@ -111,8 +118,14 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
             </div>
           </div>
           <div class="mundo-station station-hero-text">
-            <p class="hand">{t('hero.eyebrow')}</p>
-            <h1 class="station-hero-name">André<br />Luan</h1>
+            <p class="hand station-hero-eyebrow">{t('hero.eyebrow')}</p>
+            <div class="station-hero-title">
+              <h1 class="station-hero-name">André<br />Luan</h1>
+              <span class="station-hero-seal" aria-hidden="true">
+                <span class="station-hero-kana" lang="ja">アンドレ・ルアン</span>
+                <img class="hanko station-hero-hanko" src="/brand/hanko.svg" alt="" width="46" height="45" />
+              </span>
+            </div>
             <p class="station-hero-role">{t('hero.role')}</p>
             <p class="station-hero-lede">{t('hero.lede')}</p>
             <div class="station-hero-actions">
@@ -129,7 +142,7 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
                 <img class="station-sign-banner" src="/images/pecas/placa.webp" alt="" width="420" height="909" loading="lazy" decoding="async" />
                 <img class="station-sign-art" src={`/images/placas/${item.sign}.webp`} alt="" width="416" height="410" loading="lazy" decoding="async" />
                 <span class="station-sign-label" role="heading" aria-level="2">{t(item.key)}</span>
-                <span class="station-sign-rule" aria-hidden="true"></span>
+                <span class="station-sign-rule cursor-rule" aria-hidden="true"></span>
               </div>
             ))
           }
@@ -151,7 +164,7 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
                         <span class="repo-description">{repo.description ?? '—'}</span>
                         <span class="repo-foot">
                           <span class="hand repo-language">{repo.language ?? ''}</span>
-                          <span class="repo-date">{t('repos.updated')} {repoDate(repo.pushedAt)}</span>
+                          <span class="repo-date"><span class="repo-date-label">{t('repos.updated')} </span>{repoDate(repo.pushedAt)}</span>
                         </span>
                       </a>
                     </li>
@@ -168,7 +181,7 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
             </button>
             <div class="station-mail-note">
               <Ink name="note-frame-wide" narrow="note-frame-narrow" class="station-mail-note-frame" />
-              <h2 class="hand">{t('mail.title')}</h2>
+              <h2 class="station-mail-title">{t('mail.title')}</h2>
               <p class="station-mail-lede">{t('mail.lede')}</p>
               <p class="station-mail-email">andre.luanbq@gmail.com</p>
               <div class="station-mail-actions">
@@ -253,8 +266,13 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
           </div>
 
           <div class="mundo-station station-end">
-            <Ink name="enso" class="station-end-enso" />
+            <div class="cut-mark station-end-mark" aria-hidden="true">
+              <Ink name="enso" class="cut-mark-half is-left" />
+              <Ink name="enso" class="cut-mark-half is-right" />
+              <span class="cut-mark-wire"></span>
+            </div>
             <p class="hand">{t('mundo.end')}</p>
+            <p class="wordmark station-end-wordmark">andreluaan.dev</p>
           </div>
 
           <div class="mundo-station station-desk">
@@ -272,6 +290,7 @@ const repoDate = (pushedAt: string) => new Date(`${pushedAt}T12:00:00`).toLocale
         <div class="mundo-progress" aria-hidden="true">
           <Ink name="progress-wide" narrow="progress-narrow" class="mundo-progress-base" eager />
           <Ink name="progress-fill" class="mundo-progress-fill" eager />
+          <span class="mundo-progress-head"></span>
         </div>
       </div>
       <div class="mundo-painting-bar" hidden>

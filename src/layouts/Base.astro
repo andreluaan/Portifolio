@@ -6,10 +6,10 @@ import world from '../data/world.json';
 import { layoutSizes } from '../world/layout-css';
 import type { WorldLayout } from '../world/layout';
 import { pathFor } from '../lib/i18n';
-// The fonts on screen at first paint: preloaded, so the text does not change width (and shift the bar) as they land
-import handFont from '@fontsource/nanum-pen-script/files/nanum-pen-script-latin-400-normal.woff2?url';
-import nameFont from '@fontsource/shippori-mincho-b1/files/shippori-mincho-b1-latin-800-normal.woff2?url';
-import bodyFont from '@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2?url';
+// The fonts on screen at first paint: preloaded, so the text does not change width (and shift the bar) as they land.
+// The regular round dot is preloaded too: the hero's text has one, and a late swap would nudge it.
+import sansFont from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
+import monoFont from '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2?url';
 
 interface Props {
   title: string;
@@ -28,9 +28,12 @@ const href = (path: string) => (Astro.site ? new URL(path, Astro.site).href : pa
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content={strings['meta.description'][lang]} />
-    <meta name="theme-color" content="#eeeeec" />
+    <meta name="theme-color" content="#f3f0e8" />
+    <!-- andreluaan.dev icons (manual p. 16): the memory mark in the tab, the reduced AL from 32 px up -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    {[handFont, nameFont, bodyFont].map((font) => <link rel="preload" as="font" type="font/woff2" href={font} crossorigin />)}
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    {[sansFont, monoFont, '/fonts/ponto-400.woff2'].map((font) => <link rel="preload" as="font" type="font/woff2" href={font} crossorigin />)}
     <link rel="canonical" href={href(pathFor(lang))} />
     <link rel="alternate" hreflang="pt-BR" href={href(pathFor('pt'))} />
     <link rel="alternate" hreflang="en" href={href(pathFor('en'))} />

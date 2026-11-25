@@ -1,0 +1,199 @@
+/* The andreluaan.dev marks as page components: the lockup in the top bar, the memory mark and its loader, the
+   hanko, the cut ensō at the end of the walk and the dot that leads the progress bar. Source of truth for the brand:
+   C:\PROJETOS DE PROGRAMAÇÃO\Andreluaan.dev\DOCUMENTACAO-TECNICA.md (manual v1.5). */
+
+:root {
+  /* The brand's motion curve (manual p. 22) */
+  --ease-brand: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Lockup: the reduced AL (it is the version drawn for 32 px and up) beside the wordmark */
+.brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.brand-lockup-symbol {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  transition: transform 0.5s var(--ease-brand);
+}
+
+.brand-lockup:hover .brand-lockup-symbol {
+  transform: translateY(-2px) rotate(-4deg);
+}
+
+/* Wordmark (manual p. 03): Geist Light, wide spacing, a round dot (brand-fonts.css) and the shu cursor under it */
+.wordmark {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5em;
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 0.95rem;
+  line-height: 1;
+  letter-spacing: 0.3em;
+  white-space: nowrap;
+}
+
+.wordmark::after {
+  content: '';
+  position: absolute;
+  left: 0.05em;
+  bottom: 0;
+  width: 2.2em;
+  height: 1.5px;
+  background: var(--shu);
+  transform-origin: 0 50%;
+  transition: transform 0.6s var(--ease-brand);
+}
+
+.brand-lockup:hover .wordmark::after {
+  transform: scaleX(1.8);
+}
+
+/* Memory mark. --draw, --wire and --slide (0 to 1) scrub it; .is-playing plays the loader once (manual p. 22):
+   the circle draws itself (0–400 ms), the wire comes down (to 600 ms), the cut slides (to 750 ms), it rests. */
+.memory-mark {
+  display: block;
+  overflow: visible;
+}
+
+.memory-half {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 8;
+  stroke-dasharray: var(--half) calc(var(--half) + 1);
+  stroke-dashoffset: calc(var(--half) * (1 - var(--draw, 1)));
+}
+
+.memory-slide {
+  transform: translateY(calc(var(--slide, 1) * 5px));
+}
+
+.memory-wire {
+  fill: var(--shu);
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  transform: scaleY(var(--wire, 1));
+}
+
+.memory-mark.is-playing .memory-half {
+  animation: memory-draw 0.4s var(--ease-brand) both;
+}
+
+.memory-mark.is-playing .memory-wire {
+  animation: memory-wire 0.2s cubic-bezier(0.5, 0, 0.75, 0) 0.4s both;
+}
+
+.memory-mark.is-playing .memory-slide {
+  animation: memory-slide 0.15s var(--ease-brand) 0.6s both;
+}
+
+@keyframes memory-draw {
+  from { stroke-dashoffset: var(--half); }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes memory-wire {
+  from { transform: scaleY(0); }
+}
+
+@keyframes memory-slide {
+  from { transform: translateY(0); }
+}
+
+/* Hanko (manual p. 03): authorship, so it sits where André signs: beside his name and on the sketchbook's cover */
+/* :where keeps the size a default: the hero and the book cover size their own hanko */
+:where(.hanko) {
+  display: block;
+  width: 44px;
+  height: auto;
+}
+
+/* Sits in narrow columns (beside the vertical katakana): the global img max-width must not shrink it */
+.hanko {
+  max-width: none;
+}
+
+/* The end of the walk: the brushed ensō is cut by the shu wire and its right half slides down, turning into the
+   memory mark. Two copies of the baked ensō, each clipped to one side of the cut (7% of the circle). */
+.cut-mark {
+  position: relative;
+  width: 200px;
+  aspect-ratio: 1;
+}
+
+.cut-mark-half {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cut-mark-half.is-left {
+  clip-path: inset(-10% 52.9% -10% -10%);
+}
+
+.cut-mark-half.is-right {
+  clip-path: inset(-10% -10% -10% 52.9%);
+  translate: 0 4.2%;
+  transition: translate 0.25s var(--ease-brand) 0.3s;
+}
+
+.cut-mark-wire {
+  position: absolute;
+  left: 50%;
+  top: -15%;
+  bottom: -15%;
+  width: 3px;
+  translate: -50% 0;
+  background: var(--shu);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  transform-origin: 50% 0;
+  transition: transform 0.3s cubic-bezier(0.5, 0, 0.75, 0);
+}
+
+/* Before the cut: whole, the wire not yet drawn (world/index.ts removes this once the ensō is brushed on) */
+.cut-mark.is-whole .cut-mark-half.is-right {
+  translate: 0 0;
+  transition: none;
+}
+
+.cut-mark.is-whole .cut-mark-wire {
+  transform: scaleY(0);
+  transition: none;
+}
+
+/* The walk's progress bar is led by the brand's dot. It rides on a full-width track that only translates, so the
+   per-frame update stays on the compositor. */
+.mundo-progress-head {
+  position: absolute;
+  inset: 0;
+  translate: calc((var(--progress, 0) - 1) * 100%) 0;
+  pointer-events: none;
+}
+
+.mundo-progress-head::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--shu);
+  translate: 0 -50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .memory-mark.is-playing .memory-half,
+  .memory-mark.is-playing .memory-wire,
+  .memory-mark.is-playing .memory-slide {
+    animation: none;
+  }
+}

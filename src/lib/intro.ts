@@ -6,6 +6,12 @@ import { sounds } from './sound';
 const SESSION_KEY = 'portfolio-intro-seen';
 const DURATION = 2600;
 
+/** How far through the stretch [from, to] of the loading `progress` is, eased out like the brand's own curve. */
+const phase = (progress: number, from: number, to: number) => {
+  const t = Math.min(1, Math.max(0, (progress - from) / (to - from)));
+  return 1 - Math.pow(1 - t, 3);
+};
+
 export function runIntro(): Promise<void> {
   let seen = false;
   try {
@@ -19,8 +25,10 @@ export function runIntro(): Promise<void> {
 
   intro.hidden = false;
   document.body.classList.add('is-locked');
-  // The baked stroke is uncovered as the loading goes (--progress, see pieces.css)
+  // The baked stroke is uncovered as the loading goes (--progress, see pieces.css), and the brand's memory mark is
+  // drawn in step with it: the circle, then the wire coming down, then the cut sliding (brand.css .memory-mark)
   const line = intro.querySelector<HTMLElement>('.intro-line')!;
+  const mark = intro.querySelector<SVGSVGElement>('.intro-mark')!;
   const stage = intro.querySelector<HTMLElement>('.intro-stage')!;
   const percent = intro.querySelector<HTMLElement>('.intro-percent')!;
 
@@ -60,6 +68,9 @@ export function runIntro(): Promise<void> {
       progress = raw < 0.5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
       percent.textContent = `${Math.round(progress * 100)}%`;
       line.style.setProperty('--progress', progress.toFixed(3));
+      mark.style.setProperty('--draw', phase(progress, 0, 0.5).toFixed(3));
+      mark.style.setProperty('--wire', phase(progress, 0.5, 0.78).toFixed(3));
+      mark.style.setProperty('--slide', phase(progress, 0.8, 0.92).toFixed(3));
       const x = 22 + progress * (stage.clientWidth - 44);
       mascot.drive(x, (x - previousX) * 60);
       previousX = x;

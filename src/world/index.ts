@@ -23,6 +23,14 @@ export type { StationName };
 
 const NAV_STATIONS: StationName[] = ['hero', 'line', 'house', 'lectern', 'repos', 'mail'];
 const SIGNS: SignName[] = ['varal', 'estante', 'atelie', 'sobre'];
+/** The box that holds each station's content, for stations the camera may have to centre (offsetFor). */
+const STATION_BOXES: Partial<Record<StationName, 'line' | 'house' | 'lectern' | 'repos' | 'mail'>> = {
+  line: 'line',
+  house: 'house',
+  lectern: 'lectern',
+  repos: 'repos',
+  mail: 'mail',
+};
 /** Where Mel stands in the view while the scroll leads, as a share of its width. */
 const SCROLL_SLOT = { wide: 0.28, narrow: 0.22 };
 /** While she leads, the camera only moves once she leaves this stretch of the view. */
@@ -422,10 +430,16 @@ export function mountWorld() {
     if (walked > 0.985) unlock('walker');
   }
 
-  /** Where the camera stops to show a station: a little of the way before it. */
+  /** Where the camera stops to show a station: a little of the way before it, or centred on it when it fits the
+   * view but not with that lead (the GitHub board on a phone is nearly the screen's width). A station wider than
+   * the view, like the clothesline, is walked along from its start. */
   function offsetFor(name: StationName) {
     if (name === 'hero') return 0;
-    return clampCamera(view.layout.stations[name] - view.span * 0.12);
+    const lead = view.span * 0.12;
+    const key = STATION_BOXES[name];
+    const box = key ? view.layout.boxes[key] : null;
+    if (box && box.width > view.span - lead * 2 && box.width <= view.span) return clampCamera(box.x + box.width / 2 - view.span / 2);
+    return clampCamera(view.layout.stations[name] - lead);
   }
 
   // Stations ---------------------------------------------------------------------
@@ -493,8 +507,16 @@ export function mountWorld() {
     lectern: () => mel.say(pick({ pt: 'tem um livro ali! (aperta E)', en: 'there’s a book there! (press E)' })),
     house: () => boardBars.animate(0.4),
     end: () => {
-      const enso = stationEl.end.querySelector('.station-end-enso');
-      if (enso && !reduced) brushOn(enso);
+      // The ensō is brushed on whole, then the shu wire cuts it and its right half slides: the memory mark
+      const mark = stationEl.end.querySelector<HTMLElement>('.station-end-mark');
+      if (!mark || reduced) return;
+      window.clearTimeout(Number(mark.dataset.cutTimer));
+      mark.classList.add('is-whole');
+      mark.querySelectorAll('.cut-mark-half').forEach(brushOn);
+      mark.dataset.cutTimer = String(window.setTimeout(() => {
+        mark.classList.remove('is-whole');
+        sounds.brush();
+      }, 950));
     },
     desk: () => {
       mascot.say(t('mundo.desk'), 2600);

@@ -14,15 +14,16 @@
     "ink": "node scripts/ink-bake/index.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/hanken-grotesk": "^5.3.0",
-    "@fontsource/nanum-pen-script": "^5.3.0",
-    "@fontsource/shippori-mincho-b1": "^5.3.0",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
     "astro": "^7.4.2",
     "gsap": "^3.15.0",
     "pixi.js": "8.22.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
+    "@fontsource/shippori-mincho-b1": "^5.3.0",
+    "@fontsource/zen-maru-gothic": "^5.3.1",
     "playwright-core": "^1.56.1",
     "typescript": "^6.0.3"
   }

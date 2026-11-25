@@ -61,6 +61,33 @@ function mascotSvg() {
 
 export type MascotEvent = 'hop' | 'say' | 'poke' | 'carried' | 'knocked' | 'sleep' | 'wake';
 
+/** Keeps a speech bubble inside the window while it shows, sliding it in when its character stands near an edge.
+ * It follows every frame because a bubble often opens while the camera is still travelling. The bubble lives inside
+ * the zoomed (and, for Mel, depth-scaled) world, so the screen overshoot is turned back into its own pixels. */
+export function keepOnScreen(bubble: HTMLElement, margin = 8) {
+  if (bubble.dataset.onScreen) return;
+  bubble.dataset.onScreen = 'watching';
+  let nudge = 0;
+  const follow = () => {
+    if (bubble.hidden || !bubble.isConnected) {
+      delete bubble.dataset.onScreen;
+      return;
+    }
+    const box = bubble.getBoundingClientRect();
+    const scale = box.width / (bubble.offsetWidth || box.width || 1);
+    // Where it would sit without the current nudge
+    const left = box.left - nudge * scale;
+    const right = box.right - nudge * scale;
+    const wanted = left < margin ? (margin - left) / scale : right > window.innerWidth - margin ? (window.innerWidth - margin - right) / scale : 0;
+    if (Math.abs(wanted - nudge) > 0.5) {
+      nudge = wanted;
+      bubble.style.setProperty('--nudge', `${nudge.toFixed(1)}px`);
+    }
+    requestAnimationFrame(follow);
+  };
+  follow();
+}
+
 export class Mascot {
   readonly el: HTMLDivElement;
   /** Announces what Borrão does, so companions (Mel) can react without him knowing about them. */
@@ -170,6 +197,7 @@ export class Mascot {
     this.emit('say');
     this.bubble.textContent = text;
     this.bubble.hidden = false;
+    keepOnScreen(this.bubble);
     this.bubble.classList.remove('is-popping');
     void this.bubble.offsetWidth;
     this.bubble.classList.add('is-popping');

@@ -1,0 +1,13 @@
+---
+// The andreluaan.dev memory mark, ready to be drawn: each half of the circle, the slid right half and the shu wire
+// are separate so CSS can play the brand's loader (brand.css .memory-mark) or a script can scrub it (intro.ts).
+import { memoryMarkMarkup } from '../lib/memory-mark';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<Fragment set:html={memoryMarkMarkup(className)} />

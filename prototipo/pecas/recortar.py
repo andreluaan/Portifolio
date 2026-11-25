@@ -17,6 +17,8 @@ HOLES = {"estante": [(499, 1009)], "placa": [(507, 110)], "quadro": [], "casa": 
 OUTSIDE = 120
 # How far the blacks rise towards white, so the heaviest wood sits with the pale painting
 LIFT = {"estante": 0.14, "quadro": 0.22}
+# The andreluaan.dev paper (#F3F0E8): every piece is printed on it, so its blank paper matches the page around it
+PAPER = (243, 240, 232)
 
 for name, width in WIDTHS.items():
     source = Image.open(HERE / f"{name}.png").convert("RGB")
@@ -30,7 +32,8 @@ for name, width in WIDTHS.items():
     alpha = outside.point(lambda value: 255 - value).filter(ImageFilter.GaussianBlur(0.8))
     box = alpha.getbbox()
     lift = LIFT.get(name, 0)
-    piece = source.point([round(value + (255 - value) * lift) for value in range(256)] * 3)
+    lifted = [value + (255 - value) * lift for value in range(256)]
+    piece = source.point([round(value * tone / 255) for tone in PAPER for value in lifted])
     piece.putalpha(alpha)
     piece = piece.crop(box)
     piece = piece.resize((width, round(piece.height * width / piece.width)), Image.LANCZOS)

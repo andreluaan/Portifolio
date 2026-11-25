@@ -24,7 +24,7 @@ export interface CutoutFrame {
 
 const LINE = 0x151515;
 const SHADOW = 0x151515;
-const DUST = 0x8d8f8b;
+const DUST = 0x8e8a82;
 /** The far legs are a shade darker, as they are in the drawing's shadow side. */
 const FAR_TINT = 0x8c8d8a;
 const TAIL_POINTS = 10;
@@ -266,7 +266,7 @@ export class MelCutout {
 
     this.tongue.visible = false;
     // The tongue hangs just under the smile
-    this.tongue.ellipse(134.4, 100.6, 1.7, 2.4).fill(0x8d8f8b).stroke({ color: LINE, width: 0.5 });
+    this.tongue.ellipse(134.4, 100.6, 1.7, 2.4).fill(0x8e8a82).stroke({ color: LINE, width: 0.5 });
   }
 
   static async create(parent: HTMLElement, width: number, height: number, scale: number) {
