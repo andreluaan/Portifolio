@@ -35,7 +35,7 @@ As ideias #1 a #20 vêm do relatório em [referencias.md](referencias.md). Toda 
 | 22 | Segredo para quem abandonar ou vencer um minijogo | 💭 | P | baixo | `unlock()` no fim da partida; depende da #12 | Gatilho do samuelrizzon.dev |
 | 23 | Recado de volta do Borrão quando o visitante retorna | 💭 | P | médio | localStorage com a última visita | Proposta do Claude |
 | 28 | Imagem de compartilhamento (og:image) com o logo oficial sobre o papel | 💭 | P | médio | PNG gerado por script a partir de `andreluaan-logo-oficial.svg` | Precisa de `site` no `astro.config.mjs` (link absoluto) |
-| 29 | Modo escuro "papel sumi" com os tons escuros do manual | 💭 | M | alto | Tokens já preparados: a capa do caderno troca `--ink`, `--paper` e `--shu` num só lugar | Proposta do Claude na troca de identidade |
+| 29 | Modo escuro "papel sumi" com os tons escuros do manual | ⬜ aprovado, para 25/11 | M | alto | Tokens já preparados: a capa do caderno troca `--ink`, `--paper` e `--shu` num só lugar | Proposta do Claude na troca de identidade |
 | 30 | Selo circular da marca como prêmio dos 15 segredos | 💭 | P | médio | O círculo da marca de memória em shu com o AL dentro, carimbado no passaporte | Ideia do banco da marca ("easter egg quando acha todos os segredos") |
 | 31 | Circuito do símbolo AL bem fraco atrás do ateliê do GitHub | 💭 | P | baixo | Camada `circuito` de `al-completo.svg` em `--circuit`, revelada por pincelada | O lado "tecnologia" da marca junto aos repositórios |
 | 24 | Fundo como rolo emaki único em sumi-e: pintura contínua, sem divisão por cenas, só neutros, com áreas calmas atrás do conteúdo | ⬜ | G | alto | WebP pré-pintado em blocos + overlay leve | Feito com a pintura enviada pelo André, usada sem alteração |
