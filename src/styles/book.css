@@ -280,12 +280,14 @@
   font-weight: 400;
 }
 
-/* Clear of the brushed stroke that runs down the cover's right side (coverArt in book.ts) */
+/* Clear of the brushed stroke that runs down the cover's right side (coverArt in book.ts).
+   The v2.0 symbol is 576 units wide (440 of brush + the < / > tag), so the box grows by 576/440
+   and moves left by the tag's 68 units: the brush keeps the size and place it had. */
 .book-cover-symbol {
   position: absolute;
   top: 12cqw;
-  left: 12cqw;
-  width: 36cqw;
+  left: calc(12cqw - 36cqw * 68 / 440);
+  width: calc(36cqw * 576 / 440);
   height: auto;
 }
 

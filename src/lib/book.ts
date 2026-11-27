@@ -88,7 +88,7 @@ class Book {
     const cover = page(
       'book-cover',
       `<svg class="ink book-cover-art" viewBox="0 0 360 500" preserveAspectRatio="none" aria-hidden="true"></svg>
-       <img class="book-cover-symbol" src="/brand/al-completo-escuro.svg" alt="" width="440" height="495" decoding="async">
+       <img class="book-cover-symbol" src="/brand/al-completo-escuro.svg" alt="" width="576" height="495" decoding="async">
        <div class="book-cover-content">
          <p class="hand"></p>
          <h2 class="book-cover-title"></h2>

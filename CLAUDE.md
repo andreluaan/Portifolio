@@ -2,7 +2,7 @@
 
 Portfólio pessoal para atrair clientes e mostrar personalidade. Arte desenhada em nanquim (pincel seco, aguada), ilustrações do próprio André, bilíngue PT/EN.
 
-**Identidade: a marca pessoal andreluaan.dev** (desde 24/11/2026). A fonte de verdade é `C:\PROJETOS DE PROGRAMAÇÃO\Andreluaan.dev\DOCUMENTACAO-TECNICA.md` (manual v1.5); o que foi aplicado aqui, e onde, está em `docs/identidade.md`. Em resumo:
+**Identidade: a marca pessoal andreluaan.dev** (desde 24/11/2026). A fonte de verdade é `C:\PROJETOS DE PROGRAMAÇÃO\Andreluaan.dev\DOCUMENTACAO-TECNICA.md` (manual v2.0); o que foi aplicado aqui, e onde, está em `docs/identidade.md`. Em resumo:
 - Cores: papel `#F3F0E8`, sumi `#151515`, cinzas quentes e o shu `#B5392C` **só** no fio (corte), no ponto, no selo e no hanko, nunca em áreas.
 - Tipografia: Geist e Geist Mono (a classe `.hand` é a voz mono: caixa alta, espaçamento de 10%). Todo "." é redondo (família `Ponto`), e o katakana usa Shippori Mincho (família `Kana`).
 - Marcas: AL reduzido na barra, wordmark, hanko, marca de memória (loader, favicon, fim do caderno). Nunca redesenhar o AL: usar os SVGs de `public/brand/`.

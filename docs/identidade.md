@@ -4,7 +4,7 @@
 
 Registro da troca de identidade feita em 24/11/2026. O portfólio deixou a identidade "caderno em nanquim" (cinza frio, Shippori Mincho, letra à mão) e passou a usar a marca pessoal **andreluaan.dev**. O mundo de papel continua igual: as estações, a Mel, o Borrão, os segredos, o livro e o caderno de recados. O que mudou foi a identidade aplicada sobre ele.
 
-**Fonte de verdade da marca:** `C:\PROJETOS DE PROGRAMAÇÃO\Andreluaan.dev\DOCUMENTACAO-TECNICA.md` (manual v1.5). Se a marca mudar lá, este arquivo diz onde cada peça mora aqui.
+**Fonte de verdade da marca:** `C:\PROJETOS DE PROGRAMAÇÃO\Andreluaan.dev\DOCUMENTACAO-TECNICA.md` (manual v2.0). Se a marca mudar lá, este arquivo diz onde cada peça mora aqui.
 
 ---
 
@@ -17,7 +17,7 @@ Registro da troca de identidade feita em 24/11/2026. O portfólio deixou a ident
 | Regra do ponto redondo (manual p. 05) | Todo "." vem da Zen Maru Gothic, no peso equivalente | `src/styles/brand-fonts.css`, `public/fonts/ponto-*.woff2` |
 | Katakana アンドレ・ルアン em Shippori Mincho | Ao lado do nome, no início (some no mapa estreito) | `public/fonts/kana.woff2` |
 | AL reduzido (a partir de 32 px) | Barra do topo, favicon 32/48, ícone da tela inicial | `public/brand/al.svg` |
-| AL principal, com circuito | Capa sumi do caderno de projetos (versão para fundo escuro) | `public/brand/al-completo(-escuro).svg` |
+| Símbolo com a tag `< / >` (v2.0, era o "AL principal com circuito") | Capa sumi do caderno de projetos (versão negativa). Cópia de `Andreluaan.dev/marca/andreluaan-simbolo(-negativo).svg`, 576 × 495 | `public/brand/al-completo(-escuro).svg` |
 | Wordmark `andreluaan.dev` com o cursor shu | Barra do topo (só a partir de 1181 px), intro e fim do caminho | `.wordmark` em `src/styles/brand.css` |
 | Hanko | Assina o nome no início e a capa do caderno | `public/brand/hanko.svg` |
 | Marca de memória | Loader da intro, última página do caderno, favicon da aba (16 px) | `src/lib/memory-mark.ts` |
